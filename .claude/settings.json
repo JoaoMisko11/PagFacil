@@ -10,7 +10,9 @@
       "Bash(npx --yes create-next-app@latest pagafacil --ts --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --use-npm --turbopack)",
       "Bash(npm install:*)",
       "Bash(git init:*)",
-      "Bash(npx --yes shadcn@latest init -d)"
+      "Bash(npx --yes shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add card input label select textarea badge dialog dropdown-menu calendar separator skeleton toast -y)",
+      "Bash(npx shadcn@latest add card input label select textarea badge dialog dropdown-menu calendar separator skeleton sonner popover -y)"
     ]
   }
 }
