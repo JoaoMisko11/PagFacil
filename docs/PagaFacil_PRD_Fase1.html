@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PagaFácil — PRD Fase 1: 10 Clientes (MVP)</title>
+<style>
+  :root {
+    --primary: #0D47A1;
+    --primary-light: #1976D2;
+    --primary-dark: #0A2A5E;
+    --accent: #00C853;
+    --accent-dark: #00A844;
+    --warning: #FF9800;
+    --danger: #E53935;
+    --bg: #F5F7FA;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --text-light: #5A6477;
+    --border: #E2E8F0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  .top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,42,94,0.97);
+    backdrop-filter: blur(12px);
+    padding: 0 2rem;
+    display: flex; align-items: center; height: 56px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  }
+  .nav-logo { font-size: 1.2rem; font-weight: 800; color: #fff; margin-right: 1.5rem; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 0.15rem; flex: 1; flex-wrap: wrap; }
+  .nav-links a {
+    color: rgba(255,255,255,0.7); text-decoration: none; padding: 0.4rem 0.75rem;
+    border-radius: 8px; font-size: 0.78rem; font-weight: 500; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(255,255,255,0.12); }
+
+  /* HERO */
+  .hero {
+    margin-top: 56px;
+    background: linear-gradient(135deg, #1A1A2E, #16213E);
+    padding: 3rem 2rem 2.5rem;
+    color: white;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40%; right: -15%; width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,200,83,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero .badge-phase {
+    display: inline-block; padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.75rem;
+    font-weight: 700; background: rgba(0,200,83,0.15); color: var(--accent); border: 1px solid rgba(0,200,83,0.3);
+    margin-bottom: 1rem; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .hero h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.5rem; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p.subtitle { font-size: 1rem; opacity: 0.8; max-width: 650px; }
+  .hero-meta {
+    display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap;
+  }
+  .hero-meta-item { }
+  .hero-meta-item .val { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+  .hero-meta-item .lbl { font-size: 0.72rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* CONTAINER */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+  section { padding: 3rem 0; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+  }
+  .section-num {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: white; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary-dark); }
+  .section-header p { font-size: 0.85rem; color: var(--text-light); margin-top: 0.15rem; }
+
+  .sep { height: 3px; background: linear-gradient(to right, var(--primary), var(--accent), var(--primary)); border-radius: 2px; margin: 0 auto; max-width: 150px; }
+
+  /* CARDS */
+  .card {
+    background: var(--card); border-radius: 14px; padding: 1.5rem;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary-dark); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+
+  /* PRIORITY BADGES */
+  .p0 { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.68rem; font-weight: 700; background: #FFEBEE; color: #C62828; }
+  .p1 { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.68rem; font-weight: 700; background: #FFF3E0; color: #E65100; }
+  .p2 { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.68rem; font-weight: 700; background: #E3F2FD; color: #1565C0; }
+
+  /* USER STORIES */
+  .story-card {
+    background: var(--card); border-radius: 12px; padding: 1.25rem;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+    border-left: 4px solid;
+  }
+  .story-card .persona-tag {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+  .story-card .story-text { font-size: 0.88rem; color: var(--text); line-height: 1.6; }
+  .story-card .story-text em { font-style: normal; font-weight: 600; color: var(--primary); }
+  .story-card .acceptance {
+    margin-top: 0.75rem; padding: 0.75rem; background: #F8FAFC; border-radius: 8px;
+    font-size: 0.78rem; color: var(--text-light);
+  }
+  .story-card .acceptance strong { color: var(--text); }
+
+  /* REQUIREMENTS TABLE */
+  .req-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .req-table th {
+    background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left;
+    font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .req-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  .req-table tr:hover td { background: #F0F7FF; }
+
+  /* TIMELINE */
+  .day-block {
+    display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border);
+  }
+  .day-block:last-child { border-bottom: none; }
+  .day-num {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: white; flex-shrink: 0;
+  }
+  .day-content { flex: 1; }
+  .day-content h4 { font-size: 0.9rem; font-weight: 700; color: var(--primary-dark); }
+  .day-content .tasks { margin-top: 0.4rem; font-size: 0.82rem; color: var(--text-light); }
+  .day-content .tasks div { padding: 0.15rem 0; }
+  .day-content .deliverable {
+    display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.6rem; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 600; background: #E8F5E9; color: #2E7D32;
+  }
+
+  /* METRICS */
+  .metric-card {
+    background: var(--card); border-radius: 12px; padding: 1.25rem; text-align: center;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .metric-card .metric-val { font-size: 2rem; font-weight: 800; }
+  .metric-card .metric-label { font-size: 0.72rem; color: var(--text-light); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-card .metric-type { font-size: 0.68rem; margin-top: 0.4rem; font-weight: 600; }
+
+  /* OPEN QUESTIONS */
+  .question-item {
+    display: flex; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+  }
+  .question-item:last-child { border-bottom: none; }
+  .q-owner {
+    padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.68rem; font-weight: 700;
+    height: fit-content; white-space: nowrap;
+  }
+  .q-eng { background: #E3F2FD; color: #1565C0; }
+  .q-product { background: #F3E5F5; color: #6A1B9A; }
+  .q-design { background: #FFF3E0; color: #E65100; }
+  .q-data { background: #E8F5E9; color: #2E7D32; }
+  .q-biz { background: #FFEBEE; color: #C62828; }
+
+  /* FOOTER */
+  footer {
+    background: var(--primary-dark); color: rgba(255,255,255,0.6); padding: 1.5rem;
+    text-align: center; font-size: 0.75rem; margin-top: 2rem;
+  }
+
+  /* NON-GOALS */
+  .nongoal-item {
+    display: flex; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .nongoal-item:last-child { border-bottom: none; }
+  .nongoal-item .x-icon { color: #E53935; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+  .nongoal-item .rationale { font-size: 0.78rem; color: var(--text-light); margin-top: 0.2rem; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.6rem; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .container { padding: 0 1rem; }
+  }
+
+  .scroll-reveal { opacity: 0; transform: translateY(15px); transition: all 0.5s ease; }
+  .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 0.5rem 1rem; border-radius: 8px; border: 2px solid var(--border);
+    background: white; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+    color: var(--text-light); transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: var(--primary-light); color: var(--primary); }
+  .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="nav-logo">Paga<span>Fácil</span> <span style="font-size:0.7rem;opacity:0.5;font-weight:400;margin-left:0.5rem">PRD v1.0</span></div>
+  <div class="nav-links">
+    <a href="#problema" class="active">Problema</a>
+    <a href="#goals">Goals</a>
+    <a href="#stories">User Stories</a>
+    <a href="#reqs">Requirements</a>
+    <a href="#tech">Tech</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#metrics">Métricas</a>
+    <a href="#questions">Open Questions</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="badge-phase">PRD — Fase 1: Validação</div>
+    <h1>PagaFácil MVP: <em>10 Clientes</em></h1>
+    <p class="subtitle">Product Requirements Document para o MVP mínimo de contas a pagar — validar se MEIs e PFs abandonam a planilha pelo app em 10 dias.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="val">10 dias</div>
+        <div class="lbl">Prazo</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="val">2 pessoas</div>
+        <div class="lbl">Time (João + Claude)</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="val">10 usuários</div>
+        <div class="lbl">Target</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="val">R$0</div>
+        <div class="lbl">Custo Infra</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="val">Web App</div>
+        <div class="lbl">Plataforma</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ 1. PROBLEMA ═══════════ -->
+<section id="problema">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #E53935, #FF5252)">01</div>
+      <div>
+        <h2>Problem Statement</h2>
+        <p>O que estamos resolvendo e por que agora</p>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal" style="border-left:4px solid #E53935; margin-bottom:1.5rem">
+      <h3>O Problema</h3>
+      <p style="font-size:0.92rem; margin-top:0.5rem">
+        <strong>16.5 milhões de MEIs</strong> e milhões de pessoas físicas no Brasil gerenciam suas contas a pagar com <strong>planilhas, cadernos ou memória</strong>. As soluções existentes são ou <strong>simples demais</strong> (Organizze, Mobills — sem AP real) ou <strong>caras e complexas demais</strong> (Conta Azul R$49,90+, Omie R$49+). Não existe um produto que ofereça gestão profissional de contas a pagar com a simplicidade de um app de finanças pessoais e preço zero.
+      </p>
+      <p style="font-size:0.92rem; margin-top:0.75rem">
+        <strong>Impacto de não resolver:</strong> MEIs perdem prazos de pagamento, pagam multas desnecessárias, não têm visibilidade do fluxo de caixa, e gastam horas por semana em tarefas manuais que poderiam ser automatizadas. 88% dos CNPJs brasileiros (23M de empresas no Simples Nacional) são afetados.
+      </p>
+    </div>
+
+    <div class="grid-3 scroll-reveal">
+      <div class="card" style="border-top:3px solid #E91E63">
+        <h3>👩‍💻 Persona Primária: Ana</h3>
+        <p style="font-size:0.82rem; color:var(--text-light)">MEI solo, freelancer, 32 anos. Faturamento R$5K/mês, 10-15 fornecedores. Usa WhatsApp para tudo.</p>
+        <div style="margin-top:0.75rem; padding:0.5rem 0.75rem; background:#FFF3E0; border-radius:8px; font-size:0.78rem">
+          <strong style="color:#E65100">Dor:</strong> Perde prazos, gasta 3h/semana em planilha, não sabe quanto vai pagar na semana que vem
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid #7C4DFF">
+        <h3>👩‍👧 Persona Secundária: Mariana</h3>
+        <p style="font-size:0.82rem; color:var(--text-light)">Pessoa física, 28 anos. Gerencia aluguel, assinaturas, contas fixas. Quer mais controle.</p>
+        <div style="margin-top:0.75rem; padding:0.5rem 0.75rem; background:#FFF3E0; border-radius:8px; font-size:0.78rem">
+          <strong style="color:#E65100">Dor:</strong> Entrada manual tediosa, esquece contas, visão fragmentada entre apps de banco
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid #1976D2">
+        <h3>👨‍🍳 Persona Terciária: Carlos</h3>
+        <p style="font-size:0.82rem; color:var(--text-light)">Dono de ME (restaurante), 45 anos. R$25K/mês, 30+ fornecedores. Acha Conta Azul caro.</p>
+        <div style="margin-top:0.75rem; padding:0.5rem 0.75rem; background:#FFF3E0; border-radius:8px; font-size:0.78rem">
+          <strong style="color:#E65100">Dor:</strong> Reconciliação manual, fluxo de caixa cego, paga R$49,90/mês por features que não usa
+        </div>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal" style="margin-top:1.5rem; background:linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color:#A5D6A7">
+      <h3 style="color:#2E7D32">Hipótese a Validar</h3>
+      <p style="font-size:0.92rem; margin-top:0.5rem; color:var(--primary-dark)">
+        Se oferecermos uma <strong>web app gratuita</strong> onde o usuário cadastra contas a pagar, vê um dashboard do que vence, e recebe lembretes, <strong>pelo menos 7 de 10 usuários vão usar por 3 semanas seguidas</strong> e declarar que <strong>não voltam para a planilha</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 2. GOALS / NON-GOALS ═══════════ -->
+<section id="goals">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #00C853, #69F0AE)">02</div>
+      <div>
+        <h2>Goals & Non-Goals</h2>
+        <p>O que estamos e não estamos tentando fazer nessa fase</p>
+      </div>
+    </div>
+
+    <div class="grid-2 scroll-reveal">
+      <div class="card" style="border-left:4px solid var(--accent)">
+        <h3 style="color:#2E7D32">✅ Goals</h3>
+        <div style="margin-top:0.75rem">
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.85rem">
+            <strong>G1.</strong> Validar que a proposta de valor "AP sem planilha" ressoa com MEIs e PFs<br>
+            <span style="font-size:0.78rem; color:var(--accent-dark)">Métrica: 7/10 usuários ativos por 3 semanas</span>
+          </div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.85rem">
+            <strong>G2.</strong> Entregar um MVP funcional em 10 dias (web app responsiva)<br>
+            <span style="font-size:0.78rem; color:var(--accent-dark)">Métrica: App no ar, acessível por link, funcionando em mobile</span>
+          </div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.85rem">
+            <strong>G3.</strong> Coletar feedback qualitativo suficiente para decidir o roadmap da Fase 2<br>
+            <span style="font-size:0.78rem; color:var(--accent-dark)">Métrica: 10 entrevistas de 15min conduzidas</span>
+          </div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.85rem">
+            <strong>G4.</strong> Aprender quais features os usuários pedem primeiro (scan boleto? Pix? relatório?)<br>
+            <span style="font-size:0.78rem; color:var(--accent-dark)">Métrica: Feature request log com pelo menos 20 entradas</span>
+          </div>
+          <div style="padding:0.5rem 0; font-size:0.85rem">
+            <strong>G5.</strong> Gerar waitlist orgânica a partir dos 10 primeiros<br>
+            <span style="font-size:0.78rem; color:var(--accent-dark)">Métrica: 30+ pessoas na waitlist via referral</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left:4px solid #E53935">
+        <h3 style="color:#C62828">❌ Non-Goals (Fase 1)</h3>
+        <div style="margin-top:0.75rem">
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>Integração Pix real</strong></div>
+              <div class="rationale">Requer BaaS (Celcoin), contrato, sandbox → Fase 3. Nesta fase: deep link para app do banco.</div>
+            </div>
+          </div>
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>App nativo (iOS/Android)</strong></div>
+              <div class="rationale">React Native/Expo leva 2+ semanas. Web app responsivo atende para 10 usuários.</div>
+            </div>
+          </div>
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>Open Finance / conexão bancária</strong></div>
+              <div class="rationale">Pluggy/Belvo requerem onboarding, custo e compliance → Fase 3.</div>
+            </div>
+          </div>
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>OCR / scan de boleto</strong></div>
+              <div class="rationale">Google Vision API + parser custom → Fase 2. Nesta fase: entrada manual.</div>
+            </div>
+          </div>
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>Monetização</strong></div>
+              <div class="rationale">Cobrar nessa fase mata a validação. Plano pago só na Fase 3 (1K clientes).</div>
+            </div>
+          </div>
+          <div class="nongoal-item">
+            <div class="x-icon">✗</div>
+            <div>
+              <div><strong>IA / categorização automática</strong></div>
+              <div class="rationale">Precisa de dados para treinar. Categorias manuais nesta fase → dados → ML na Fase 4.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 3. USER STORIES ═══════════ -->
+<section id="stories">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #7C4DFF, #B388FF)">03</div>
+      <div>
+        <h2>User Stories</h2>
+        <p>Organizadas por persona — cada uma com critérios de aceitação</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchStoryTab('ana')">👩‍💻 Ana (MEI)</button>
+      <button class="tab-btn" onclick="switchStoryTab('mariana')">👩‍👧 Mariana (PF)</button>
+      <button class="tab-btn" onclick="switchStoryTab('all')">🎯 Todas</button>
+    </div>
+
+    <!-- ANA TAB -->
+    <div id="tab-ana" class="tab-content active">
+      <div class="grid-2 scroll-reveal">
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI freelancer</em>, quero <em>cadastrar uma conta a pagar</em> (valor, vencimento, fornecedor, categoria) para que eu <em>não precise manter uma planilha</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Campos: fornecedor (texto livre), valor (R$), vencimento (date picker), categoria (dropdown: fixo, variável, imposto, outro), observações (opcional)<br>
+            → Salvar em &lt;3 segundos<br>
+            → Funcionar no celular (responsivo)
+          </div>
+          <div style="margin-top:0.5rem"><span class="p0">P0 — Must Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI</em>, quero <em>ver todas as contas que vencem esta semana</em> para que eu <em>não perca nenhum prazo de pagamento</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Dashboard com 3 seções: Vencidas (vermelho), Hoje (amarelo), Próximos 7 dias (azul)<br>
+            → Cada conta mostra: fornecedor, valor, vencimento, status (paga/pendente)<br>
+            → Ordenação padrão: vencimento mais próximo primeiro
+          </div>
+          <div style="margin-top:0.5rem"><span class="p0">P0 — Must Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI</em>, quero <em>marcar uma conta como paga</em> para que eu <em>saiba o que já foi resolvido e o que falta</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Botão "Marcar como paga" com 1 toque<br>
+            → Registra data do pagamento (default: hoje)<br>
+            → Conta some da lista "pendentes" e vai para "pagas"<br>
+            → Possibilidade de desfazer (undo) por 10 segundos
+          </div>
+          <div style="margin-top:0.5rem"><span class="p0">P0 — Must Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI</em>, quero <em>ver quanto vou pagar no total esta semana e este mês</em> para que eu <em>saiba se meu caixa aguenta</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Resumo numérico no topo do dashboard: Total pendente semana | Total pendente mês<br>
+            → Valor atualiza em tempo real ao marcar como pago
+          </div>
+          <div style="margin-top:0.5rem"><span class="p0">P0 — Must Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI</em>, quero <em>receber um lembrete por email 1 dia antes do vencimento</em> para que eu <em>não esqueça de pagar</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Email enviado D-1 às 8h da manhã<br>
+            → Conteúdo: "Amanhã vence: [Fornecedor] — R$[valor]"<br>
+            → Link direto para o dashboard
+          </div>
+          <div style="margin-top:0.5rem"><span class="p1">P1 — Nice to Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#E91E63">
+          <div class="persona-tag" style="color:#E91E63">Ana · MEI Solo</div>
+          <div class="story-text">Como <em>MEI</em>, quero <em>editar ou deletar uma conta</em> que cadastrei errado para que eu <em>mantenha meus dados corretos</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Editar qualquer campo da conta<br>
+            → Deletar com confirmação ("Tem certeza?")<br>
+            → Histórico de contas deletadas acessível por 30 dias
+          </div>
+          <div style="margin-top:0.5rem"><span class="p0">P0 — Must Have</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARIANA TAB -->
+    <div id="tab-mariana" class="tab-content">
+      <div class="grid-2 scroll-reveal">
+        <div class="story-card" style="border-left-color:#7C4DFF">
+          <div class="persona-tag" style="color:#7C4DFF">Mariana · Pessoa Física</div>
+          <div class="story-text">Como <em>pessoa física</em>, quero <em>cadastrar contas recorrentes (aluguel, Netflix, internet)</em> uma única vez para que <em>elas apareçam automaticamente todo mês</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Checkbox "Essa conta é recorrente" com período (mensal, semanal)<br>
+            → Auto-cria a próxima ocorrência quando a atual é marcada como paga<br>
+            → Mostrar badge "recorrente" na lista
+          </div>
+          <div style="margin-top:0.5rem"><span class="p1">P1 — Nice to Have</span></div>
+        </div>
+
+        <div class="story-card" style="border-left-color:#7C4DFF">
+          <div class="persona-tag" style="color:#7C4DFF">Mariana · Pessoa Física</div>
+          <div class="story-text">Como <em>pessoa física</em>, quero <em>ver um calendário mensal</em> com minhas contas marcadas por dia para que eu <em>tenha uma visão visual de quando cada conta vence</em>.</div>
+          <div class="acceptance">
+            <strong>Critérios de Aceitação:</strong><br>
+            → Visão calendário com dots coloridos nos dias com contas<br>
+            → Clicar no dia mostra lista das contas<br>
+            → Vermelho = vencida, verde = paga, azul = pendente
+          </div>
+          <div style="margin-top:0.5rem"><span class="p2">P2 — Future</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALL TAB -->
+    <div id="tab-all" class="tab-content">
+      <div class="card scroll-reveal">
+        <h3>Todas as User Stories — Resumo</h3>
+        <div style="overflow-x:auto; margin-top:0.75rem">
+          <table class="req-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Persona</th>
+                <th>User Story (resumo)</th>
+                <th>Prioridade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>US-01</td><td>Ana</td><td>Cadastrar conta a pagar</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-02</td><td>Ana</td><td>Ver contas que vencem esta semana</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-03</td><td>Ana</td><td>Marcar conta como paga</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-04</td><td>Ana</td><td>Ver total pendente (semana/mês)</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-05</td><td>Ana</td><td>Receber lembrete por email D-1</td><td><span class="p1">P1</span></td></tr>
+              <tr><td>US-06</td><td>Ana</td><td>Editar ou deletar conta</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-07</td><td>Mariana</td><td>Cadastrar conta recorrente</td><td><span class="p1">P1</span></td></tr>
+              <tr><td>US-08</td><td>Mariana</td><td>Ver calendário mensal</td><td><span class="p2">P2</span></td></tr>
+              <tr><td>US-09</td><td>Todos</td><td>Login com email + senha (ou magic link)</td><td><span class="p0">P0</span></td></tr>
+              <tr><td>US-10</td><td>Todos</td><td>Onboarding em 3 passos (nome, email, primeira conta)</td><td><span class="p0">P0</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 4. REQUIREMENTS ═══════════ -->
+<section id="reqs">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #FF9800, #FFB74D)">04</div>
+      <div>
+        <h2>Requirements</h2>
+        <p>Divididos por prioridade com critérios de aceitação</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchReqTab('p0')">🔴 P0 — Must Have</button>
+      <button class="tab-btn" onclick="switchReqTab('p1')">🟡 P1 — Nice to Have</button>
+      <button class="tab-btn" onclick="switchReqTab('p2')">🔵 P2 — Future</button>
+    </div>
+
+    <!-- P0 TAB -->
+    <div id="tab-p0" class="tab-content active">
+      <div class="card scroll-reveal">
+        <h3 style="color:#C62828">Must Have — Sem isso não é MVP</h3>
+        <div style="overflow-x:auto; margin-top:0.75rem">
+          <table class="req-table">
+            <thead><tr><th>ID</th><th>Requirement</th><th>Acceptance Criteria</th><th>Esforço</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>R-01</strong></td>
+                <td>Autenticação de usuário</td>
+                <td>Magic link por email (sem senha). Sessão dura 30 dias. Logout funcional.</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td><strong>R-02</strong></td>
+                <td>CRUD de contas a pagar</td>
+                <td>Criar, ler, editar, deletar. Campos: fornecedor, valor, vencimento, categoria, status, obs. Validação de campos obrigatórios.</td>
+                <td>6h</td>
+              </tr>
+              <tr>
+                <td><strong>R-03</strong></td>
+                <td>Dashboard principal</td>
+                <td>3 seções: vencidas, hoje, próximos 7 dias. Total pendente semana + mês. Contadores por status. Responsivo mobile.</td>
+                <td>8h</td>
+              </tr>
+              <tr>
+                <td><strong>R-04</strong></td>
+                <td>Marcar como paga</td>
+                <td>1 clique. Registra data pagamento. Undo 10s. Atualiza totais em tempo real.</td>
+                <td>3h</td>
+              </tr>
+              <tr>
+                <td><strong>R-05</strong></td>
+                <td>Categorias de conta</td>
+                <td>Dropdown: Fixo, Variável, Imposto, Fornecedor, Assinatura, Outro. Filtro por categoria na listagem.</td>
+                <td>2h</td>
+              </tr>
+              <tr>
+                <td><strong>R-06</strong></td>
+                <td>Onboarding flow</td>
+                <td>3 passos: nome → email (magic link) → cadastrar primeira conta. Welcome screen com tutorial rápido.</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td><strong>R-07</strong></td>
+                <td>Listagem com filtros</td>
+                <td>Filtrar por: status (paga/pendente/vencida), categoria, período. Busca por nome do fornecedor.</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td><strong>R-08</strong></td>
+                <td>Responsividade mobile</td>
+                <td>Funcionar em telas de 360px+. Touch-friendly (botões 44px+). PWA installable.</td>
+                <td>4h</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:1rem; padding:0.75rem; background:#FFEBEE; border-radius:8px; font-size:0.82rem">
+            <strong style="color:#C62828">Total P0: ~35h de dev</strong> → 4.5 dias a 8h/dia. Cabe nos 10 dias com folga para testes.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P1 TAB -->
+    <div id="tab-p1" class="tab-content">
+      <div class="card scroll-reveal">
+        <h3 style="color:#E65100">Nice to Have — Se der tempo nos 10 dias</h3>
+        <div style="overflow-x:auto; margin-top:0.75rem">
+          <table class="req-table">
+            <thead><tr><th>ID</th><th>Requirement</th><th>Acceptance Criteria</th><th>Esforço</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>R-09</strong></td>
+                <td>Email reminder D-1</td>
+                <td>Cron job diário 8h. Email com fornecedor + valor + link. Resend ou Mailgun free tier.</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td><strong>R-10</strong></td>
+                <td>Contas recorrentes</td>
+                <td>Marcar como recorrente (mensal). Auto-gera próxima ao marcar paga. Badge visual.</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td><strong>R-11</strong></td>
+                <td>Feedback widget</td>
+                <td>Botão flutuante "Sugerir feature" que abre formulário simples. Salva no DB.</td>
+                <td>2h</td>
+              </tr>
+              <tr>
+                <td><strong>R-12</strong></td>
+                <td>Dark mode</td>
+                <td>Toggle light/dark. Respeita preferência do sistema.</td>
+                <td>2h</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:1rem; padding:0.75rem; background:#FFF3E0; border-radius:8px; font-size:0.82rem">
+            <strong style="color:#E65100">Total P1: ~12h adicionais.</strong> Email reminder e recorrentes são os mais impactantes.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P2 TAB -->
+    <div id="tab-p2" class="tab-content">
+      <div class="card scroll-reveal">
+        <h3 style="color:#1565C0">Future — Para Fase 2 em diante</h3>
+        <div style="margin-top:0.75rem; font-size:0.85rem; color:var(--text-light)">
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">📅 Visão calendário mensal</div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">📸 Scan de boleto (câmera → OCR)</div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">⚡ Pagamento Pix direto do app</div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">🏦 Conexão bancária via Open Finance</div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">📊 Relatório mensal com gráficos</div>
+          <div style="padding:0.5rem 0; border-bottom:1px solid var(--border)">💬 Notificações via WhatsApp</div>
+          <div style="padding:0.5rem 0;">🤖 Categorização por IA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 5. TECH STACK ═══════════ -->
+<section id="tech">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #1976D2, #42A5F5)">05</div>
+      <div>
+        <h2>Tech Stack — 10 Day Build</h2>
+        <p>Mínimo absoluto para entregar rápido. Zero over-engineering.</p>
+      </div>
+    </div>
+
+    <div class="grid-2 scroll-reveal">
+      <div class="card">
+        <h3>🏗️ Architecture: Monolith + Hosted DB</h3>
+        <div style="margin-top:0.75rem">
+          <div style="padding:0.6rem 0.75rem; background:#F5F7FA; border-radius:8px; margin-bottom:0.5rem">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong style="font-size:0.85rem">Framework</strong>
+              <span class="p0" style="background:#E3F2FD; color:#1565C0">Next.js 15</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">Full-stack: API routes (backend) + React (frontend) em um só projeto. Server Actions para mutations. Deploy instantâneo na Vercel.</div>
+          </div>
+          <div style="padding:0.6rem 0.75rem; background:#F5F7FA; border-radius:8px; margin-bottom:0.5rem">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong style="font-size:0.85rem">Database</strong>
+              <span class="p0" style="background:#E8F5E9; color:#2E7D32">Neon PostgreSQL</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">Free tier: 0.5 GB storage, 1 branch. Serverless — escala a zero. Prisma ORM para type safety. Migration-first.</div>
+          </div>
+          <div style="padding:0.6rem 0.75rem; background:#F5F7FA; border-radius:8px; margin-bottom:0.5rem">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong style="font-size:0.85rem">Auth</strong>
+              <span class="p0" style="background:#F3E5F5; color:#6A1B9A">NextAuth.js v5</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">Magic link via email (Resend free: 100 emails/dia). Sem senha = sem fricção. Sessão JWT 30 dias.</div>
+          </div>
+          <div style="padding:0.6rem 0.75rem; background:#F5F7FA; border-radius:8px; margin-bottom:0.5rem">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong style="font-size:0.85rem">UI</strong>
+              <span class="p0" style="background:#FFF3E0; color:#E65100">Tailwind + shadcn/ui</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">Componentes prontos, acessíveis, customizáveis. Sem tempo para design system custom nessa fase.</div>
+          </div>
+          <div style="padding:0.6rem 0.75rem; background:#F5F7FA; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong style="font-size:0.85rem">Deploy</strong>
+              <span class="p0" style="background:#E3F2FD; color:#1565C0">Vercel Free</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">Push to main = deploy. Preview por PR. Edge functions. Custom domain (pagafacil.app). SSL automático.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💰 Custo Mensal: R$0</h3>
+        <div style="margin-top:0.75rem">
+          <div style="overflow-x:auto">
+            <table class="req-table">
+              <thead><tr><th>Serviço</th><th>Tier</th><th>Custo</th></tr></thead>
+              <tbody>
+                <tr><td>Vercel</td><td>Hobby (free)</td><td>R$0</td></tr>
+                <tr><td>Neon</td><td>Free (0.5GB)</td><td>R$0</td></tr>
+                <tr><td>Resend</td><td>Free (100 emails/dia)</td><td>R$0</td></tr>
+                <tr><td>GitHub</td><td>Free</td><td>R$0</td></tr>
+                <tr><td>Domínio (.app)</td><td>1 ano</td><td>~R$70/ano</td></tr>
+                <tr style="background:#E8F5E9"><td colspan="2"><strong>Total</strong></td><td><strong style="color:#2E7D32">R$0/mês</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:1rem; padding:0.75rem; background:#F5F7FA; border-radius:8px; font-size:0.78rem; color:var(--text-light)">
+            <strong>Princípio:</strong> Nesta fase, todo centavo gasto em infra é dinheiro jogado fora. Free tiers de Vercel + Neon + Resend suportam tranquilamente 10-100 usuários. Só gasta quando o crescimento forçar.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal" style="margin-top:1.25rem">
+      <h3>📁 Estrutura do Projeto</h3>
+      <div style="margin-top:0.75rem; font-family:'Courier New', monospace; font-size:0.78rem; background:#1A1A2E; color:#A0AEC0; padding:1.25rem; border-radius:10px; line-height:1.8; overflow-x:auto">
+        <span style="color:#00E676">pagafacil/</span><br>
+        ├── <span style="color:#42A5F5">app/</span><br>
+        │   ├── <span style="color:#FFB74D">(auth)/</span> login/ page.tsx<br>
+        │   ├── <span style="color:#FFB74D">(dashboard)/</span><br>
+        │   │   ├── page.tsx <span style="color:#666"># Dashboard principal</span><br>
+        │   │   ├── bills/ page.tsx <span style="color:#666"># Lista de contas</span><br>
+        │   │   └── bills/new/ page.tsx <span style="color:#666"># Nova conta</span><br>
+        │   ├── api/ auth/ [...nextauth]/<br>
+        │   └── layout.tsx<br>
+        ├── <span style="color:#42A5F5">components/</span><br>
+        │   ├── bill-card.tsx<br>
+        │   ├── bill-form.tsx<br>
+        │   ├── dashboard-summary.tsx<br>
+        │   └── ui/ <span style="color:#666"># shadcn components</span><br>
+        ├── <span style="color:#42A5F5">lib/</span><br>
+        │   ├── db.ts <span style="color:#666"># Prisma client</span><br>
+        │   ├── auth.ts <span style="color:#666"># NextAuth config</span><br>
+        │   └── actions.ts <span style="color:#666"># Server Actions</span><br>
+        ├── <span style="color:#42A5F5">prisma/</span><br>
+        │   └── schema.prisma<br>
+        └── package.json
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 6. TIMELINE ═══════════ -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #FF6F00, #FFB74D)">06</div>
+      <div>
+        <h2>Timeline — 10 Dias</h2>
+        <p>Sprint de validação: do zero ao app com 10 usuários</p>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal">
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #1976D2, #42A5F5)">D1</div>
+        <div class="day-content">
+          <h4>Setup & Fundação</h4>
+          <div class="tasks">
+            <div>→ Criar repo GitHub, Next.js 15, Tailwind, shadcn/ui</div>
+            <div>→ Configurar Neon PostgreSQL + Prisma schema (User, Bill, Category)</div>
+            <div>→ Configurar NextAuth.js com magic link (Resend)</div>
+            <div>→ Deploy na Vercel com custom domain</div>
+          </div>
+          <div class="deliverable">✓ App rodando em pagafacil.app com login funcional</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #1976D2, #42A5F5)">D2</div>
+        <div class="day-content">
+          <h4>CRUD de Contas</h4>
+          <div class="tasks">
+            <div>→ Formulário de nova conta (Server Action para criar)</div>
+            <div>→ Listagem de contas com filtros (status, categoria)</div>
+            <div>→ Editar conta existente</div>
+            <div>→ Deletar com confirmação</div>
+          </div>
+          <div class="deliverable">✓ Fluxo completo: criar, ver, editar, deletar contas</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #1976D2, #42A5F5)">D3</div>
+        <div class="day-content">
+          <h4>Dashboard Principal</h4>
+          <div class="tasks">
+            <div>→ Seções: vencidas / hoje / próximos 7 dias</div>
+            <div>→ Cards de resumo: total semana, total mês, qtd contas</div>
+            <div>→ Botão "marcar como paga" com undo</div>
+            <div>→ Ordenação por vencimento</div>
+          </div>
+          <div class="deliverable">✓ Dashboard funcional — core do produto</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #00C853, #69F0AE)">D4</div>
+        <div class="day-content">
+          <h4>Mobile & Polish</h4>
+          <div class="tasks">
+            <div>→ Responsividade completa (testar em 360px, 390px, 430px)</div>
+            <div>→ PWA manifest + service worker (installable)</div>
+            <div>→ Onboarding flow (3 steps)</div>
+            <div>→ Empty states e loading skeletons</div>
+          </div>
+          <div class="deliverable">✓ App instalável no celular via "Add to Home Screen"</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #00C853, #69F0AE)">D5</div>
+        <div class="day-content">
+          <h4>Email Reminders + Recorrentes</h4>
+          <div class="tasks">
+            <div>→ Cron job (Vercel Cron) para enviar lembretes D-1</div>
+            <div>→ Template de email bonito com Resend + React Email</div>
+            <div>→ Checkbox "recorrente" + auto-gerar próxima conta</div>
+            <div>→ Widget de feedback (botão flutuante)</div>
+          </div>
+          <div class="deliverable">✓ Lembretes funcionando + recorrências</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #FF9800, #FFB74D)">D6</div>
+        <div class="day-content">
+          <h4>Testes & QA</h4>
+          <div class="tasks">
+            <div>→ Testar todos os fluxos em mobile (iOS Safari, Android Chrome)</div>
+            <div>→ Testar edge cases (conta sem valor, datas passadas, muitas contas)</div>
+            <div>→ Corrigir bugs encontrados</div>
+            <div>→ Performance check (Lighthouse score > 90)</div>
+          </div>
+          <div class="deliverable">✓ App estável e testado para early adopters</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #FF9800, #FFB74D)">D7</div>
+        <div class="day-content">
+          <h4>Onboard 5 Usuários (Grupo A)</h4>
+          <div class="tasks">
+            <div>→ Enviar convites para 5 contatos conhecidos</div>
+            <div>→ Acompanhar onboarding por WhatsApp</div>
+            <div>→ Anotar dúvidas, bugs, frustrações em tempo real</div>
+            <div>→ Hotfix imediato se algo travar</div>
+          </div>
+          <div class="deliverable">✓ 5 usuários usando o app</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #7C4DFF, #B388FF)">D8</div>
+        <div class="day-content">
+          <h4>Onboard +5 Usuários (Grupo B) + Fixes</h4>
+          <div class="tasks">
+            <div>→ Recrutar 5 usuários adicionais (comunidades MEI, amigos de amigos)</div>
+            <div>→ Corrigir top 3 issues do Grupo A</div>
+            <div>→ Monitorar uso e engajamento</div>
+          </div>
+          <div class="deliverable">✓ 10 usuários ativos</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #7C4DFF, #B388FF)">D9</div>
+        <div class="day-content">
+          <h4>Entrevistas + Analytics</h4>
+          <div class="tasks">
+            <div>→ Entrevistar 5 usuários (15 min cada por WhatsApp)</div>
+            <div>→ Compilar feature requests</div>
+            <div>→ Analisar: quem usa, quanto usa, o que mais usa</div>
+            <div>→ Setup landing page com waitlist (Vercel + form)</div>
+          </div>
+          <div class="deliverable">✓ Dados qualitativos coletados</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-num" style="background:linear-gradient(135deg, #E53935, #FF5252)">D10</div>
+        <div class="day-content">
+          <h4>Retrospectiva + Decisão Go/No-Go</h4>
+          <div class="tasks">
+            <div>→ Compilar relatório: retenção, NPS, feature requests</div>
+            <div>→ Decidir: escalar para Fase 2 (100 clientes) ou pivotar</div>
+            <div>→ Priorizar roadmap Fase 2 baseado em dados reais</div>
+            <div>→ Pedir para os 10 indicarem amigos → waitlist</div>
+          </div>
+          <div class="deliverable">✓ Go/No-Go decision + roadmap Fase 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 7. SUCCESS METRICS ═══════════ -->
+<section id="metrics">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #00BCD4, #4DD0E1)">07</div>
+      <div>
+        <h2>Success Metrics</h2>
+        <p>Leading indicators (mudam rápido) e lagging indicators (mudam ao longo do tempo)</p>
+      </div>
+    </div>
+
+    <div class="grid-4 scroll-reveal" style="margin-bottom:1.5rem">
+      <div class="metric-card">
+        <div class="metric-val" style="color:var(--primary)">7/10</div>
+        <div class="metric-label">Usuários ativos 3 semanas</div>
+        <div class="metric-type" style="color:#C62828">🎯 North Star</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" style="color:var(--accent)">NPS ≥ 8</div>
+        <div class="metric-label">Net Promoter Score</div>
+        <div class="metric-type" style="color:#E65100">📊 Lagging</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" style="color:var(--warning)">30+</div>
+        <div class="metric-label">Waitlist via referral</div>
+        <div class="metric-type" style="color:#1565C0">📈 Leading</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" style="color:#7C4DFF">5+/sem</div>
+        <div class="metric-label">Contas cadastradas por user</div>
+        <div class="metric-type" style="color:#1565C0">📈 Leading</div>
+      </div>
+    </div>
+
+    <div class="grid-2 scroll-reveal">
+      <div class="card">
+        <h3 style="color:#1565C0">📈 Leading Indicators (mudam em dias)</h3>
+        <div style="margin-top:0.75rem; font-size:0.85rem">
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>DAU/WAU:</strong> >50% (pelo menos 5 dos 10 acessam por semana)</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>Contas criadas/user/semana:</strong> >5 (usando ativamente)</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>% marcadas como pagas:</strong> >60% (não só cadastra, resolve)</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>Tempo no app/sessão:</strong> >3 minutos</div>
+          <div style="padding:0.4rem 0;"><strong>Feature requests recebidos:</strong> >20 (engajamento alto)</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="color:#E65100">📊 Lagging Indicators (mudam em semanas)</h3>
+        <div style="margin-top:0.75rem; font-size:0.85rem">
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>Retenção semana 3:</strong> 70%+ (7/10 ainda usando)</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>NPS:</strong> ≥8 (medido por formulário na semana 2)</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>"Não volto para planilha":</strong> 70%+ declaram nas entrevistas</div>
+          <div style="padding:0.4rem 0; border-bottom:1px solid var(--border)"><strong>Waitlist orgânica:</strong> 30+ pessoas via referral dos 10</div>
+          <div style="padding:0.4rem 0;"><strong>Churn reason:</strong> Se alguém sair, por quê? (falta feature? bug? não precisa?)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal" style="margin-top:1.25rem; background:linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color:#A5D6A7">
+      <h3 style="color:#2E7D32">🚦 Critério Go/No-Go para Fase 2</h3>
+      <div style="margin-top:0.75rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:1rem">
+        <div style="padding:0.75rem; background:white; border-radius:10px; border-left:3px solid #2E7D32">
+          <strong style="color:#2E7D32; font-size:0.85rem">🟢 GO — Escalar para 100</strong>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">7/10 ativos na semana 3 + NPS ≥8 + 30 na waitlist + "não volto para planilha"</div>
+        </div>
+        <div style="padding:0.75rem; background:white; border-radius:10px; border-left:3px solid #FF9800">
+          <strong style="color:#E65100; font-size:0.85rem">🟡 ITERATE — Mais testes</strong>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">4-6/10 ativos. Feedback indica features faltando. Investir mais 2 semanas em P1 features.</div>
+        </div>
+        <div style="padding:0.75rem; background:white; border-radius:10px; border-left:3px solid #E53935">
+          <strong style="color:#C62828; font-size:0.85rem">🔴 PIVOT — Repensar</strong>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.25rem">&lt;4/10 ativos. Ninguém indica. O problema não é forte o suficiente ou a solução está errada.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════ 8. OPEN QUESTIONS ═══════════ -->
+<section id="questions">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num" style="background:linear-gradient(135deg, #795548, #A1887F)">08</div>
+      <div>
+        <h2>Open Questions</h2>
+        <p>Perguntas que precisam ser respondidas antes ou durante o sprint</p>
+      </div>
+    </div>
+
+    <div class="card scroll-reveal">
+      <div class="question-item">
+        <span class="q-owner q-biz">Business</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Queremos focar em MEIs ou PFs para os 10 primeiros?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">Mix pode diluir aprendizado. Sugestão: 7 MEIs + 3 PFs para comparar comportamentos.</div>
+        </div>
+      </div>
+      <div class="question-item">
+        <span class="q-owner q-eng">Engineering</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Usar Next.js App Router ou Pages Router?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">App Router tem Server Components/Actions (mais moderno, mas quirks). Pages Router é mais estável. Recomendação: App Router — é o futuro do Next.js.</div>
+        </div>
+      </div>
+      <div class="question-item">
+        <span class="q-owner q-product">Product</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Precisamos de um nome para a conta recorrente ficar "automática" ou é melhor o usuário confirmar todo mês?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">Auto-criar pode gerar contas indesejadas. "Sugerir + confirmar com 1 clique" pode ser melhor UX.</div>
+        </div>
+      </div>
+      <div class="question-item">
+        <span class="q-owner q-data">Data</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Que analytics usar para trackear uso nos 10 primeiros?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">Opções: Vercel Analytics (free, básico), PostHog (free tier, event tracking), ou custom events no DB. Recomendação: PostHog free — dá funnel e session replay.</div>
+        </div>
+      </div>
+      <div class="question-item">
+        <span class="q-owner q-design">Design</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Qual a identidade visual? Cores, logo?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">Para MVP: usar azul (#0D47A1) + verde (#00C853) do business plan. Logo simples em texto. Refinamento visual na Fase 2.</div>
+        </div>
+      </div>
+      <div class="question-item">
+        <span class="q-owner q-biz">Business</span>
+        <div>
+          <div style="font-size:0.88rem"><strong>Registrar domínio pagafacil.app agora ou usar subdomínio gratuito?</strong></div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-top:0.2rem">pagafacil.vercel.app é free e funciona. Custom domain dá mais credibilidade por ~R$70/ano.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div style="font-size:0.9rem; font-weight:700; margin-bottom:0.3rem">Paga<span style="color:var(--accent)">Fácil</span> — PRD Fase 1</div>
+  <div>Março 2026 · v1.0 · João + Claude</div>
+</footer>
+
+<script>
+// Tab switching scoped to sections
+function switchStoryTab(tab) {
+  const section = document.getElementById('stories');
+  section.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  section.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchReqTab(tab) {
+  const section = document.getElementById('reqs');
+  section.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  section.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); }});
+}, { threshold: 0.1 });
+document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+// Active nav
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

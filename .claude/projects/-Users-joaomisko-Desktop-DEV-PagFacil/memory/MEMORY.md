@@ -1,0 +1,2 @@
+- [João - Fundador](user_joao.md) — Fundador solo do PagaFácil, comunica em PT-BR
+- [Fase 1 Status](project_fase1.md) — MVP 10 dias, iniciado 2026-03-28 (D1)

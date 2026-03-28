@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PagaFácil — Protótipo Low-Fi</title>
+<style>
+  :root {
+    --wire-bg: #F0F0F0;
+    --wire-card: #FFFFFF;
+    --wire-border: #CCCCCC;
+    --wire-text: #333333;
+    --wire-muted: #888888;
+    --wire-blue: #4A90D9;
+    --wire-green: #5CB85C;
+    --wire-red: #D9534F;
+    --wire-yellow: #F0AD4E;
+    --wire-radius: 8px;
+    --phone-w: 375px;
+    --phone-h: 720px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Courier New', monospace;
+    background: #E8E8E8;
+    color: var(--wire-text);
+    line-height: 1.5;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: #333;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar h1 { font-size: 1.1rem; font-weight: 700; }
+  .topbar h1 span { color: var(--wire-green); }
+  .topbar .subtitle { font-size: 0.7rem; opacity: 0.6; }
+  .screen-nav {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  .screen-nav button {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.7rem;
+    transition: all 0.2s;
+  }
+  .screen-nav button:hover, .screen-nav button.active {
+    background: var(--wire-blue);
+    border-color: var(--wire-blue);
+  }
+
+  /* FLOW MAP */
+  .flow-map {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px dashed var(--wire-border);
+    text-align: center;
+  }
+  .flow-map h2 { font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--wire-muted); text-transform: uppercase; letter-spacing: 2px; }
+  .flow-arrows {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    padding: 0.4rem 0.8rem;
+    border: 2px solid var(--wire-blue);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+  .flow-node:hover, .flow-node.active { background: var(--wire-blue); color: white; }
+  .flow-arrow { font-size: 1.2rem; color: var(--wire-muted); }
+
+  /* SCREEN CONTAINER */
+  .screens-container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .screen-section {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+  }
+  .screen-section.active { display: block; }
+  .screen-section.show-all { display: block; }
+
+  .screen-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .screen-label .screen-id {
+    background: var(--wire-blue);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .screen-label h3 { font-size: 1rem; font-weight: 700; }
+  .screen-label .us-tag {
+    font-size: 0.65rem;
+    background: #EEE;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    color: var(--wire-muted);
+  }
+
+  .screen-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  /* PHONE FRAME */
+  .phone {
+    width: var(--phone-w);
+    min-height: 500px;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 28px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .phone-status-bar {
+    height: 28px;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+  }
+  .phone-content {
+    padding: 0;
+    position: relative;
+  }
+
+  /* ANNOTATIONS */
+  .annotations {
+    flex: 1;
+    min-width: 250px;
+  }
+  .annotation {
+    background: #FFFDE7;
+    border: 1px solid #FDD835;
+    border-left: 4px solid #FDD835;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+  }
+  .annotation .ann-title { font-weight: 700; font-size: 0.7rem; color: #F57F17; margin-bottom: 0.3rem; text-transform: uppercase; }
+  .annotation code { background: #EEE; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.68rem; }
+  .annotation .us-ref { color: var(--wire-blue); font-weight: 700; }
+
+  /* WIREFRAME ELEMENTS */
+  .w-header {
+    background: var(--wire-blue);
+    color: white;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .w-header .logo { font-weight: 700; font-size: 1rem; }
+  .w-header .logo span { color: #90EE90; }
+
+  .w-input {
+    border: 2px dashed var(--wire-border);
+    border-radius: var(--wire-radius);
+    padding: 0.6rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.78rem;
+    color: var(--wire-muted);
+    background: #FAFAFA;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  .w-input-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--wire-text);
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .w-btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--wire-radius);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    border: 2px solid;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .w-btn-primary { background: var(--wire-blue); color: white; border-color: var(--wire-blue); }
+  .w-btn-success { background: var(--wire-green); color: white; border-color: var(--wire-green); }
+  .w-btn-danger { background: var(--wire-red); color: white; border-color: var(--wire-red); }
+  .w-btn-outline { background: white; color: var(--wire-blue); border-color: var(--wire-blue); }
+  .w-btn-ghost { background: transparent; color: var(--wire-muted); border-color: var(--wire-border); }
+
+  .w-card {
+    background: white;
+    border: 2px solid var(--wire-border);
+    border-radius: var(--wire-radius);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .w-badge {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+  }
+
+  .w-divider { border-top: 1px dashed var(--wire-border); margin: 0.75rem 0; }
+
+  /* SUMMARY CARDS */
+  .summary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+    padding: 0.75rem;
+    background: #F5F5F5;
+  }
+  .summary-card {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid var(--wire-border);
+  }
+  .summary-card .val { font-size: 1.1rem; font-weight: 800; }
+  .summary-card .lbl { font-size: 0.55rem; color: var(--wire-muted); text-transform: uppercase; }
+
+  /* BILL CARD */
+  .bill-card {
+    border: 2px solid var(--wire-border);
+    border-radius: var(--wire-radius);
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.4rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .bill-card:hover { border-color: var(--wire-blue); }
+  .bill-card .bill-info { flex: 1; }
+  .bill-card .bill-name { font-weight: 700; font-size: 0.78rem; }
+  .bill-card .bill-meta { font-size: 0.65rem; color: var(--wire-muted); }
+  .bill-card .bill-amount { font-weight: 800; font-size: 0.9rem; text-align: right; }
+  .bill-card .bill-check {
+    width: 28px; height: 28px;
+    border: 2px dashed var(--wire-green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    color: var(--wire-green);
+    flex-shrink: 0;
+  }
+
+  .section-tag {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.4rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .tab-row {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    background: #F5F5F5;
+    border-bottom: 1px solid var(--wire-border);
+  }
+  .tab-item {
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    border: 1px solid var(--wire-border);
+    background: white;
+    cursor: pointer;
+  }
+  .tab-item.active { background: var(--wire-blue); color: white; border-color: var(--wire-blue); }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 2px solid var(--wire-border);
+    background: white;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .bottom-nav .nav-item {
+    text-align: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .bottom-nav .nav-item:hover { background: #F0F0F0; }
+  .bottom-nav .nav-item.active { color: var(--wire-blue); }
+  .bottom-nav .nav-item .nav-icon { font-size: 1.2rem; }
+  .bottom-nav .nav-item .nav-label { font-size: 0.55rem; font-weight: 600; }
+
+  /* TOAST */
+  .toast-bar {
+    position: absolute;
+    bottom: 55px;
+    left: 0.5rem;
+    right: 0.5rem;
+    background: #333;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+  }
+  .toast-bar .undo { color: var(--wire-yellow); font-weight: 700; cursor: pointer; }
+
+  /* ONBOARDING STEPS */
+  .step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem;
+  }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--wire-border);
+  }
+  .step-dot.active { background: var(--wire-blue); }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 65px;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--wire-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 300;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--wire-muted);
+  }
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .empty-state .empty-text { font-size: 0.82rem; margin-bottom: 1rem; }
+
+  /* FILTER ROW */
+  .filter-row {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.4rem 0.75rem;
+    overflow-x: auto;
+  }
+  .filter-chip {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--wire-border);
+    border-radius: 20px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    cursor: pointer;
+    background: white;
+  }
+  .filter-chip.active { background: var(--wire-blue); color: white; border-color: var(--wire-blue); }
+
+  /* ALL SCREENS VIEW */
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+  .view-toggle button {
+    padding: 0.4rem 1rem;
+    border: 2px solid var(--wire-border);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .view-toggle button.active { background: #333; color: white; border-color: #333; }
+
+  /* FEEDBACK WIDGET */
+  .feedback-fab {
+    position: absolute;
+    bottom: 65px;
+    left: 1rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    background: #FF9800;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .screen-layout { flex-direction: column; align-items: center; }
+    .annotations { min-width: unset; width: 100%; max-width: var(--phone-w); }
+    .screen-nav { display: none; }
+    .phone { width: 340px; }
+  }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: absolute;
+    inset: 28px 0 0 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: flex-end;
+  }
+  .modal-sheet {
+    background: white;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 1rem;
+  }
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--wire-border);
+    border-radius: 2px;
+    margin: 0 auto 0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>Paga<span>Fácil</span> — Wireframe</h1>
+    <div class="subtitle">Protótipo Low-Fi · Fase 1 MVP · 8 telas</div>
+  </div>
+  <div class="screen-nav" id="screenNav">
+    <button onclick="showScreen('all')" class="active">Todas</button>
+    <button onclick="showScreen('login')">Login</button>
+    <button onclick="showScreen('onboard')">Onboarding</button>
+    <button onclick="showScreen('dashboard')">Dashboard</button>
+    <button onclick="showScreen('new-bill')">Nova Conta</button>
+    <button onclick="showScreen('bill-list')">Lista</button>
+    <button onclick="showScreen('edit-bill')">Editar</button>
+    <button onclick="showScreen('paid-toast')">Pagar</button>
+    <button onclick="showScreen('empty')">Empty State</button>
+  </div>
+</div>
+
+<!-- FLOW MAP -->
+<div class="flow-map">
+  <h2>Fluxo do Usuário</h2>
+  <div class="flow-arrows">
+    <div class="flow-node" onclick="showScreen('login')">01 Login</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('onboard')">02 Onboarding</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('dashboard')">03 Dashboard</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('new-bill')">04 Nova Conta</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('bill-list')">05 Lista</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('edit-bill')">06 Editar</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" onclick="showScreen('paid-toast')">07 Pagar</div>
+  </div>
+</div>
+
+<div class="screens-container">
+
+<!-- ═══════════ SCREEN 1: LOGIN ═══════════ -->
+<div class="screen-section show-all" id="screen-login">
+  <div class="screen-label">
+    <span class="screen-id">01</span>
+    <h3>Login — Magic Link</h3>
+    <span class="us-tag">US-09 · R-01</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app</div>
+      <div class="phone-content" style="padding: 2rem 1.25rem; text-align:center; min-height:470px">
+        <div style="margin-top:3rem">
+          <div style="font-size:2rem; font-weight:800; color:var(--wire-blue)">Paga<span style="color:var(--wire-green)">Fácil</span></div>
+          <div style="font-size:0.72rem; color:var(--wire-muted); margin-top:0.3rem">Suas contas a pagar, sem planilha.</div>
+        </div>
+
+        <div style="margin-top:2.5rem; text-align:left">
+          <div class="w-input-label">Seu email</div>
+          <div class="w-input">ana@exemplo.com</div>
+        </div>
+
+        <div class="w-btn w-btn-primary" style="width:100%; margin-top:1rem">Entrar com Magic Link</div>
+
+        <div style="margin-top:1.5rem; font-size:0.68rem; color:var(--wire-muted)">
+          Sem senha. Enviamos um link para seu email.
+        </div>
+
+        <div style="margin-top:3rem; padding:1rem; background:#F5F5F5; border-radius:8px; text-align:center">
+          <div style="font-size:0.65rem; color:var(--wire-muted)">Primeira vez? Cria a conta automaticamente.</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Decisão de Design</div>
+        <span class="us-ref">US-09</span> — Magic link via Resend. Zero senha = zero fricção.<br>
+        Se o email não existe, cria conta automaticamente (merge login+signup).
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Fluxo</div>
+        1. Usuário digita email<br>
+        2. Clica "Entrar com Magic Link"<br>
+        3. Tela muda para "Verifique seu email"<br>
+        4. Clica no link → sessão JWT 30 dias
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Tech</div>
+        <code>NextAuth.js v5</code> + <code>Resend</code><br>
+        Free tier: 100 emails/dia (suficiente para 10 users)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 2: ONBOARDING ═══════════ -->
+<div class="screen-section show-all" id="screen-onboard">
+  <div class="screen-label">
+    <span class="screen-id">02</span>
+    <h3>Onboarding — 3 Passos</h3>
+    <span class="us-tag">US-10 · R-06</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app</div>
+      <div class="phone-content" style="padding: 1.25rem; min-height:470px">
+        <div class="step-dots">
+          <div class="step-dot active"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <div style="text-align:center; margin:1rem 0">
+          <div style="font-size:1.1rem; font-weight:800">Cadastre sua primeira conta</div>
+          <div style="font-size:0.72rem; color:var(--wire-muted)">Passo 3 de 3 — depois disso, seu dashboard estará pronto!</div>
+        </div>
+
+        <div style="margin-top:1rem">
+          <div class="w-input-label">Fornecedor</div>
+          <div class="w-input">Ex: Aluguel, Netflix, Fornecedor X</div>
+
+          <div class="w-input-label" style="margin-top:0.5rem">Valor (R$)</div>
+          <div class="w-input">Ex: 150,00</div>
+
+          <div class="w-input-label" style="margin-top:0.5rem">Vencimento</div>
+          <div class="w-input">dd/mm/aaaa</div>
+
+          <div class="w-input-label" style="margin-top:0.5rem">Categoria</div>
+          <div class="w-input" style="display:flex; justify-content:space-between; align-items:center">
+            <span>Selecione...</span>
+            <span>▼</span>
+          </div>
+        </div>
+
+        <div class="w-btn w-btn-success" style="width:100%; margin-top:1.25rem">Salvar e ir para o Dashboard →</div>
+
+        <div style="text-align:center; margin-top:0.75rem">
+          <span style="font-size:0.68rem; color:var(--wire-blue); cursor:pointer">Pular por agora</span>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">3 Passos do Onboarding</div>
+        <strong>Passo 1:</strong> Seu nome (pre-fill do email)<br>
+        <strong>Passo 2:</strong> Confirmação do email (magic link)<br>
+        <strong>Passo 3:</strong> Cadastrar primeira conta (esta tela)
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Decisão de Design</div>
+        <span class="us-ref">US-10</span> — A primeira conta é cadastrada no onboarding para que o dashboard não comece vazio.<br>
+        "Pular" é permitido mas não incentivado.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Categorias no Dropdown</div>
+        <code>Fixo</code> <code>Variável</code> <code>Imposto</code> <code>Fornecedor</code> <code>Assinatura</code> <code>Outro</code><br>
+        Ref: <span class="us-ref">R-05</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 3: DASHBOARD ═══════════ -->
+<div class="screen-section show-all" id="screen-dashboard">
+  <div class="screen-label">
+    <span class="screen-id">03</span>
+    <h3>Dashboard Principal</h3>
+    <span class="us-tag">US-02 · US-04 · R-03</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone" style="min-height:620px">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app</div>
+      <div class="phone-content">
+        <div class="w-header">
+          <div class="logo">Paga<span>Fácil</span></div>
+          <div style="font-size:0.7rem; cursor:pointer">☰</div>
+        </div>
+
+        <!-- SUMMARY ROW -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-red)">R$850</div>
+            <div class="lbl">Semana</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-blue)">R$3.420</div>
+            <div class="lbl">Mês</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-green)">8</div>
+            <div class="lbl">Pendentes</div>
+          </div>
+        </div>
+
+        <!-- VENCIDAS -->
+        <div class="section-tag" style="color:var(--wire-red); background:#FFF0F0; margin-top:0.25rem">
+          <span>●</span> VENCIDAS (2)
+        </div>
+        <div style="padding:0 0.5rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-red)">
+            <div class="bill-info">
+              <div class="bill-name">Fornecedor Silva</div>
+              <div class="bill-meta">Venceu 25/03 · Variável</div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-red)">R$350</div>
+            <div class="bill-check">✓</div>
+          </div>
+          <div class="bill-card" style="border-left:3px solid var(--wire-red)">
+            <div class="bill-info">
+              <div class="bill-name">Internet Vivo</div>
+              <div class="bill-meta">Venceu 26/03 · Fixo</div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-red)">R$120</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <!-- HOJE -->
+        <div class="section-tag" style="color:var(--wire-yellow); background:#FFF8E1">
+          <span>●</span> HOJE (1)
+        </div>
+        <div style="padding:0 0.5rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-yellow)">
+            <div class="bill-info">
+              <div class="bill-name">Aluguel Escritório</div>
+              <div class="bill-meta">Vence hoje · Fixo · <span class="w-badge" style="background:#E3F2FD;color:var(--wire-blue)">recorrente</span></div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-yellow)">R$1.200</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <!-- PROXIMOS 7 DIAS -->
+        <div class="section-tag" style="color:var(--wire-blue); background:#E3F2FD">
+          <span>●</span> PRÓXIMOS 7 DIAS (3)
+        </div>
+        <div style="padding:0 0.5rem 4rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-blue)">
+            <div class="bill-info">
+              <div class="bill-name">Netflix</div>
+              <div class="bill-meta">30/03 · Assinatura · <span class="w-badge" style="background:#E3F2FD;color:var(--wire-blue)">recorrente</span></div>
+            </div>
+            <div class="bill-amount">R$39,90</div>
+            <div class="bill-check">✓</div>
+          </div>
+          <div class="bill-card" style="border-left:3px solid var(--wire-blue)">
+            <div class="bill-info">
+              <div class="bill-name">DAS MEI</div>
+              <div class="bill-meta">01/04 · Imposto</div>
+            </div>
+            <div class="bill-amount">R$71,60</div>
+            <div class="bill-check">✓</div>
+          </div>
+          <div class="bill-card" style="border-left:3px solid var(--wire-blue)">
+            <div class="bill-info">
+              <div class="bill-name">Contador</div>
+              <div class="bill-meta">03/04 · Fornecedor</div>
+            </div>
+            <div class="bill-amount">R$200</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <!-- FAB -->
+        <div class="fab">+</div>
+
+        <!-- FEEDBACK WIDGET -->
+        <div class="feedback-fab">💡 Sugerir</div>
+
+        <!-- BOTTOM NAV -->
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Dashboard</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Contas</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">➕</div>
+            <div class="nav-label">Nova</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Config</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Layout do Dashboard</div>
+        <span class="us-ref">US-02</span> — 3 seções com cores semafóricas:<br>
+        🔴 Vencidas, 🟡 Hoje, 🔵 Próximos 7 dias<br>
+        Ordenação: vencimento mais próximo primeiro.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Cards de Resumo</div>
+        <span class="us-ref">US-04</span> — Total pendente semana + mês + quantidade.<br>
+        Atualiza em tempo real ao marcar como pago.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Ação: Marcar como Paga</div>
+        <span class="us-ref">US-03</span> — Botão ✓ circular no card.<br>
+        1 toque → marca como paga → toast com "Desfazer" (10s).<br>
+        Conta sai da lista pendentes.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">FAB (+) e Feedback</div>
+        <span class="us-ref">R-11</span> — Botão flutuante azul para nova conta.<br>
+        Botão amarelo "Sugerir" para feedback widget.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Bottom Nav</div>
+        4 tabs: Dashboard (home), Contas (lista), Nova (+), Config (perfil/logout/dark mode).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 4: NOVA CONTA ═══════════ -->
+<div class="screen-section show-all" id="screen-new-bill">
+  <div class="screen-label">
+    <span class="screen-id">04</span>
+    <h3>Nova Conta a Pagar</h3>
+    <span class="us-tag">US-01 · R-02</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app/bills/new</div>
+      <div class="phone-content" style="min-height:470px">
+        <div class="w-header">
+          <div style="font-size:0.8rem; cursor:pointer">← Voltar</div>
+          <div style="font-weight:700; font-size:0.85rem">Nova Conta</div>
+          <div></div>
+        </div>
+
+        <div style="padding:1rem">
+          <div class="w-input-label">Fornecedor *</div>
+          <div class="w-input">Nome do fornecedor ou conta</div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Valor (R$) *</div>
+          <div class="w-input">0,00</div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Vencimento *</div>
+          <div class="w-input" style="display:flex; justify-content:space-between">
+            <span>dd/mm/aaaa</span>
+            <span>📅</span>
+          </div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Categoria *</div>
+          <div class="w-input" style="display:flex; justify-content:space-between">
+            <span>Selecione...</span>
+            <span>▼</span>
+          </div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Observações</div>
+          <div class="w-input" style="min-height:60px; vertical-align:top">Opcional — notas, nº do boleto, etc.</div>
+
+          <div style="margin-top:0.75rem; display:flex; align-items:center; gap:0.5rem">
+            <div style="width:18px; height:18px; border:2px dashed var(--wire-border); border-radius:4px"></div>
+            <span style="font-size:0.75rem">Essa conta é recorrente (mensal)</span>
+          </div>
+
+          <div class="w-btn w-btn-success" style="width:100%; margin-top:1.25rem">Salvar Conta</div>
+          <div class="w-btn w-btn-ghost" style="width:100%; margin-top:0.5rem">Cancelar</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Campos do Formulário</div>
+        <span class="us-ref">US-01</span> — Campos obrigatórios marcados com *<br>
+        Fornecedor (texto livre), Valor (R$), Vencimento (date picker), Categoria (dropdown).<br>
+        Observações é opcional.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Checkbox Recorrente</div>
+        <span class="us-ref">US-07 · R-10</span> (P1) — Se marcado, auto-gera a próxima conta quando esta for marcada como paga.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Performance</div>
+        Salvar em &lt;3 segundos (Server Action → Neon PostgreSQL).<br>
+        Redirect automático para o dashboard após salvar.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 5: LISTA DE CONTAS ═══════════ -->
+<div class="screen-section show-all" id="screen-bill-list">
+  <div class="screen-label">
+    <span class="screen-id">05</span>
+    <h3>Lista de Contas com Filtros</h3>
+    <span class="us-tag">US-06 · R-07</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone" style="min-height:580px">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app/bills</div>
+      <div class="phone-content">
+        <div class="w-header">
+          <div style="font-weight:700; font-size:0.85rem">Minhas Contas</div>
+          <div style="font-size:0.7rem">🔍</div>
+        </div>
+
+        <!-- SEARCH -->
+        <div style="padding:0.5rem 0.75rem">
+          <div class="w-input" style="margin-bottom:0">🔍 Buscar por fornecedor...</div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filter-row">
+          <div class="filter-chip active">Todas</div>
+          <div class="filter-chip">Pendentes</div>
+          <div class="filter-chip">Vencidas</div>
+          <div class="filter-chip">Pagas</div>
+          <div class="filter-chip">Fixo</div>
+          <div class="filter-chip">Variável</div>
+          <div class="filter-chip">Imposto</div>
+        </div>
+
+        <div class="w-divider" style="margin:0.25rem 0.75rem"></div>
+
+        <!-- LIST -->
+        <div style="padding:0.25rem 0.5rem 4rem">
+          <div class="bill-card">
+            <div class="bill-info">
+              <div class="bill-name">Aluguel Escritório</div>
+              <div class="bill-meta">28/03 · Fixo · <span class="w-badge" style="background:#FFF3E0;color:#E65100">pendente</span></div>
+            </div>
+            <div class="bill-amount">R$1.200</div>
+          </div>
+          <div class="bill-card">
+            <div class="bill-info">
+              <div class="bill-name">Fornecedor Silva</div>
+              <div class="bill-meta">25/03 · Variável · <span class="w-badge" style="background:#FFEBEE;color:#C62828">vencida</span></div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-red)">R$350</div>
+          </div>
+          <div class="bill-card">
+            <div class="bill-info">
+              <div class="bill-name">Netflix</div>
+              <div class="bill-meta">30/03 · Assinatura · <span class="w-badge" style="background:#FFF3E0;color:#E65100">pendente</span></div>
+            </div>
+            <div class="bill-amount">R$39,90</div>
+          </div>
+          <div class="bill-card" style="opacity:0.5">
+            <div class="bill-info">
+              <div class="bill-name">Celular Tim</div>
+              <div class="bill-meta">20/03 · Fixo · <span class="w-badge" style="background:#E8F5E9;color:#2E7D32">paga</span></div>
+            </div>
+            <div class="bill-amount" style="text-decoration:line-through">R$79,90</div>
+          </div>
+          <div class="bill-card" style="opacity:0.5">
+            <div class="bill-info">
+              <div class="bill-name">Energia CEMIG</div>
+              <div class="bill-meta">18/03 · Fixo · <span class="w-badge" style="background:#E8F5E9;color:#2E7D32">paga</span></div>
+            </div>
+            <div class="bill-amount" style="text-decoration:line-through">R$210</div>
+          </div>
+        </div>
+
+        <!-- FAB -->
+        <div class="fab">+</div>
+
+        <div class="bottom-nav">
+          <div class="nav-item">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Dashboard</div>
+          </div>
+          <div class="nav-item active">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Contas</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">➕</div>
+            <div class="nav-label">Nova</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Config</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Filtros</div>
+        <span class="us-ref">R-07</span> — Filtrar por status (pendente/vencida/paga) e categoria.<br>
+        Busca por nome do fornecedor no topo.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Visual</div>
+        Contas pagas aparecem com opacidade reduzida e valor riscado.<br>
+        Badges coloridos por status: 🔴 vencida, 🟡 pendente, 🟢 paga.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Ação no Card</div>
+        Tap no card → abre tela de editar (Tela 06).<br>
+        Swipe left → opção de deletar (com confirmação).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 6: EDITAR CONTA ═══════════ -->
+<div class="screen-section show-all" id="screen-edit-bill">
+  <div class="screen-label">
+    <span class="screen-id">06</span>
+    <h3>Editar / Deletar Conta</h3>
+    <span class="us-tag">US-06 · R-02</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app/bills/edit</div>
+      <div class="phone-content" style="min-height:470px">
+        <div class="w-header">
+          <div style="font-size:0.8rem; cursor:pointer">← Voltar</div>
+          <div style="font-weight:700; font-size:0.85rem">Editar Conta</div>
+          <div style="color:#FF6B6B; font-size:0.75rem; cursor:pointer">🗑️</div>
+        </div>
+
+        <div style="padding:1rem">
+          <div class="w-input-label">Fornecedor</div>
+          <div class="w-input" style="color:var(--wire-text); font-weight:600">Fornecedor Silva</div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Valor (R$)</div>
+          <div class="w-input" style="color:var(--wire-text); font-weight:600">350,00</div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Vencimento</div>
+          <div class="w-input" style="color:var(--wire-text); font-weight:600; display:flex; justify-content:space-between">
+            <span>25/03/2026</span>
+            <span>📅</span>
+          </div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Categoria</div>
+          <div class="w-input" style="color:var(--wire-text); font-weight:600; display:flex; justify-content:space-between">
+            <span>Variável</span>
+            <span>▼</span>
+          </div>
+
+          <div class="w-input-label" style="margin-top:0.75rem">Observações</div>
+          <div class="w-input" style="min-height:50px">Material de escritório ref. março</div>
+
+          <div class="w-btn w-btn-primary" style="width:100%; margin-top:1.25rem">Salvar Alterações</div>
+          <div class="w-btn w-btn-danger" style="width:100%; margin-top:0.5rem">Deletar Conta</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Editar</div>
+        <span class="us-ref">US-06</span> — Todos os campos editáveis.<br>
+        Pre-fill com dados atuais. Salvar volta para a lista.
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Deletar</div>
+        Botão vermelho "Deletar Conta" com confirmação modal:<br>
+        "Tem certeza? Essa ação não pode ser desfeita."<br>
+        Conta deletada fica acessível por 30 dias (soft delete).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 7: MARCAR COMO PAGA (TOAST) ═══════════ -->
+<div class="screen-section show-all" id="screen-paid-toast">
+  <div class="screen-label">
+    <span class="screen-id">07</span>
+    <h3>Marcar como Paga — Toast com Undo</h3>
+    <span class="us-tag">US-03 · R-04</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone" style="min-height:560px">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app</div>
+      <div class="phone-content">
+        <div class="w-header">
+          <div class="logo">Paga<span>Fácil</span></div>
+          <div style="font-size:0.7rem">☰</div>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-red)">R$500</div>
+            <div class="lbl">Semana</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-blue)">R$2.070</div>
+            <div class="lbl">Mês</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-green)">6</div>
+            <div class="lbl">Pendentes</div>
+          </div>
+        </div>
+
+        <div class="section-tag" style="color:var(--wire-red); background:#FFF0F0; margin-top:0.25rem">
+          <span>●</span> VENCIDAS (1)
+        </div>
+        <div style="padding:0 0.5rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-red)">
+            <div class="bill-info">
+              <div class="bill-name">Internet Vivo</div>
+              <div class="bill-meta">Venceu 26/03 · Fixo</div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-red)">R$120</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <div class="section-tag" style="color:var(--wire-yellow); background:#FFF8E1">
+          <span>●</span> HOJE (1)
+        </div>
+        <div style="padding:0 0.5rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-yellow)">
+            <div class="bill-info">
+              <div class="bill-name">Aluguel Escritório</div>
+              <div class="bill-meta">Vence hoje · Fixo</div>
+            </div>
+            <div class="bill-amount" style="color:var(--wire-yellow)">R$1.200</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <div class="section-tag" style="color:var(--wire-blue); background:#E3F2FD">
+          <span>●</span> PRÓXIMOS 7 DIAS (3)
+        </div>
+        <div style="padding:0 0.5rem 4rem">
+          <div class="bill-card" style="border-left:3px solid var(--wire-blue)">
+            <div class="bill-info">
+              <div class="bill-name">Netflix</div>
+              <div class="bill-meta">30/03 · Assinatura</div>
+            </div>
+            <div class="bill-amount">R$39,90</div>
+            <div class="bill-check">✓</div>
+          </div>
+        </div>
+
+        <!-- TOAST -->
+        <div class="toast-bar">
+          <span>✅ Fornecedor Silva marcado como pago</span>
+          <span class="undo">DESFAZER (8s)</span>
+        </div>
+
+        <div class="fab">+</div>
+        <div class="feedback-fab">💡 Sugerir</div>
+
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Dashboard</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Contas</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">➕</div>
+            <div class="nav-label">Nova</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Config</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Ação: Marcar como Paga</div>
+        <span class="us-ref">US-03 · R-04</span><br>
+        1. Usuário toca no ✓ do card<br>
+        2. Card some da lista (animação fade-out)<br>
+        3. Toast aparece: "✅ [nome] marcado como pago"<br>
+        4. Botão "DESFAZER" no toast (countdown 10s)<br>
+        5. Totais atualizam em tempo real
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Estado Anterior vs. Atual</div>
+        Compare com a Tela 03:<br>
+        "Fornecedor Silva" saiu da lista vencidas.<br>
+        Totais reduziram: R$850 → R$500 (semana), 8 → 6 (pendentes).
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Data do Pagamento</div>
+        Default: data de hoje. Registrada automaticamente no DB.<br>
+        Futuramente: permitir escolher outra data.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 8: EMPTY STATE ═══════════ -->
+<div class="screen-section show-all" id="screen-empty">
+  <div class="screen-label">
+    <span class="screen-id">08</span>
+    <h3>Empty State — Primeiro Uso</h3>
+    <span class="us-tag">R-06 · UX</span>
+  </div>
+  <div class="screen-layout">
+    <div class="phone">
+      <div class="phone-status-bar">9:41 ─── pagafacil.app</div>
+      <div class="phone-content" style="min-height:470px">
+        <div class="w-header">
+          <div class="logo">Paga<span>Fácil</span></div>
+          <div style="font-size:0.7rem">☰</div>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-muted)">R$0</div>
+            <div class="lbl">Semana</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-muted)">R$0</div>
+            <div class="lbl">Mês</div>
+          </div>
+          <div class="summary-card">
+            <div class="val" style="color:var(--wire-muted)">0</div>
+            <div class="lbl">Pendentes</div>
+          </div>
+        </div>
+
+        <div class="empty-state" style="margin-top:2rem">
+          <div class="empty-icon">📋</div>
+          <div style="font-size:1rem; font-weight:700; margin-bottom:0.3rem">Nenhuma conta cadastrada</div>
+          <div class="empty-text">Cadastre sua primeira conta e nunca mais perca um prazo de pagamento.</div>
+          <div class="w-btn w-btn-primary" style="font-size:0.85rem">+ Cadastrar Primeira Conta</div>
+        </div>
+
+        <div style="padding:0 1.25rem; margin-top:2rem">
+          <div style="font-size:0.68rem; color:var(--wire-muted); text-align:center; font-weight:600; margin-bottom:0.5rem">DICA RÁPIDA</div>
+          <div style="background:#F5F5F5; padding:0.75rem; border-radius:8px; font-size:0.72rem; color:var(--wire-text)">
+            💡 Comece pelas contas fixas (aluguel, internet, celular) — são as mais fáceis de cadastrar e as que mais geram esquecimento.
+          </div>
+        </div>
+
+        <div class="bottom-nav" style="position:absolute; bottom:0">
+          <div class="nav-item active">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Dashboard</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Contas</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">➕</div>
+            <div class="nav-label">Nova</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Config</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation">
+        <div class="ann-title">Empty State</div>
+        Usuário que pulou o step 3 do onboarding ou deletou todas as contas.<br>
+        CTA grande e direto: "Cadastrar Primeira Conta".
+      </div>
+      <div class="annotation">
+        <div class="ann-title">Dica Contextual</div>
+        Sugestão prática para reduzir a barreira de começar.<br>
+        Desaparece após o usuário ter 3+ contas.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /screens-container -->
+
+<footer style="background:#333; color:rgba(255,255,255,0.5); padding:1.5rem; text-align:center; font-size:0.72rem; font-family:'Courier New',monospace">
+  PagaFácil — Protótipo Low-Fi · Fase 1 MVP · 8 Telas · João + Claude · Março 2026
+</footer>
+
+<script>
+function showScreen(id) {
+  const sections = document.querySelectorAll('.screen-section');
+  const navBtns = document.querySelectorAll('.screen-nav button');
+  const flowNodes = document.querySelectorAll('.flow-node');
+
+  // Update nav buttons
+  navBtns.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (id === 'all') {
+    sections.forEach(s => {
+      s.classList.remove('active');
+      s.classList.add('show-all');
+    });
+  } else {
+    sections.forEach(s => {
+      s.classList.remove('show-all');
+      s.classList.remove('active');
+    });
+    const target = document.getElementById('screen-' + id);
+    if (target) {
+      target.classList.add('active');
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Update flow nodes
+  flowNodes.forEach(n => n.classList.remove('active'));
+}
+
+// Flow node clicks
+document.querySelectorAll('.flow-node').forEach(node => {
+  node.addEventListener('click', function() {
+    document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
