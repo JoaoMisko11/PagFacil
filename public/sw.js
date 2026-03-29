@@ -1,4 +1,4 @@
-const CACHE_NAME = "pagafacil-v1"
+const CACHE_NAME = "pagafacil-v2"
 
 self.addEventListener("install", (event) => {
   self.skipWaiting()
@@ -16,6 +16,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return
   if (event.request.url.includes("/api/")) return
+  // Nunca cacheia navegação (HTML) para evitar redirect loops
+  if (event.request.mode === "navigate") return
 
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
