@@ -1,24 +1,43 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Lista de cookies possíveis do NextAuth v5 (JWT strategy)
+const SESSION_COOKIES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+]
+
 export function middleware(request: NextRequest) {
-  const token =
-    request.cookies.get("authjs.session-token")?.value ??
-    request.cookies.get("__Secure-authjs.session-token")?.value
+  const { pathname } = request.nextUrl
 
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login")
-
-  if (!token && !isLoginPage) {
-    return NextResponse.redirect(new URL("/login", request.url))
+  // Rotas públicas — não precisa de auth
+  if (
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/manifest.json" ||
+    pathname === "/sw.js" ||
+    pathname.startsWith("/icon-")
+  ) {
+    return NextResponse.next()
   }
 
-  if (token && isLoginPage) {
-    return NextResponse.redirect(new URL("/", request.url))
+  const hasToken = SESSION_COOKIES.some(
+    (name) => request.cookies.get(name)?.value
+  )
+
+  if (!hasToken) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("callbackUrl", pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|icon-.*|manifest.json|sw.js).*)"],
+  matcher: ["/((?!_next/static|_next/image).*)"],
 }
