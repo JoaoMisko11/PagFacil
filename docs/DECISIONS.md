@@ -1,5 +1,11 @@
 # Decisões Técnicas — PagaFácil
 
+## D5 - 2026-03-29
+- **setMonth fix sem date-fns:** Em vez de instalar dependência, fix manual com `new Date(year, month+1, day)` + check de overflow. Simples e sem deps extras.
+- **CATEGORIES em lib/constants.ts:** Arquivos `"use server"` não podem exportar objetos (Next.js restrição). Movido para arquivo separado importado pelos componentes.
+- **Dark mode sem next-themes:** Implementado com script inline no `<head>` para evitar FOUC, toggle cycle (light→dark→system), e localStorage. Sem dependência externa.
+- **Nav cores semânticas:** Trocadas cores hardcoded (#00A868, #20252A, etc.) por classes Tailwind (bg-card, text-foreground, etc.) para compatibilidade com dark mode.
+
 ## D4 - 2026-03-29
 - **Auto-gerar recorrente no markBillAsPaid:** Quando uma conta recorrente é marcada como paga, cria automaticamente a próxima com `dueDate + 1 mês`. Simples e sem overengineering.
 - **Email reminder via Vercel Cron:** Rota `/api/cron/reminders` protegida com `CRON_SECRET`. Agrupa contas por usuário para evitar spam. Cron roda às 11h UTC (8h BRT).
