@@ -1,7 +1,9 @@
 import { config } from "dotenv"
 import { defineConfig, env } from "prisma/config"
 
+// Carrega .env.local em dev — em produção (Vercel) as vars já estão no environment
 config({ path: ".env.local" })
+config({ path: ".env" })
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
