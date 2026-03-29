@@ -202,8 +202,10 @@ Este projeto roda em múltiplas sessões do Claude Code ao longo de 10 dias. Par
 3. **Se não tem certeza de algo, pergunte.** Nunca invente uma API, flag ou config.
 4. **Consulte o PRD para acceptance criteria.** Cada requirement tem critérios específicos — siga-os.
 5. **Não refaça o que já foi feito.** Consulte o CHANGELOG.md antes de começar.
-6. **Ao terminar uma sessão, atualize CHANGELOG.md** com o que foi feito e o que ficou pendente.
+6. **Após cada modificação no código, atualize CHANGELOG.md imediatamente** — não espere o fim da sessão. Registre o que foi feito assim que o código mudar.
 7. **Ao tomar uma decisão técnica, registre em DECISIONS.md** com data e justificativa.
+8. **Após cada evolução do software, atualize README.md** com as mudanças relevantes (features, setup, uso).
+9. **Ao commitar, o CHANGELOG.md deve estar incluso no commit** — sempre atualize o changelog antes de criar o commit, para que ele reflita exatamente a versão commitada.
 
 ### Prompt de Início de Sessão
 

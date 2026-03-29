@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import Resend from "next-auth/providers/resend"
+import Credentials from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -9,6 +10,56 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+    }),
+    Credentials({
+      id: "telegram-otp",
+      name: "Telegram",
+      credentials: {
+        chatId: { label: "Chat ID", type: "text" },
+        code: { label: "Código", type: "text" },
+      },
+      async authorize(credentials) {
+        const chatId = credentials.chatId as string
+        const code = credentials.code as string
+
+        if (!chatId || !code) return null
+
+        // Busca OTP válido
+        const otp = await db.telegramOtp.findFirst({
+          where: {
+            chatId,
+            code,
+            used: false,
+            expires: { gt: new Date() },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+
+        if (!otp) return null
+
+        // Marca como usado
+        await db.telegramOtp.update({
+          where: { id: otp.id },
+          data: { used: true },
+        })
+
+        // Busca ou cria usuário pelo telegramChatId
+        let user = await db.user.findUnique({
+          where: { telegramChatId: chatId },
+        })
+
+        if (!user) {
+          user = await db.user.create({
+            data: {
+              email: `telegram_${chatId}@pagafacil.local`,
+              telegramChatId: chatId,
+              notifyVia: "telegram",
+            },
+          })
+        }
+
+        return { id: user.id, name: user.name, email: user.email }
+      },
     }),
   ],
   pages: {

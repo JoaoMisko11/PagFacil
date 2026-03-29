@@ -1,5 +1,13 @@
 # Decisões Técnicas — PagaFácil
 
+## D7 - 2026-03-29
+- **Telegram em vez de WhatsApp:** WhatsApp Cloud API exige Meta Business Account (verificação 2-7 dias), templates aprovados para cada mensagem, e setup complexo. Telegram Bot API é instantâneo (BotFather), grátis sem limites, e sem aprovação de templates. Arquitetura igual — se futuramente quiser WhatsApp, só troca o `sendTelegramMessage` por `sendWhatsAppMessage`.
+- **OTP em vez de magic link para Telegram:** No celular, clicar um link no Telegram abriria o browser, quebrando o fluxo. Um código de 6 dígitos é mais natural no mobile — o usuário copia e cola. TTL de 10 minutos.
+- **Credentials provider no NextAuth:** NextAuth v5 não tem provider nativo para Telegram. Adicionamos um Credentials provider (`telegram-otp`) que valida OTP no banco. Funciona com JWT strategy sem problemas.
+- **Placeholder email para usuários Telegram-only:** O campo `email` é `@unique` e required no schema. Em vez de torná-lo opcional (breaking change em todo o app), criamos `telegram_<chatId>@pagafacil.local`. Simples e sem risco.
+- **Webhook em vez de polling:** O bot usa webhook (POST para `/api/telegram/webhook`) em vez de long polling. Mais eficiente na Vercel (serverless), sem processo permanente.
+- **`notifyVia` como string, não enum:** Usar string (`"email"` | `"telegram"`) em vez de enum Prisma evita migration extra se adicionarmos WhatsApp depois. Default `"email"` mantém retrocompatibilidade.
+
 ## D5 - 2026-03-29
 - **setMonth fix sem date-fns:** Em vez de instalar dependência, fix manual com `new Date(year, month+1, day)` + check de overflow. Simples e sem deps extras.
 - **CATEGORIES em lib/constants.ts:** Arquivos `"use server"` não podem exportar objetos (Next.js restrição). Movido para arquivo separado importado pelos componentes.

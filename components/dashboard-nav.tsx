@@ -47,6 +47,16 @@ export function DashboardNav({ user }: DashboardNavProps) {
             >
               Contas
             </Link>
+            <Link
+              href="/settings"
+              className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
+                pathname === "/settings"
+                  ? "bg-secondary text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              Config
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">

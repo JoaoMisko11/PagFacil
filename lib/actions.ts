@@ -1,10 +1,12 @@
 "use server"
 
+import crypto from "crypto"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { sendTelegramMessage } from "@/lib/telegram"
 
 const billSchema = z.object({
   supplier: z.string().trim().min(1, "Fornecedor é obrigatório"),
@@ -352,4 +354,104 @@ export async function createBillOnboarding(
   }
 
   redirect("/")
+}
+
+// --- Telegram OTP ---
+
+export async function sendTelegramOtp(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const chatId = (formData.get("chatId") as string)?.trim()
+
+  if (!chatId || !/^\d+$/.test(chatId)) {
+    return { errors: { chatId: ["Chat ID inválido. Deve conter apenas números."] } }
+  }
+
+  // Limpa OTPs expirados/usados
+  await db.telegramOtp.deleteMany({
+    where: {
+      OR: [
+        { expires: { lt: new Date() } },
+        { chatId, used: true },
+      ],
+    },
+  })
+
+  const code = crypto.randomInt(100000, 999999).toString()
+  const expires = new Date(Date.now() + 10 * 60 * 1000) // 10 min
+
+  // Busca usuário existente (se houver)
+  const existingUser = await db.user.findUnique({
+    where: { telegramChatId: chatId },
+  })
+
+  await db.telegramOtp.create({
+    data: {
+      chatId,
+      code,
+      expires,
+      userId: existingUser?.id ?? null,
+    },
+  })
+
+  const sent = await sendTelegramMessage(
+    chatId,
+    `Seu código de acesso ao PagaFácil:\n\n<b>${code}</b>\n\nVálido por 10 minutos.`
+  )
+
+  if (!sent) {
+    return {
+      errors: {
+        chatId: [
+          "Não conseguimos enviar a mensagem. Verifique o Chat ID e se você já iniciou conversa com @pagafacil_bot.",
+        ],
+      },
+    }
+  }
+
+  return { message: "Código enviado! Verifique seu Telegram." }
+}
+
+// --- Configurações de notificação ---
+
+export async function updateNotificationPreferences(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const userId = await getUserId()
+  const telegramChatId = (formData.get("telegramChatId") as string)?.trim() || null
+  const notifyVia = formData.get("notifyVia") as string
+
+  if (notifyVia === "telegram" && !telegramChatId) {
+    return { errors: { telegramChatId: ["Informe seu Chat ID do Telegram"] } }
+  }
+
+  // Valida enviando mensagem de teste
+  if (telegramChatId) {
+    const sent = await sendTelegramMessage(
+      telegramChatId,
+      "PagaFácil conectado com sucesso! Você receberá lembretes por aqui."
+    )
+    if (!sent) {
+      return {
+        errors: {
+          telegramChatId: [
+            "Não conseguimos enviar mensagem. Verifique o Chat ID e se você iniciou conversa com @pagafacil_bot.",
+          ],
+        },
+      }
+    }
+  }
+
+  await db.user.update({
+    where: { id: userId },
+    data: {
+      telegramChatId,
+      notifyVia: notifyVia === "telegram" ? "telegram" : "email",
+    },
+  })
+
+  revalidatePath("/settings")
+  return { message: "Preferências salvas!" }
 }

@@ -9,17 +9,20 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String     @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  bills         Bill[]
-  accounts      Account[]
-  sessions      Session[]
-  feedbacks     Feedback[]
+  id             String     @id @default(cuid())
+  name           String?
+  email          String     @unique
+  emailVerified  DateTime?
+  image          String?
+  telegramChatId String?    @unique
+  notifyVia      String     @default("email") // "email" | "telegram"
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  bills          Bill[]
+  accounts       Account[]
+  sessions       Session[]
+  feedbacks      Feedback[]
+  telegramOtps   TelegramOtp[]
 }
 
 model Bill {
@@ -65,6 +68,19 @@ enum RecurrenceFrequency {
   BIWEEKLY
   MONTHLY
   YEARLY
+}
+
+model TelegramOtp {
+  id        String   @id @default(cuid())
+  code      String
+  chatId    String
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, code])
 }
 
 model Feedback {

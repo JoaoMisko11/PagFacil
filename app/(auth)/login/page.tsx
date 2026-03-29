@@ -32,7 +32,7 @@ export default async function LoginPage() {
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#128276;</div>
               <p className="text-sm font-medium text-foreground">Receba lembretes</p>
-              <p className="text-xs text-muted-foreground">Email D-1 antes do vencimento</p>
+              <p className="text-xs text-muted-foreground">Email ou Telegram D-1</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#9989;</div>

@@ -1,5 +1,55 @@
 # Changelog — PagaFácil
 
+## D7 - 2026-03-29 - Integração Telegram (Login + Lembretes)
+### Feito
+- [x] Telegram Bot (@pagafacil_bot) criado via BotFather
+- [x] `lib/telegram.ts` — wrapper fetch para Telegram Bot API (zero deps)
+- [x] Webhook `/api/telegram/webhook` — bot responde `/start` com Chat ID do usuário
+- [x] Login via Telegram: Credentials provider OTP no NextAuth v5
+- [x] Model `TelegramOtp` no Prisma + migration aplicada
+- [x] Campos `telegramChatId` e `notifyVia` no User
+- [x] Login UI com tabs Email/Telegram (shadcn Tabs)
+- [x] Fluxo OTP: informa Chat ID → recebe código 6 dígitos no Telegram → digita no app
+- [x] Página `/settings` para vincular Telegram e escolher canal de notificação
+- [x] Link "Config" adicionado ao nav
+- [x] Cron reminders atualizado: envia via Telegram ou email conforme preferência
+- [x] `.env.example` atualizado com variáveis do Telegram
+- [x] Webhook registrado na Vercel
+- [x] Build passando sem erros
+
+### Pendente
+- [ ] Testar fluxo completo em produção (login + reminder via Telegram)
+- [ ] Regenerar token do bot (exposto durante setup)
+- [ ] Testar dark mode em mobile (iOS Safari, Android Chrome)
+- [ ] Lighthouse score > 90
+- [ ] Preparar onboarding dos 10 usuários
+
+### Bugs Conhecidos
+- Next.js 16 deprecou `middleware.ts` em favor de `proxy` — funciona mas mostra warning
+- Vercel Cron no free tier roda 1x/dia (suficiente para reminder D-1)
+- Usuários Telegram-only recebem email placeholder (`telegram_<chatId>@pagafacil.local`)
+
+---
+
+## D6 - 2026-03-29 - Landing Page & Recorrentes Avançadas
+### Feito
+- [x] Landing page na tela de login: hero com proposta de valor, 3 benefícios, login integrado, footer
+- [x] Frequência variável para contas recorrentes: semanal, quinzenal, mensal, anual
+- [x] Data de fim opcional para contas recorrentes
+- [x] Migration aplicada (RecurringFrequency enum + endDate)
+- [x] Contas existentes continuam funcionando como mensal (retrocompatível)
+
+### Pendente
+- [ ] Testar dark mode em mobile (iOS Safari, Android Chrome)
+- [ ] Lighthouse score > 90
+- [ ] Preparar onboarding dos 10 usuários
+
+### Bugs Conhecidos
+- Next.js 16 deprecou `middleware.ts` em favor de `proxy` — funciona mas mostra warning
+- Vercel Cron no free tier roda 1x/dia (suficiente para reminder D-1)
+
+---
+
 ## D5 - 2026-03-29 - QA, Bug Fixes & Dark Mode
 ### Feito
 - [x] QA completo: análise de Server Actions, pages, components, API routes

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { Resend } from "resend"
+import { sendTelegramMessage } from "@/lib/telegram"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
     },
     include: {
       user: {
-        select: { email: true, name: true },
+        select: { email: true, name: true, telegramChatId: true, notifyVia: true },
       },
     },
   })
@@ -40,7 +41,10 @@ export async function GET(request: Request) {
   }
 
   // Agrupa por usuário
-  const billsByUser = new Map<string, { email: string; name: string | null; bills: typeof bills }>()
+  const billsByUser = new Map<
+    string,
+    { email: string; name: string | null; telegramChatId: string | null; notifyVia: string; bills: typeof bills }
+  >()
 
   for (const bill of bills) {
     const existing = billsByUser.get(bill.userId)
@@ -50,6 +54,8 @@ export async function GET(request: Request) {
       billsByUser.set(bill.userId, {
         email: bill.user.email,
         name: bill.user.name,
+        telegramChatId: bill.user.telegramChatId,
+        notifyVia: bill.user.notifyVia,
         bills: [bill],
       })
     }
@@ -66,21 +72,37 @@ export async function GET(request: Request) {
       .join("\n")
 
     const count = userData.bills.length
-    const subject =
-      count === 1
-        ? `Amanhã vence: ${userData.bills[0].supplier}`
-        : `Amanhã vencem ${count} contas`
+    const greeting = `Olá${userData.name ? `, ${userData.name}` : ""}!`
 
-    try {
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
-        to: userData.email,
-        subject,
-        text: `Olá${userData.name ? `, ${userData.name}` : ""}!\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga:\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`,
-      })
-      sent++
-    } catch (err) {
-      console.error(`Erro ao enviar email para ${userData.email}:`, err)
+    if (userData.notifyVia === "telegram" && userData.telegramChatId) {
+      // Envia via Telegram
+      try {
+        await sendTelegramMessage(
+          userData.telegramChatId,
+          `${greeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga.`
+        )
+        sent++
+      } catch (err) {
+        console.error(`Erro ao enviar Telegram para ${userData.telegramChatId}:`, err)
+      }
+    } else {
+      // Envia via email
+      const subject =
+        count === 1
+          ? `Amanhã vence: ${userData.bills[0].supplier}`
+          : `Amanhã vencem ${count} contas`
+
+      try {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+          to: userData.email,
+          subject,
+          text: `${greeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga:\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`,
+        })
+        sent++
+      } catch (err) {
+        console.error(`Erro ao enviar email para ${userData.email}:`, err)
+      }
     }
   }
 
