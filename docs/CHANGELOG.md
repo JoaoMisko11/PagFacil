@@ -11,6 +11,8 @@
 - [x] Fix: viewport/themeColor movidos para export separado (Next.js best practice)
 - [x] PWA já funcional (manifest.json, service worker, ícones — feito no D1/D2)
 - [x] Build passando sem warnings
+- [x] Deploy na Vercel: https://paga-facil.vercel.app
+- [x] Middleware leve (cookie check) para caber no Edge Function limit 1MB
 
 ### Pendente para D4
 - [ ] Email reminders D-1 (R-09, P1)
