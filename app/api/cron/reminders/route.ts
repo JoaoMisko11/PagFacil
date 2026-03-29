@@ -6,11 +6,13 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function GET(request: Request) {
   // Verifica o secret para proteger o endpoint
+  const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  try {
   const now = new Date()
   const tomorrow = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
   tomorrow.setDate(tomorrow.getDate() + 1)
@@ -83,4 +85,8 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({ sent, totalBills: bills.length })
+  } catch (error) {
+    console.error("Erro no cron de reminders:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

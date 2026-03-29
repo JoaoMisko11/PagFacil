@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,6 +24,8 @@ export function BillFilters({
 }: BillFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [search, setSearch] = useState(currentQuery ?? "")
+  const timeoutRef = useRef<NodeJS.Timeout>(null)
 
   function updateFilter(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,15 +37,20 @@ export function BillFilters({
     router.push(`/bills?${params.toString()}`)
   }
 
+  useEffect(() => {
+    timeoutRef.current = setTimeout(() => updateFilter("q", search), 300)
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
+
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
       <Input
         placeholder="Buscar fornecedor..."
-        defaultValue={currentQuery}
-        onChange={(e) => {
-          const timeout = setTimeout(() => updateFilter("q", e.target.value), 300)
-          return () => clearTimeout(timeout)
-        }}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         className="h-11 sm:h-9 sm:max-w-[200px]"
       />
       <Select

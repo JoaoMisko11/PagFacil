@@ -93,14 +93,14 @@ export function BillCard({ bill }: BillCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[44px] flex-1 text-xs sm:flex-none sm:text-sm"
+            className="h-11 min-w-[44px] flex-1 text-xs sm:h-9 sm:flex-none sm:text-sm"
             onClick={handleTogglePaid}
           >
             {isPaid ? "↩ Desfazer" : "✓ Paga"}
           </Button>
 
           <Link href={`/bills/${bill.id}/edit`} className="flex-1 sm:flex-none">
-            <Button variant="ghost" size="sm" className="h-9 w-full min-w-[44px] text-xs sm:text-sm">
+            <Button variant="ghost" size="sm" className="h-11 w-full min-w-[44px] text-xs sm:h-9 sm:text-sm">
               ✏️ Editar
             </Button>
           </Link>
@@ -108,7 +108,7 @@ export function BillCard({ bill }: BillCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive sm:flex-none sm:text-sm"
+            className="h-11 min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive sm:h-9 sm:flex-none sm:text-sm"
             onClick={() => setDialogOpen(true)}
           >
             🗑 Deletar

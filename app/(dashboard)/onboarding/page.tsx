@@ -33,7 +33,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <div className="mb-2 flex justify-center gap-2">
-            <div className={`h-2 w-12 rounded-full ${step === "name" ? "bg-primary" : "bg-primary"}`} />
+            <div className={`h-2 w-12 rounded-full ${step === "name" ? "bg-primary" : "bg-muted"}`} />
             <div className={`h-2 w-12 rounded-full ${step === "bill" ? "bg-primary" : "bg-muted"}`} />
           </div>
           <p className="text-xs text-muted-foreground">

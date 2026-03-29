@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 const billSchema = z.object({
-  supplier: z.string().min(1, "Fornecedor é obrigatório"),
+  supplier: z.string().trim().min(1, "Fornecedor é obrigatório"),
   amount: z
     .string()
     .min(1, "Valor é obrigatório")
@@ -116,27 +116,49 @@ export async function deleteBill(billId: string): Promise<void> {
 export async function markBillAsPaid(billId: string): Promise<void> {
   const userId = await getUserId()
 
-  const bill = await db.bill.update({
-    where: { id: billId, userId },
-    data: { status: "PAID", paidAt: new Date() },
-  })
-
-  // Auto-gera próxima conta se recorrente (mensal)
-  if (bill.isRecurring) {
-    const nextDueDate = new Date(bill.dueDate)
-    nextDueDate.setMonth(nextDueDate.getMonth() + 1)
-
-    await db.bill.create({
-      data: {
-        supplier: bill.supplier,
-        amount: bill.amount,
-        dueDate: nextDueDate,
-        category: bill.category,
-        notes: bill.notes,
-        isRecurring: true,
-        userId,
-      },
+  try {
+    const bill = await db.bill.findUniqueOrThrow({
+      where: { id: billId, userId },
     })
+
+    if (bill.isRecurring) {
+      // Calcula próximo vencimento sem overflow de mês
+      // (ex: Jan 31 + 1 mês = Fev 28, não Mar 2)
+      const d = new Date(bill.dueDate)
+      const nextMonth = d.getMonth() + 1
+      const nextDueDate = new Date(d.getFullYear(), nextMonth, d.getDate(), 12, 0, 0)
+      // Se o dia estourou (ex: 31 fev → 3 mar), volta pro último dia do mês
+      if (nextDueDate.getMonth() !== nextMonth % 12) {
+        nextDueDate.setDate(0) // último dia do mês anterior
+        nextDueDate.setHours(12, 0, 0, 0)
+      }
+
+      await db.$transaction([
+        db.bill.update({
+          where: { id: billId, userId },
+          data: { status: "PAID", paidAt: new Date() },
+        }),
+        db.bill.create({
+          data: {
+            supplier: bill.supplier,
+            amount: bill.amount,
+            dueDate: nextDueDate,
+            category: bill.category,
+            notes: bill.notes,
+            isRecurring: true,
+            userId,
+          },
+        }),
+      ])
+    } else {
+      await db.bill.update({
+        where: { id: billId, userId },
+        data: { status: "PAID", paidAt: new Date() },
+      })
+    }
+  } catch (error) {
+    console.error("Erro ao marcar conta como paga:", error)
+    throw error
   }
 
   revalidatePath("/bills")
@@ -179,16 +201,26 @@ export async function submitFeedback(
   formData: FormData
 ): Promise<ActionState> {
   const userId = await getUserId()
-  const type = (formData.get("type") as string) || "feature"
+  const rawType = (formData.get("type") as string) || "feature"
+  const type = ["feature", "bug", "other"].includes(rawType) ? rawType : "other"
   const message = (formData.get("message") as string)?.trim()
 
   if (!message || message.length < 3) {
     return { errors: { message: ["Mensagem deve ter pelo menos 3 caracteres"] } }
   }
 
-  await db.feedback.create({
-    data: { type, message, userId },
-  })
+  if (message.length > 5000) {
+    return { errors: { message: ["Mensagem deve ter no máximo 5000 caracteres"] } }
+  }
+
+  try {
+    await db.feedback.create({
+      data: { type, message, userId },
+    })
+  } catch (error) {
+    console.error("Erro ao salvar feedback:", error)
+    return { message: "Erro ao enviar feedback. Tente novamente." }
+  }
 
   return { message: "Obrigado pelo feedback!" }
 }
