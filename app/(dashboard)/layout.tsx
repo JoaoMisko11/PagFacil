@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { DashboardNav } from "@/components/dashboard-nav"
+import { FeedbackWidget } from "@/components/feedback-widget"
 
 export default async function DashboardLayout({
   children,
@@ -14,6 +15,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-background">
       <DashboardNav user={session.user} />
       <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6">{children}</main>
+      <FeedbackWidget />
     </div>
   )
 }

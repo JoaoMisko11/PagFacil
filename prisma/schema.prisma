@@ -9,16 +9,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   bills         Bill[]
   accounts      Account[]
   sessions      Session[]
+  feedbacks     Feedback[]
 }
 
 model Bill {
@@ -54,6 +55,15 @@ enum BillStatus {
   PENDING
   PAID
   OVERDUE
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  type      String   // "feature", "bug", "other"
+  message   String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 // NextAuth models

@@ -116,10 +116,28 @@ export async function deleteBill(billId: string): Promise<void> {
 export async function markBillAsPaid(billId: string): Promise<void> {
   const userId = await getUserId()
 
-  await db.bill.update({
+  const bill = await db.bill.update({
     where: { id: billId, userId },
     data: { status: "PAID", paidAt: new Date() },
   })
+
+  // Auto-gera próxima conta se recorrente (mensal)
+  if (bill.isRecurring) {
+    const nextDueDate = new Date(bill.dueDate)
+    nextDueDate.setMonth(nextDueDate.getMonth() + 1)
+
+    await db.bill.create({
+      data: {
+        supplier: bill.supplier,
+        amount: bill.amount,
+        dueDate: nextDueDate,
+        category: bill.category,
+        notes: bill.notes,
+        isRecurring: true,
+        userId,
+      },
+    })
+  }
 
   revalidatePath("/bills")
   revalidatePath("/")
@@ -154,6 +172,25 @@ export async function updateUserName(
   })
 
   redirect("/onboarding?step=bill")
+}
+
+export async function submitFeedback(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const userId = await getUserId()
+  const type = (formData.get("type") as string) || "feature"
+  const message = (formData.get("message") as string)?.trim()
+
+  if (!message || message.length < 3) {
+    return { errors: { message: ["Mensagem deve ter pelo menos 3 caracteres"] } }
+  }
+
+  await db.feedback.create({
+    data: { type, message, userId },
+  })
+
+  return { message: "Obrigado pelo feedback!" }
 }
 
 export async function createBillOnboarding(
