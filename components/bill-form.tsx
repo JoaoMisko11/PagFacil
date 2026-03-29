@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { type ActionState } from "@/lib/actions"
-import { CATEGORIES } from "@/lib/constants"
+import { CATEGORIES, RECURRENCE_FREQUENCIES } from "@/lib/constants"
 
 interface BillFormProps {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>
@@ -25,6 +25,8 @@ interface BillFormProps {
     category?: string
     notes?: string
     isRecurring?: boolean
+    recurrenceFrequency?: string
+    recurrenceEndDate?: string
   }
   submitLabel?: string
 }
@@ -35,6 +37,7 @@ export function BillForm({
   submitLabel = "Salvar conta",
 }: BillFormProps) {
   const [state, formAction, pending] = useActionState(action, {})
+  const [isRecurring, setIsRecurring] = useState(defaultValues?.isRecurring ?? false)
 
   return (
     <Card>
@@ -122,17 +125,56 @@ export function BillForm({
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              id="isRecurring"
-              name="isRecurring"
-              type="checkbox"
-              defaultChecked={defaultValues?.isRecurring}
-              className="h-4 w-4 rounded border-border accent-primary"
-            />
-            <Label htmlFor="isRecurring" className="font-normal">
-              Essa conta é recorrente (mensal)
-            </Label>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <input
+                id="isRecurring"
+                name="isRecurring"
+                type="checkbox"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              <Label htmlFor="isRecurring" className="font-normal">
+                Essa conta é recorrente
+              </Label>
+            </div>
+
+            {isRecurring && (
+              <div className="grid grid-cols-2 gap-4 pl-6">
+                <div className="space-y-2">
+                  <Label htmlFor="recurrenceFrequency">Frequência</Label>
+                  <Select
+                    name="recurrenceFrequency"
+                    defaultValue={defaultValues?.recurrenceFrequency ?? "MONTHLY"}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RECURRENCE_FREQUENCIES.map((freq) => (
+                        <SelectItem key={freq.value} value={freq.value}>
+                          {freq.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="recurrenceEndDate">Data de fim</Label>
+                  <Input
+                    id="recurrenceEndDate"
+                    name="recurrenceEndDate"
+                    type="date"
+                    defaultValue={defaultValues?.recurrenceEndDate}
+                    placeholder="Opcional"
+                    className="h-11"
+                  />
+                  <p className="text-xs text-muted-foreground">Opcional</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {state.message && (

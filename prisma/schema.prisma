@@ -30,8 +30,10 @@ model Bill {
   category    Category
   status      BillStatus @default(PENDING)
   notes       String?
-  isRecurring Boolean    @default(false)
-  paidAt      DateTime?
+  isRecurring         Boolean              @default(false)
+  recurrenceFrequency RecurrenceFrequency? // null quando não é recorrente
+  recurrenceEndDate   DateTime?            // null = sem fim
+  paidAt              DateTime?
   deletedAt   DateTime?  // soft delete
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -56,6 +58,13 @@ enum BillStatus {
   PENDING
   PAID
   OVERDUE
+}
+
+enum RecurrenceFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
 }
 
 model Feedback {

@@ -16,6 +16,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+const frequencyLabels: Record<string, string> = {
+  WEEKLY: "Semanal",
+  BIWEEKLY: "Quinzenal",
+  MONTHLY: "Mensal",
+  YEARLY: "Anual",
+}
+
 interface BillCardProps {
   bill: {
     id: string
@@ -26,6 +33,7 @@ interface BillCardProps {
     status: string
     notes: string | null
     isRecurring: boolean
+    recurrenceFrequency?: string | null
   }
 }
 
@@ -70,7 +78,7 @@ export function BillCard({ bill }: BillCardProps) {
               </p>
               {bill.isRecurring && (
                 <Badge variant="secondary" className="text-[10px] sm:text-xs shrink-0">
-                  Recorrente
+                  {frequencyLabels[bill.recurrenceFrequency ?? "MONTHLY"] ?? "Mensal"}
                 </Badge>
               )}
             </div>

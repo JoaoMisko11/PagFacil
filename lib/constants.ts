@@ -6,3 +6,10 @@ export const CATEGORIES = [
   { value: "ASSINATURA", label: "Assinatura" },
   { value: "OUTRO", label: "Outro" },
 ] as const
+
+export const RECURRENCE_FREQUENCIES = [
+  { value: "WEEKLY", label: "Semanal" },
+  { value: "BIWEEKLY", label: "Quinzenal" },
+  { value: "MONTHLY", label: "Mensal" },
+  { value: "YEARLY", label: "Anual" },
+] as const

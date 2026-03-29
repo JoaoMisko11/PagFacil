@@ -40,6 +40,10 @@ export default async function EditBillPage({ params }: EditBillPageProps) {
           category: bill.category,
           notes: bill.notes ?? "",
           isRecurring: bill.isRecurring,
+          recurrenceFrequency: bill.recurrenceFrequency ?? undefined,
+          recurrenceEndDate: bill.recurrenceEndDate
+            ? formatDateInput(bill.recurrenceEndDate)
+            : undefined,
         }}
         submitLabel="Salvar alterações"
       />

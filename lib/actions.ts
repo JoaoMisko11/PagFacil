@@ -26,6 +26,14 @@ const billSchema = z.object({
   category: z.enum(["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "OUTRO"]),
   notes: z.string().optional(),
   isRecurring: z.coerce.boolean().optional().default(false),
+  recurrenceFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "YEARLY"]).optional(),
+  recurrenceEndDate: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || !isNaN(new Date(val + "T00:00:00Z").getTime()),
+      "Data de fim inválida"
+    ),
 })
 
 export type ActionState = {
@@ -52,6 +60,8 @@ export async function createBill(
     category: formData.get("category"),
     notes: formData.get("notes"),
     isRecurring: formData.get("isRecurring") === "on",
+    recurrenceFrequency: formData.get("recurrenceFrequency") || undefined,
+    recurrenceEndDate: formData.get("recurrenceEndDate") || undefined,
   })
 
   if (!parsed.success) {
@@ -67,6 +77,10 @@ export async function createBill(
         category: parsed.data.category,
         notes: parsed.data.notes || null,
         isRecurring: parsed.data.isRecurring,
+        recurrenceFrequency: parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null,
+        recurrenceEndDate: parsed.data.isRecurring && parsed.data.recurrenceEndDate
+          ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
+          : null,
         userId,
       },
     })
@@ -92,6 +106,8 @@ export async function updateBill(
     category: formData.get("category"),
     notes: formData.get("notes"),
     isRecurring: formData.get("isRecurring") === "on",
+    recurrenceFrequency: formData.get("recurrenceFrequency") || undefined,
+    recurrenceEndDate: formData.get("recurrenceEndDate") || undefined,
   })
 
   if (!parsed.success) {
@@ -108,6 +124,10 @@ export async function updateBill(
         category: parsed.data.category,
         notes: parsed.data.notes || null,
         isRecurring: parsed.data.isRecurring,
+        recurrenceFrequency: parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null,
+        recurrenceEndDate: parsed.data.isRecurring && parsed.data.recurrenceEndDate
+          ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
+          : null,
       },
     })
   } catch (error) {
@@ -143,34 +163,67 @@ export async function markBillAsPaid(billId: string): Promise<void> {
     })
 
     if (bill.isRecurring) {
-      // Calcula próximo vencimento sem overflow de mês
-      // (ex: Jan 31 + 1 mês = Fev 28, não Mar 2)
       const d = new Date(bill.dueDate)
-      const nextMonth = d.getMonth() + 1
-      const nextDueDate = new Date(d.getFullYear(), nextMonth, d.getDate(), 12, 0, 0)
-      // Se o dia estourou (ex: 31 fev → 3 mar), volta pro último dia do mês
-      if (nextDueDate.getMonth() !== nextMonth % 12) {
-        nextDueDate.setDate(0) // último dia do mês anterior
-        nextDueDate.setHours(12, 0, 0, 0)
+      const freq = bill.recurrenceFrequency ?? "MONTHLY"
+
+      let nextDueDate: Date
+      switch (freq) {
+        case "WEEKLY":
+          nextDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7, 12, 0, 0)
+          break
+        case "BIWEEKLY":
+          nextDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 14, 12, 0, 0)
+          break
+        case "YEARLY":
+          nextDueDate = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate(), 12, 0, 0)
+          // Overflow check (ex: 29 fev em ano não-bissexto)
+          if (nextDueDate.getMonth() !== d.getMonth()) {
+            nextDueDate.setDate(0)
+            nextDueDate.setHours(12, 0, 0, 0)
+          }
+          break
+        case "MONTHLY":
+        default: {
+          const nextMonth = d.getMonth() + 1
+          nextDueDate = new Date(d.getFullYear(), nextMonth, d.getDate(), 12, 0, 0)
+          if (nextDueDate.getMonth() !== nextMonth % 12) {
+            nextDueDate.setDate(0)
+            nextDueDate.setHours(12, 0, 0, 0)
+          }
+          break
+        }
       }
 
-      await db.$transaction([
+      // Se tem data de fim e a próxima parcela passaria dela, não cria
+      const shouldCreateNext =
+        !bill.recurrenceEndDate || nextDueDate <= bill.recurrenceEndDate
+
+      const ops = [
         db.bill.update({
           where: { id: billId, userId },
           data: { status: "PAID", paidAt: new Date() },
         }),
-        db.bill.create({
-          data: {
-            supplier: bill.supplier,
-            amount: bill.amount,
-            dueDate: nextDueDate,
-            category: bill.category,
-            notes: bill.notes,
-            isRecurring: true,
-            userId,
-          },
-        }),
-      ])
+      ]
+
+      if (shouldCreateNext) {
+        ops.push(
+          db.bill.create({
+            data: {
+              supplier: bill.supplier,
+              amount: bill.amount,
+              dueDate: nextDueDate,
+              category: bill.category,
+              notes: bill.notes,
+              isRecurring: true,
+              recurrenceFrequency: bill.recurrenceFrequency,
+              recurrenceEndDate: bill.recurrenceEndDate,
+              userId,
+            },
+          })
+        )
+      }
+
+      await db.$transaction(ops)
     } else {
       await db.bill.update({
         where: { id: billId, userId },
@@ -269,6 +322,8 @@ export async function createBillOnboarding(
     category: formData.get("category"),
     notes: formData.get("notes"),
     isRecurring: formData.get("isRecurring") === "on",
+    recurrenceFrequency: formData.get("recurrenceFrequency") || undefined,
+    recurrenceEndDate: formData.get("recurrenceEndDate") || undefined,
   })
 
   if (!parsed.success) {
@@ -284,6 +339,10 @@ export async function createBillOnboarding(
         category: parsed.data.category,
         notes: parsed.data.notes || null,
         isRecurring: parsed.data.isRecurring,
+        recurrenceFrequency: parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null,
+        recurrenceEndDate: parsed.data.isRecurring && parsed.data.recurrenceEndDate
+          ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
+          : null,
         userId,
       },
     })
