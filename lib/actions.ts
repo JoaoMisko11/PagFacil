@@ -16,7 +16,13 @@ const billSchema = z.object({
       return Math.round(parseFloat(cleaned) * 100)
     })
     .refine((val) => val > 0, "Valor deve ser maior que zero"),
-  dueDate: z.string().min(1, "Vencimento é obrigatório"),
+  dueDate: z
+    .string()
+    .min(1, "Vencimento é obrigatório")
+    .refine(
+      (val) => !isNaN(new Date(val + "T00:00:00Z").getTime()),
+      "Data de vencimento inválida"
+    ),
   category: z.enum(["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "OUTRO"]),
   notes: z.string().optional(),
   isRecurring: z.coerce.boolean().optional().default(false),
@@ -52,17 +58,22 @@ export async function createBill(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  await db.bill.create({
-    data: {
-      supplier: parsed.data.supplier,
-      amount: parsed.data.amount,
-      dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
-      category: parsed.data.category,
-      notes: parsed.data.notes || null,
-      isRecurring: parsed.data.isRecurring,
-      userId,
-    },
-  })
+  try {
+    await db.bill.create({
+      data: {
+        supplier: parsed.data.supplier,
+        amount: parsed.data.amount,
+        dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
+        category: parsed.data.category,
+        notes: parsed.data.notes || null,
+        isRecurring: parsed.data.isRecurring,
+        userId,
+      },
+    })
+  } catch (error) {
+    console.error("Erro ao criar conta:", error)
+    return { message: "Erro ao salvar conta. Tente novamente." }
+  }
 
   redirect("/bills")
 }
@@ -87,17 +98,22 @@ export async function updateBill(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  await db.bill.update({
-    where: { id: billId, userId },
-    data: {
-      supplier: parsed.data.supplier,
-      amount: parsed.data.amount,
-      dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
-      category: parsed.data.category,
-      notes: parsed.data.notes || null,
-      isRecurring: parsed.data.isRecurring,
-    },
-  })
+  try {
+    await db.bill.update({
+      where: { id: billId, userId },
+      data: {
+        supplier: parsed.data.supplier,
+        amount: parsed.data.amount,
+        dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
+        category: parsed.data.category,
+        notes: parsed.data.notes || null,
+        isRecurring: parsed.data.isRecurring,
+      },
+    })
+  } catch (error) {
+    console.error("Erro ao atualizar conta:", error)
+    return { message: "Erro ao atualizar conta. Tente novamente." }
+  }
 
   redirect("/bills")
 }
@@ -105,10 +121,15 @@ export async function updateBill(
 export async function deleteBill(billId: string): Promise<void> {
   const userId = await getUserId()
 
-  await db.bill.update({
-    where: { id: billId, userId },
-    data: { deletedAt: new Date() },
-  })
+  try {
+    await db.bill.update({
+      where: { id: billId, userId },
+      data: { deletedAt: new Date() },
+    })
+  } catch (error) {
+    console.error("Erro ao deletar conta:", error)
+    throw error
+  }
 
   revalidatePath("/bills")
 }
@@ -168,10 +189,15 @@ export async function markBillAsPaid(billId: string): Promise<void> {
 export async function markBillAsPending(billId: string): Promise<void> {
   const userId = await getUserId()
 
-  await db.bill.update({
-    where: { id: billId, userId },
-    data: { status: "PENDING", paidAt: null },
-  })
+  try {
+    await db.bill.update({
+      where: { id: billId, userId },
+      data: { status: "PENDING", paidAt: null },
+    })
+  } catch (error) {
+    console.error("Erro ao desfazer pagamento:", error)
+    throw error
+  }
 
   revalidatePath("/bills")
   revalidatePath("/")
@@ -188,10 +214,15 @@ export async function updateUserName(
     return { errors: { name: ["Nome deve ter pelo menos 2 caracteres"] } }
   }
 
-  await db.user.update({
-    where: { id: userId },
-    data: { name: name.trim() },
-  })
+  try {
+    await db.user.update({
+      where: { id: userId },
+      data: { name: name.trim() },
+    })
+  } catch (error) {
+    console.error("Erro ao atualizar nome:", error)
+    return { message: "Erro ao salvar nome. Tente novamente." }
+  }
 
   redirect("/onboarding?step=bill")
 }
@@ -244,17 +275,22 @@ export async function createBillOnboarding(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  await db.bill.create({
-    data: {
-      supplier: parsed.data.supplier,
-      amount: parsed.data.amount,
-      dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
-      category: parsed.data.category,
-      notes: parsed.data.notes || null,
-      isRecurring: parsed.data.isRecurring,
-      userId,
-    },
-  })
+  try {
+    await db.bill.create({
+      data: {
+        supplier: parsed.data.supplier,
+        amount: parsed.data.amount,
+        dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
+        category: parsed.data.category,
+        notes: parsed.data.notes || null,
+        isRecurring: parsed.data.isRecurring,
+        userId,
+      },
+    })
+  } catch (error) {
+    console.error("Erro ao criar conta (onboarding):", error)
+    return { message: "Erro ao salvar conta. Tente novamente." }
+  }
 
   redirect("/")
 }

@@ -14,15 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { type ActionState } from "@/lib/actions"
-
-const categories = [
-  { value: "FIXO", label: "Fixo" },
-  { value: "VARIAVEL", label: "Variável" },
-  { value: "IMPOSTO", label: "Imposto" },
-  { value: "FORNECEDOR", label: "Fornecedor" },
-  { value: "ASSINATURA", label: "Assinatura" },
-  { value: "OUTRO", label: "Outro" },
-]
+import { CATEGORIES } from "@/lib/constants"
 
 interface BillFormProps {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>
@@ -107,7 +99,7 @@ export function BillForm({
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>
