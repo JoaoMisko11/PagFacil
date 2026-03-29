@@ -1,5 +1,26 @@
 # Changelog — PagaFácil
 
+## D4 - 2026-03-29 - Recorrentes, Reminders & Feedback
+### Feito
+- [x] Contas recorrentes: ao marcar como paga, auto-cria a próxima (mês seguinte)
+- [x] Email reminder D-1: API route `/api/cron/reminders` com Vercel Cron (8h BRT)
+- [x] Feedback widget: botão flutuante com formulário (feature/bug/outro), salva no DB
+- [x] Model Feedback no Prisma + migration aplicada
+- [x] vercel.json com cron schedule
+- [x] Deploy: https://paga-facil-mvp.vercel.app
+- [x] Repo tornado público (necessário para Vercel Hobby tier)
+
+### Pendente para D5-D6
+- [ ] QA e testes manuais
+- [ ] Fixes de bugs encontrados
+- [ ] Preparar onboarding dos 10 usuários
+
+### Bugs Conhecidos
+- Next.js 16 deprecou `middleware.ts` em favor de `proxy` — funciona mas mostra warning
+- Vercel Cron no free tier roda 1x/dia (suficiente para reminder D-1)
+
+---
+
 ## D3 - 2026-03-28 - Dashboard + Mobile + PWA + Onboarding
 ### Feito
 - [x] Onboarding flow (2 passos: nome → primeira conta) com redirect automático para usuários novos
@@ -11,7 +32,7 @@
 - [x] Fix: viewport/themeColor movidos para export separado (Next.js best practice)
 - [x] PWA já funcional (manifest.json, service worker, ícones — feito no D1/D2)
 - [x] Build passando sem warnings
-- [x] Deploy na Vercel: https://paga-facil.vercel.app
+- [x] Deploy na Vercel: https://paga-facil-mvp.vercel.app
 - [x] Middleware leve (cookie check) para caber no Edge Function limit 1MB
 
 ### Pendente para D4
