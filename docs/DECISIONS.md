@@ -1,5 +1,10 @@
 # Decisões Técnicas — PagaFácil
 
+## D8 - 2026-03-30
+- **Calendário no dashboard (não em página separada):** Usuário pediu visão calendário inline no dashboard para não precisar navegar. Componente client (`BillCalendar`) renderizado entre os cards de resumo e as seções de contas.
+- **Query separada para calendário:** O calendário mostra todas as contas (pendentes + pagas), diferente do dashboard que só mostra pendentes. Query com `select` enxuto para performance.
+- **Dots via CSS pseudo-elements:** Em vez de customizar o componente DayButton do shadcn Calendar, usamos `modifiersClassNames` do react-day-picker + `::after` pseudo-elements. Mais simples e sem conflito com estilos do shadcn.
+
 ## D7 - 2026-03-29
 - **Telegram em vez de WhatsApp:** WhatsApp Cloud API exige Meta Business Account (verificação 2-7 dias), templates aprovados para cada mensagem, e setup complexo. Telegram Bot API é instantâneo (BotFather), grátis sem limites, e sem aprovação de templates. Arquitetura igual — se futuramente quiser WhatsApp, só troca o `sendTelegramMessage` por `sendWhatsAppMessage`.
 - **OTP em vez de magic link para Telegram:** No celular, clicar um link no Telegram abriria o browser, quebrando o fluxo. Um código de 6 dígitos é mais natural no mobile — o usuário copia e cola. TTL de 10 minutos.

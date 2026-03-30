@@ -12,7 +12,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard do que vence, e
 
 - **Login sem senha** -- magic link por email
 - **CRUD de contas** -- fornecedor, valor, vencimento, categoria, observacoes
-- **Dashboard** -- secoes: vencidas, hoje, proximos 7 dias + totais semana/mes
+- **Dashboard** -- secoes: vencidas, hoje, proximos 7 dias + totais semana/mes + calendario mensal
 - **Filtros** -- status, categoria, busca por fornecedor
 - **Contas recorrentes** -- ao marcar como paga, auto-gera a proxima (mensal)
 - **Lembretes D-1** -- email automatico 1 dia antes do vencimento

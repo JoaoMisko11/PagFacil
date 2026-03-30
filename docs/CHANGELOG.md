@@ -1,5 +1,29 @@
 # Changelog — PagaFácil
 
+## D8 - 2026-03-30 - Calendário no Dashboard
+### Feito
+- [x] Componente `BillCalendar` — calendário mensal interativo no dashboard (US-08)
+- [x] Dots coloridos nos dias com contas: vermelho (vencida), amarelo (hoje), azul (a vencer)
+- [x] Clique no dia mostra contas daquele dia com fornecedor, categoria, valor e status
+- [x] Legenda visual abaixo do calendário
+- [x] Locale pt-BR via date-fns (já instalado)
+- [x] CSS dos dots em globals.css
+- [x] Build passando sem erros
+
+### Pendente
+- [ ] Testar fluxo completo em produção (login + reminder via Telegram)
+- [ ] Regenerar token do bot (exposto durante setup)
+- [ ] Testar dark mode em mobile (iOS Safari, Android Chrome)
+- [ ] Lighthouse score > 90
+- [ ] Preparar onboarding dos 10 usuários
+
+### Bugs Conhecidos
+- Next.js 16 deprecou `middleware.ts` em favor de `proxy` — funciona mas mostra warning
+- Vercel Cron no free tier roda 1x/dia (suficiente para reminder D-1)
+- Usuários Telegram-only recebem email placeholder (`telegram_<chatId>@pagafacil.local`)
+
+---
+
 ## D7 - 2026-03-29 - Integração Telegram (Login + Lembretes)
 ### Feito
 - [x] Telegram Bot (@pagafacil_bot) criado via BotFather

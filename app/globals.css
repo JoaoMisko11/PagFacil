@@ -134,3 +134,31 @@
     @apply font-sans;
   }
 }
+
+/* Calendar bill dots */
+.bill-dot-red,
+.bill-dot-amber,
+.bill-dot-blue {
+  position: relative;
+}
+.bill-dot-red::after,
+.bill-dot-amber::after,
+.bill-dot-blue::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.bill-dot-red::after {
+  background-color: #ef4444;
+}
+.bill-dot-amber::after {
+  background-color: #f59e0b;
+}
+.bill-dot-blue::after {
+  background-color: #3b82f6;
+}

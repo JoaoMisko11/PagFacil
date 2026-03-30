@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/format"
 import { BillCard } from "@/components/bill-card"
+import { BillCalendar } from "@/components/bill-calendar"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -31,6 +32,29 @@ export default async function DashboardPage() {
     },
     orderBy: { dueDate: "asc" },
   })
+
+  // Todas as contas (incluindo pagas) para o calendário
+  const allBills = await db.bill.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+    orderBy: { dueDate: "asc" },
+    select: {
+      id: true,
+      supplier: true,
+      amount: true,
+      dueDate: true,
+      category: true,
+      status: true,
+      isRecurring: true,
+    },
+  })
+
+  const calendarBills = allBills.map((b) => ({
+    ...b,
+    dueDate: b.dueDate.toISOString(),
+  }))
 
   const overdue = pendingBills.filter((b) => b.dueDate < today)
   const dueToday = pendingBills.filter(
@@ -113,6 +137,9 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Calendário */}
+      <BillCalendar bills={calendarBills} />
 
       {/* Vencidas */}
       {overdue.length > 0 && (
