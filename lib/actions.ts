@@ -444,6 +444,23 @@ export async function updateNotificationPreferences(
     }
   }
 
+  // Verifica se o Chat ID já está vinculado a outra conta
+  if (telegramChatId) {
+    const existing = await db.user.findUnique({
+      where: { telegramChatId },
+      select: { id: true },
+    })
+    if (existing && existing.id !== userId) {
+      return {
+        errors: {
+          telegramChatId: [
+            "Este Chat ID já está vinculado a outra conta.",
+          ],
+        },
+      }
+    }
+  }
+
   await db.user.update({
     where: { id: userId },
     data: {
