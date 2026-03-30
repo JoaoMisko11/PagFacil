@@ -1,5 +1,24 @@
 # Changelog — PagaFácil
 
+## D9 - 2026-03-30 - Auth: Google OAuth + Nodemailer (substitui Resend)
+### Feito
+- [x] Google OAuth provider adicionado ao NextAuth (login com 1 clique)
+- [x] Resend substituído por Nodemailer + Gmail SMTP para magic links
+- [x] Resend substituído por Nodemailer no cron de lembretes (`/api/cron/reminders`)
+- [x] Login form atualizado: botão Google no topo + tabs Email/Telegram abaixo
+- [x] Pacote `resend` removido do projeto
+- [x] Env vars novas: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SMTP_USER`, `SMTP_PASSWORD`
+
+### Pendente
+- [ ] Testar login Google em produção (redirect URI na Vercel)
+- [ ] Testar magic link via Gmail SMTP
+- [ ] Configurar env vars na Vercel
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D8 - 2026-03-30 - Calendário no Dashboard
 ### Feito
 - [x] Componente `BillCalendar` — calendário mensal interativo no dashboard (US-08)

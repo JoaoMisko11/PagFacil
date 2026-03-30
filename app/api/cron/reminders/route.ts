@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { Resend } from "resend"
+import nodemailer from "nodemailer"
 import { sendTelegramMessage } from "@/lib/telegram"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+})
 
 export async function GET(request: Request) {
   // Verifica o secret para proteger o endpoint
@@ -93,8 +100,8 @@ export async function GET(request: Request) {
           : `Amanhã vencem ${count} contas`
 
       try {
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+        await transporter.sendMail({
+          from: process.env.EMAIL_FROM ?? process.env.SMTP_USER,
           to: userData.email,
           subject,
           text: `${greeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga:\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`,

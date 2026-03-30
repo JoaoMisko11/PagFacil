@@ -1,5 +1,9 @@
 # Decisões Técnicas — PagaFácil
 
+## D9 - 2026-03-30
+- **Google OAuth + Nodemailer em vez de Resend:** Resend free tier só envia para o email do dono da conta, impossibilitando onboarding dos 10 usuários. Google OAuth é o login mais simples (sem senha), e Nodemailer com Gmail SMTP (app password) substitui Resend para magic links e lembretes — limite de ~500 emails/dia grátis, suficiente para MVP.
+- **Remoção do pacote resend:** Com Nodemailer cobrindo magic links (via NextAuth provider) e lembretes (via `transporter.sendMail`), o pacote `resend` foi removido. Menos uma dependência externa.
+
 ## D8 - 2026-03-30
 - **Calendário no dashboard (não em página separada):** Usuário pediu visão calendário inline no dashboard para não precisar navegar. Componente client (`BillCalendar`) renderizado entre os cards de resumo e as seções de contas.
 - **Query separada para calendário:** O calendário mostra todas as contas (pendentes + pagas), diferente do dashboard que só mostra pendentes. Query com `select` enxuto para performance.
