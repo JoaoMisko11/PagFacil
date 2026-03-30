@@ -57,7 +57,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
     return d.getFullYear() === viewYear && d.getMonth() === viewMo
   })
   const totalPending = monthBills
-    .filter((b) => b.status === "PENDING")
+    .filter((b) => b.status === "PENDING" || b.status === "OVERDUE")
     .reduce((sum, b) => sum + b.amount, 0)
   const totalPaid = monthBills
     .filter((b) => b.status === "PAID")
