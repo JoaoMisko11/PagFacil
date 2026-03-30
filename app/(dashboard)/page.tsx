@@ -22,7 +22,8 @@ export default async function DashboardPage() {
   const tomorrow = new Date(today.getTime() + 86400000)
   const endOfWeek = new Date(today)
   endOfWeek.setDate(endOfWeek.getDate() + 7)
-  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  const endOf30Days = new Date(today)
+  endOf30Days.setDate(endOf30Days.getDate() + 30)
 
   const pendingBills = await db.bill.findMany({
     where: {
@@ -69,7 +70,7 @@ export default async function DashboardPage() {
     .reduce((sum, b) => sum + b.amount, 0)
 
   const totalMonth = pendingBills
-    .filter((b) => b.dueDate <= endOfMonth)
+    .filter((b) => b.dueDate <= endOf30Days)
     .reduce((sum, b) => sum + b.amount, 0)
 
   const totalBills = pendingBills.length
@@ -105,7 +106,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
             <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
-              Pendente mês
+              Pendente 30 dias
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">

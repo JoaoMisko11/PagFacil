@@ -1,5 +1,19 @@
 # Changelog — PagaFácil
 
+## D10 - 2026-03-30 - UX: Dashboard & Calendário
+### Feito
+- [x] Fix: "Pendente mês" → "Pendente 30 dias" (rolling window, evita semana > mês no fim do mês)
+- [x] Totalizadores no calendário: total pendente e pago do mês visualizado, atualiza ao navegar
+
+### Pendente
+- [ ] Testar login Google em produção (redirect URI na Vercel)
+- [ ] Deploy na Vercel com novas mudanças
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D9 - 2026-03-30 - Auth: Google OAuth + Nodemailer (substitui Resend)
 ### Feito
 - [x] Google OAuth provider adicionado ao NextAuth (login com 1 clique)

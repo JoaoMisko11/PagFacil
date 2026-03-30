@@ -24,6 +24,7 @@ interface BillCalendarProps {
 
 export function BillCalendar({ bills }: BillCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [viewMonth, setViewMonth] = useState<Date>(new Date())
 
   // Agrupa contas por dia (YYYY-MM-DD)
   const billsByDay = new Map<string, CalendarBill[]>()
@@ -48,6 +49,20 @@ export function BillCalendar({ bills }: BillCalendarProps) {
     else upcomingDates.push(d)
   }
 
+  // Totais do mês visualizado
+  const viewYear = viewMonth.getFullYear()
+  const viewMo = viewMonth.getMonth()
+  const monthBills = bills.filter((b) => {
+    const d = new Date(b.dueDate)
+    return d.getFullYear() === viewYear && d.getMonth() === viewMo
+  })
+  const totalPending = monthBills
+    .filter((b) => b.status === "PENDING")
+    .reduce((sum, b) => sum + b.amount, 0)
+  const totalPaid = monthBills
+    .filter((b) => b.status === "PAID")
+    .reduce((sum, b) => sum + b.amount, 0)
+
   const selectedKey = selectedDate
     ? selectedDate.toISOString().split("T")[0]
     : undefined
@@ -71,6 +86,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
             mode="single"
             selected={selectedDate}
             onDayClick={handleDayClick}
+            onMonthChange={setViewMonth}
             modifiers={{
               overdue: overdueDates,
               dueToday: todayDates,
@@ -82,6 +98,23 @@ export function BillCalendar({ bills }: BillCalendarProps) {
               upcoming: "bill-dot-blue",
             }}
           />
+        </div>
+
+        {/* Totais do mês */}
+        <div className="mt-3 flex items-center justify-center gap-4 text-xs">
+          {totalPending > 0 && (
+            <span className="rounded-md bg-amber-50 px-2 py-1 font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+              Pendente: {formatCurrency(totalPending)}
+            </span>
+          )}
+          {totalPaid > 0 && (
+            <span className="rounded-md bg-green-50 px-2 py-1 font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
+              Pago: {formatCurrency(totalPaid)}
+            </span>
+          )}
+          {totalPending === 0 && totalPaid === 0 && (
+            <span className="text-muted-foreground">Nenhuma conta neste mês</span>
+          )}
         </div>
 
         {/* Legenda */}

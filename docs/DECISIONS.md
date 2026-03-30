@@ -1,5 +1,9 @@
 # Decisões Técnicas — PagaFácil
 
+## D10 - 2026-03-30
+- **"Pendente mês" → "Pendente 30 dias" (rolling window):** No fim do mês (ex: 30/mar), "semana" ia até 6/abr mas "mês" só até 31/mar — contas de abril apareciam na semana mas não no mês, confundindo o usuário. Rolling 30 dias garante que mês >= semana sempre.
+- **Totalizadores no calendário:** Ao navegar entre meses no calendário, o usuário agora vê o total pendente e pago daquele mês. Informação útil sem precisar sair da visão calendário.
+
 ## D9 - 2026-03-30
 - **Google OAuth + Nodemailer em vez de Resend:** Resend free tier só envia para o email do dono da conta, impossibilitando onboarding dos 10 usuários. Google OAuth é o login mais simples (sem senha), e Nodemailer com Gmail SMTP (app password) substitui Resend para magic links e lembretes — limite de ~500 emails/dia grátis, suficiente para MVP.
 - **Remoção do pacote resend:** Com Nodemailer cobrindo magic links (via NextAuth provider) e lembretes (via `transporter.sendMail`), o pacote `resend` foi removido. Menos uma dependência externa.
