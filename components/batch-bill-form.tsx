@@ -3,13 +3,13 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { CATEGORIES } from "@/lib/constants"
+import { CATEGORIES, RECURRENCE_FREQUENCIES } from "@/lib/constants"
 import { createBillsBatch } from "@/lib/actions"
 import type { BatchBillInput } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 
 function emptyRow(): BatchBillInput {
-  return { supplier: "", amount: "", dueDate: "", category: "OUTRO", notes: "", isRecurring: false }
+  return { supplier: "", amount: "", dueDate: "", category: "OUTRO", notes: "", isRecurring: false, recurrenceFrequency: "MONTHLY", recurrenceEndDate: "" }
 }
 
 export function BatchBillForm() {
@@ -197,6 +197,35 @@ export function BatchBillForm() {
                 &times;
               </button>
             </div>
+
+            {/* Campos de recorrência */}
+            {row.isRecurring && (
+              <div className="col-span-full grid grid-cols-2 gap-2 rounded-md bg-muted/50 p-2 sm:col-span-full sm:ml-0">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Frequência</label>
+                  <select
+                    value={row.recurrenceFrequency}
+                    onChange={(e) => updateRow(i, "recurrenceFrequency", e.target.value)}
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    {RECURRENCE_FREQUENCIES.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Data de fim (opcional)</label>
+                  <Input
+                    type="date"
+                    value={row.recurrenceEndDate}
+                    onChange={(e) => updateRow(i, "recurrenceEndDate", e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

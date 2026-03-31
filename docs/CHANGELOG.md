@@ -12,6 +12,7 @@
 - [x] Página `/bills/batch` — tabela editável para cadastro de várias contas de uma vez
 - [x] Adicionar/remover linhas dinamicamente, validação inline por campo
 - [x] Checkbox de recorrência por linha no cadastro em lote
+- [x] Campos de frequência e data de fim para contas recorrentes no cadastro em lote
 - [x] Botões "Importar" e "+ Lote" na página de contas
 - [x] Landing page atualizada com destaque da feature
 - [x] Build passando sem erros

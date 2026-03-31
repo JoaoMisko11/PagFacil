@@ -542,6 +542,8 @@ export type BatchBillInput = {
   category: string
   notes: string
   isRecurring: boolean
+  recurrenceFrequency: string
+  recurrenceEndDate: string
 }
 
 export type BatchResult = {
@@ -561,7 +563,7 @@ export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchRe
   }
 
   const errors: { row: number; fields: Record<string, string> }[] = []
-  const validBills: { supplier: string; amount: number; dueDate: string; category: string; notes: string | null; isRecurring: boolean }[] = []
+  const validBills: { supplier: string; amount: number; dueDate: string; category: string; notes: string | null; isRecurring: boolean; recurrenceFrequency: string | null; recurrenceEndDate: string | null }[] = []
 
   for (let i = 0; i < bills.length; i++) {
     const b = bills[i]
@@ -589,6 +591,8 @@ export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchRe
         category: b.category,
         notes: b.notes.trim() || null,
         isRecurring: b.isRecurring,
+        recurrenceFrequency: b.isRecurring ? b.recurrenceFrequency : null,
+        recurrenceEndDate: b.isRecurring && b.recurrenceEndDate.trim() ? b.recurrenceEndDate.trim() : null,
       })
     }
   }
@@ -606,6 +610,8 @@ export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchRe
         category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "OUTRO",
         notes: b.notes,
         isRecurring: b.isRecurring,
+        recurrenceFrequency: b.recurrenceFrequency as "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY" | null,
+        recurrenceEndDate: b.recurrenceEndDate ? new Date(b.recurrenceEndDate + "T12:00:00Z") : null,
         userId,
       })),
     })
