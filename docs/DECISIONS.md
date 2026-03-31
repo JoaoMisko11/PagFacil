@@ -5,6 +5,7 @@
 - **Upload + preview (não Google Drive API):** Integração com Google Drive exigiria OAuth separado, file picker e permissões complexas. Para MVP, o usuário baixa do Drive e faz upload — mesmo resultado com fração da complexidade.
 - **Mapeamento flexível de colunas:** Headers são encontrados por substring match (ex: coluna "Fornecedor/Supplier" ou "Nome" → fornecedor). Categorias aceitam variações e abreviações. Reduz erros de formatação do usuário.
 - **createMany em vez de loop de creates:** Uma única query INSERT para todas as contas válidas — mais rápido e usa uma única transação implícita. Limite de 500 linhas por importação para evitar timeouts no serverless.
+- **Cadastro em lote como tabela editável (não modal/wizard):** Página dedicada `/bills/batch` com grid de inputs. Mais intuitivo que um wizard multi-step e não precisa de estado complexo. Linhas vazias são ignoradas automaticamente. Limite de 100 contas por vez (mais que suficiente para uso manual).
 
 ## D11 - 2026-03-31
 - **Comandos do bot no webhook (não lib separada):** Toda a lógica dos comandos `/contas`, `/nova`, `/pagar` fica no handler do webhook. Como são poucos comandos e o código é linear, não justifica criar uma abstração de "command router" separada.

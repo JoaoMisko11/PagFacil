@@ -533,6 +533,90 @@ export async function importBills(rows: ImportBillRow[]): Promise<ImportResult> 
   return { imported: validRows.length }
 }
 
+// --- Cadastro em lote ---
+
+export type BatchBillInput = {
+  supplier: string
+  amount: string
+  dueDate: string
+  category: string
+  notes: string
+}
+
+export type BatchResult = {
+  created?: number
+  errors?: { row: number; fields: Record<string, string> }[]
+  message?: string
+}
+
+export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchResult> {
+  const userId = await getUserId()
+
+  if (bills.length === 0) {
+    return { message: "Nenhuma conta para cadastrar." }
+  }
+  if (bills.length > 100) {
+    return { message: "Máximo de 100 contas por vez." }
+  }
+
+  const errors: { row: number; fields: Record<string, string> }[] = []
+  const validBills: { supplier: string; amount: number; dueDate: string; category: string; notes: string | null }[] = []
+
+  for (let i = 0; i < bills.length; i++) {
+    const b = bills[i]
+    const fieldErrors: Record<string, string> = {}
+
+    const supplier = b.supplier.trim()
+    if (!supplier) fieldErrors.supplier = "Obrigatório"
+
+    const cleaned = b.amount.replace(/[^\d,]/g, "").replace(",", ".")
+    const amountCents = Math.round(parseFloat(cleaned) * 100)
+    if (!b.amount.trim() || isNaN(amountCents) || amountCents <= 0) fieldErrors.amount = "Valor inválido"
+
+    const dueDate = b.dueDate.trim()
+    if (!dueDate || isNaN(new Date(dueDate + "T00:00:00Z").getTime())) fieldErrors.dueDate = "Data inválida"
+
+    if (!VALID_CATEGORIES.includes(b.category)) fieldErrors.category = "Categoria inválida"
+
+    if (Object.keys(fieldErrors).length > 0) {
+      errors.push({ row: i, fields: fieldErrors })
+    } else {
+      validBills.push({
+        supplier,
+        amount: amountCents,
+        dueDate,
+        category: b.category,
+        notes: b.notes.trim() || null,
+      })
+    }
+  }
+
+  if (errors.length > 0) {
+    return { errors }
+  }
+
+  try {
+    await db.bill.createMany({
+      data: validBills.map((b) => ({
+        supplier: b.supplier,
+        amount: b.amount,
+        dueDate: new Date(b.dueDate + "T12:00:00Z"),
+        category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "OUTRO",
+        notes: b.notes,
+        isRecurring: false,
+        userId,
+      })),
+    })
+  } catch (error) {
+    console.error("Erro ao cadastrar contas em lote:", error)
+    return { message: "Erro ao salvar contas. Tente novamente." }
+  }
+
+  revalidatePath("/bills")
+  revalidatePath("/")
+  return { created: validBills.length }
+}
+
 // --- Telegram OTP ---
 
 export async function sendTelegramOtp(

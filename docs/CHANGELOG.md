@@ -1,6 +1,6 @@
 # Changelog — PagaFácil
 
-## D12 - 2026-03-31 - Importação de Contas via Planilha
+## D12 - 2026-03-31 - Importação via Planilha + Cadastro em Lote
 ### Feito
 - [x] Página `/bills/import` — upload de planilha Excel (.xlsx, .xls) ou CSV
 - [x] Parse com SheetJS (xlsx) — mapeamento flexível de colunas (fornecedor, valor, vencimento, categoria, obs)
@@ -9,7 +9,9 @@
 - [x] Parse de valores em formato brasileiro (R$ 1.234,56 → centavos)
 - [x] Parse de datas DD/MM/AAAA
 - [x] Normalização flexível de categorias (aceita abreviações e variações)
-- [x] Botão "Importar" na página de contas
+- [x] Página `/bills/batch` — tabela editável para cadastro de várias contas de uma vez
+- [x] Adicionar/remover linhas dinamicamente, validação inline por campo
+- [x] Botões "Importar" e "+ Lote" na página de contas
 - [x] Landing page atualizada com destaque da feature
 - [x] Build passando sem erros
 
