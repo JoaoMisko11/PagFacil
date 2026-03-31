@@ -9,7 +9,7 @@ import type { BatchBillInput } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 
 function emptyRow(): BatchBillInput {
-  return { supplier: "", amount: "", dueDate: "", category: "OUTRO", notes: "" }
+  return { supplier: "", amount: "", dueDate: "", category: "OUTRO", notes: "", isRecurring: false }
 }
 
 export function BatchBillForm() {
@@ -19,7 +19,7 @@ export function BatchBillForm() {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  function updateRow(index: number, field: keyof BatchBillInput, value: string) {
+  function updateRow(index: number, field: keyof BatchBillInput, value: string | boolean) {
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)))
     // Limpa erro do campo ao editar
     setErrors((prev) => {
@@ -96,12 +96,13 @@ export function BatchBillForm() {
   return (
     <div className="space-y-4">
       {/* Header da tabela - só desktop */}
-      <div className="hidden rounded-lg bg-muted p-2 text-xs font-medium text-muted-foreground sm:grid sm:grid-cols-[1fr_120px_140px_130px_1fr_40px] sm:gap-2">
+      <div className="hidden rounded-lg bg-muted p-2 text-xs font-medium text-muted-foreground sm:grid sm:grid-cols-[1fr_120px_140px_130px_1fr_80px_40px] sm:gap-2">
         <span>Fornecedor *</span>
         <span>Valor *</span>
         <span>Vencimento *</span>
         <span>Categoria</span>
         <span>Observação</span>
+        <span>Recorrente</span>
         <span></span>
       </div>
 
@@ -110,7 +111,7 @@ export function BatchBillForm() {
         {rows.map((row, i) => (
           <div
             key={i}
-            className={`grid gap-2 rounded-lg border p-3 sm:grid-cols-[1fr_120px_140px_130px_1fr_40px] sm:border-0 sm:p-0 ${
+            className={`grid gap-2 rounded-lg border p-3 sm:grid-cols-[1fr_120px_140px_130px_1fr_80px_40px] sm:border-0 sm:p-0 ${
               errors[i] ? "border-destructive/50 sm:border-destructive/0" : "border-border"
             }`}
           >
@@ -172,6 +173,18 @@ export function BatchBillForm() {
                 onChange={(e) => updateRow(i, "notes", e.target.value)}
                 className="h-10 sm:h-9"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="mb-1 block text-xs text-muted-foreground sm:hidden">Recorrente</label>
+              <input
+                type="checkbox"
+                checked={row.isRecurring}
+                onChange={(e) => updateRow(i, "isRecurring", e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              <span className="text-xs text-muted-foreground sm:hidden">
+                {row.isRecurring ? "Sim" : "Não"}
+              </span>
             </div>
             <div className="flex items-start justify-end sm:justify-center">
               <button
