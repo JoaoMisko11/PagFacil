@@ -1,5 +1,11 @@
 # Decisões Técnicas — PagaFácil
 
+## D11 - 2026-03-31
+- **Comandos do bot no webhook (não lib separada):** Toda a lógica dos comandos `/contas`, `/nova`, `/pagar` fica no handler do webhook. Como são poucos comandos e o código é linear, não justifica criar uma abstração de "command router" separada.
+- **`/nova` em formato inline (não conversacional):** Em vez de um fluxo multi-step (pergunta fornecedor, depois valor, etc.), o comando recebe tudo em uma linha: `/nova Enel 150,00 15/04/2026 FIXO`. Mais rápido para o usuário e sem necessidade de estado entre mensagens.
+- **Estado do `/pagar` em Map in-memory:** O fluxo de seleção do `/pagar` precisa guardar a lista de contas por 5 minutos. Usamos um `Map` em memória. No serverless, cada request pode cair em instância diferente, mas na prática o Vercel mantém a instância quente por alguns minutos. Se falhar, o usuário só precisa digitar `/pagar` de novo — aceitável para MVP.
+- **Parse de argumentos do `/nova` de trás pra frente:** O nome do fornecedor pode ter espaços (ex: "Conta de Luz"), então extraímos categoria, data e valor do final e o restante vira o supplier.
+
 ## D10 - 2026-03-30
 - **"Pendente mês" → "Pendente 30 dias" (rolling window):** No fim do mês (ex: 30/mar), "semana" ia até 6/abr mas "mês" só até 31/mar — contas de abril apareciam na semana mas não no mês, confundindo o usuário. Rolling 30 dias garante que mês >= semana sempre.
 - **Totalizadores no calendário:** Ao navegar entre meses no calendário, o usuário agora vê o total pendente e pago daquele mês. Informação útil sem precisar sair da visão calendário.

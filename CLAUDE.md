@@ -206,6 +206,8 @@ Este projeto roda em múltiplas sessões do Claude Code ao longo de 10 dias. Par
 7. **Ao tomar uma decisão técnica, registre em DECISIONS.md** com data e justificativa.
 8. **Após cada evolução do software, atualize README.md** com as mudanças relevantes (features, setup, uso).
 9. **Ao commitar, o CHANGELOG.md deve estar incluso no commit** — sempre atualize o changelog antes de criar o commit, para que ele reflita exatamente a versão commitada.
+10. **Após cada modificação no software, atualize `docs/arquitetura.html`** — esse arquivo documenta a arquitetura e funcionalidades da solução. Mantenha-o sempre sincronizado com o estado atual do projeto (funcionalidades, estrutura de arquivos, tech stack, modelo de dados, fluxo do usuário).
+11. **Após adicionar ou modificar funcionalidades, atualize a landing page (`app/(auth)/login/page.tsx`)** — a página de login serve como landing page e deve refletir a proposta de valor atual do produto. Ao adicionar features, atualize os textos e destaques para que novos visitantes vejam o que o PagaFácil oferece.
 
 ### Prompt de Início de Sessão
 

@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PagaFácil — Arquitetura & Funcionalidades</title>
+  <style>
+    :root {
+      --green: #00A868;
+      --green-dark: #008B55;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --card: #ffffff;
+      --bg: #f4f6f9;
+      --text: #2d3748;
+      --text-light: #718096;
+      --border: #e2e8f0;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+      color: white;
+      padding: 80px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(0,168,104,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(59,130,246,0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20px, -20px); }
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .hero h1 span { color: var(--green); }
+
+    .hero p {
+      font-size: 1.2rem;
+      opacity: 0.85;
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(0,168,104,0.2);
+      color: var(--green);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Section */
+    section {
+      padding: 60px 0;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    section h2 span { color: var(--green); }
+
+    .section-subtitle {
+      color: var(--text-light);
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+      max-width: 650px;
+    }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .card p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    .icon-green { background: rgba(0,168,104,0.12); }
+    .icon-blue { background: rgba(59,130,246,0.12); }
+    .icon-amber { background: rgba(245,158,11,0.12); }
+    .icon-red { background: rgba(239,68,68,0.12); }
+    .icon-purple { background: rgba(139,92,246,0.12); }
+
+    /* Architecture */
+    .arch-diagram {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 20px;
+    }
+
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .arch-layer {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+    }
+
+    .arch-layer-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+    }
+
+    .arch-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .arch-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--dark);
+      white-space: nowrap;
+    }
+
+    .arch-item.highlight {
+      background: rgba(0,168,104,0.1);
+      border-color: var(--green);
+      color: var(--green-dark);
+    }
+
+    .arch-arrow {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    /* Tech stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .tech-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .tech-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .tech-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .tech-info p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* Flow */
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .flow-step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .flow-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: white;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .flow-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 17px;
+      top: 36px;
+      width: 2px;
+      height: calc(100%);
+      background: var(--border);
+      z-index: 1;
+    }
+
+    .flow-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .flow-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+
+    .flow-content p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    /* Data model */
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .model-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .model-header {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .model-fields {
+      padding: 12px 20px;
+    }
+
+    .model-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--bg);
+    }
+
+    .model-field:last-child { border-bottom: none; }
+
+    .model-field-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-family: 'Menlo', 'Consolas', monospace;
+    }
+
+    .model-field-type {
+      color: var(--text-light);
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.8rem;
+    }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Security */
+    .security-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .security-list li {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .check {
+      color: var(--green);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.9rem;
+    }
+
+    footer strong {
+      color: var(--green);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2rem; }
+      .hero p { font-size: 1rem; }
+      section h2 { font-size: 1.5rem; }
+      .arch-diagram { padding: 20px; }
+      .arch-items { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="badge">MVP Fase 1 — Validacao com usuarios reais</div>
+    <h1>Paga<span>Facil</span></h1>
+    <p>Contas a pagar simplificado para MEIs e pessoas fisicas no Brasil</p>
+  </div>
+
+  <!-- Visao Geral -->
+  <section>
+    <div class="container">
+      <h2>Visao <span>Geral</span></h2>
+      <p class="section-subtitle">
+        PagaFacil e um web app gratuito de gestao de contas a pagar. O usuario cadastra suas contas,
+        visualiza um dashboard inteligente e recebe lembretes automaticos por email ou Telegram.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-value">11</div>
+          <div class="stat-label">Dias de desenvolvimento</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Custo de infraestrutura</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Canais de acesso</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">PWA</div>
+          <div class="stat-label">Instalavel no celular</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Funcionalidades -->
+  <section style="background: white;">
+    <div class="container">
+      <h2>Funcionalidades <span>Principais</span></h2>
+      <p class="section-subtitle">Tudo que o usuario precisa para nunca mais perder um vencimento.</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon icon-green">&#128203;</div>
+          <h3>CRUD de Contas</h3>
+          <p>Cadastro completo com fornecedor, valor (R$), vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Outro) e observacoes. Edicao, exclusao com soft delete e recuperacao.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-blue">&#128202;</div>
+          <h3>Dashboard Inteligente</h3>
+          <p>Visao consolidada com cards de vencidas, vencem hoje, proximos 7 dias e pendente 30 dias. Totalizadores de valores pendentes e pagos com atualizacao em tempo real.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-amber">&#128197;</div>
+          <h3>Calendario Visual</h3>
+          <p>Calendario mensal interativo com dots coloridos (vermelho = vencida, amarelo = hoje, azul = a vencer). Clique no dia para ver detalhes. Totalizadores por mes ao navegar.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-red">&#128276;</div>
+          <h3>Lembretes Automaticos</h3>
+          <p>Notificacao D-1 (um dia antes do vencimento) via email ou Telegram, conforme preferencia do usuario. Cron job diario as 8h BRT via Vercel Cron.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-purple">&#128257;</div>
+          <h3>Contas Recorrentes</h3>
+          <p>Ao marcar como paga, gera automaticamente a proxima parcela. Frequencia configuravel: semanal, quinzenal, mensal ou anual. Data de fim opcional.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-blue">&#129302;</div>
+          <h3>Bot Telegram</h3>
+          <p>@pagafacil_bot com comandos: /contas (lista pendentes), /nova (cria conta inline), /pagar (marca como paga interativamente), /ajuda. Gestao completa sem abrir o navegador.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-green">&#128274;</div>
+          <h3>Autenticacao Multi-canal</h3>
+          <p>Login via Google OAuth (1 clique), magic link por email (Nodemailer/Gmail), ou OTP via Telegram. Sessao JWT com 30 dias de duracao.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-amber">&#127763;</div>
+          <h3>Dark Mode</h3>
+          <p>Toggle light/dark/system sem flash (FOUC). Implementado com script inline no head e localStorage. Cores semanticas Tailwind para compatibilidade total.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-purple">&#128172;</div>
+          <h3>Feedback Widget</h3>
+          <p>Botao flutuante para envio de feedback direto (feature, bug, outro). Dados salvos no banco para analise durante fase de validacao.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Arquitetura -->
+  <section>
+    <div class="container">
+      <h2>Arquitetura <span>Tecnica</span></h2>
+      <p class="section-subtitle">Monolito Next.js com Server Components, Server Actions e deploy serverless na Vercel.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-layers">
+
+          <div class="arch-layer">
+            <div class="arch-layer-title">Clientes</div>
+            <div class="arch-items">
+              <div class="arch-item">Browser (PWA)</div>
+              <div class="arch-item">Mobile (PWA instalado)</div>
+              <div class="arch-item">Telegram Bot</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">&#8595;</div>
+
+          <div class="arch-layer">
+            <div class="arch-layer-title">Frontend — React Server Components + Client Components</div>
+            <div class="arch-items">
+              <div class="arch-item highlight">Dashboard (RSC)</div>
+              <div class="arch-item highlight">Lista de Contas (RSC)</div>
+              <div class="arch-item">Formularios (Client)</div>
+              <div class="arch-item">Calendario (Client)</div>
+              <div class="arch-item">Filtros (Client)</div>
+              <div class="arch-item">Onboarding (Client)</div>
+              <div class="arch-item">Configuracoes (Client)</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">&#8595;</div>
+
+          <div class="arch-layer">
+            <div class="arch-layer-title">Backend — Server Actions + API Routes</div>
+            <div class="arch-items">
+              <div class="arch-item highlight">createBill</div>
+              <div class="arch-item highlight">updateBill</div>
+              <div class="arch-item highlight">deleteBill</div>
+              <div class="arch-item highlight">markBillAsPaid</div>
+              <div class="arch-item">Auth (NextAuth v5)</div>
+              <div class="arch-item">Telegram Webhook</div>
+              <div class="arch-item">Cron Reminders</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">&#8595;</div>
+
+          <div class="arch-layer">
+            <div class="arch-layer-title">Dados & Servicos Externos</div>
+            <div class="arch-items">
+              <div class="arch-item highlight">Neon PostgreSQL</div>
+              <div class="arch-item">Prisma ORM</div>
+              <div class="arch-item">Gmail SMTP (Nodemailer)</div>
+              <div class="arch-item">Telegram Bot API</div>
+              <div class="arch-item">Google OAuth</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section style="background: white;">
+    <div class="container">
+      <h2>Tech <span>Stack</span></h2>
+      <p class="section-subtitle">Stack moderna, 100% gratuita no free tier, zero custo de infraestrutura.</p>
+
+      <div class="tech-grid">
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #000; color: #fff;">N</div>
+          <div class="tech-info">
+            <h4>Next.js 16</h4>
+            <p>App Router, RSC, Server Actions</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #3178c6; color: #fff;">TS</div>
+          <div class="tech-info">
+            <h4>TypeScript</h4>
+            <p>Strict mode, type safety</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #0ea5e9; color: #fff;">Tw</div>
+          <div class="tech-info">
+            <h4>Tailwind CSS v4</h4>
+            <p>Utility-first, mobile-first</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #111; color: #fff;">Sh</div>
+          <div class="tech-info">
+            <h4>shadcn/ui</h4>
+            <p>Componentes acessiveis</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #2d3748; color: #fff;">Pr</div>
+          <div class="tech-info">
+            <h4>Prisma ORM</h4>
+            <p>Type-safe database access</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: var(--green); color: #fff;">Ne</div>
+          <div class="tech-info">
+            <h4>Neon PostgreSQL</h4>
+            <p>Serverless Postgres, sa-east-1</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #7c3aed; color: #fff;">Au</div>
+          <div class="tech-info">
+            <h4>NextAuth v5</h4>
+            <p>Google, Email, Telegram OTP</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #000; color: #fff;">Ve</div>
+          <div class="tech-info">
+            <h4>Vercel</h4>
+            <p>Deploy serverless, Cron jobs</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #0088cc; color: #fff;">Tg</div>
+          <div class="tech-info">
+            <h4>Telegram Bot API</h4>
+            <p>Webhook, zero dependencias</p>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #ea4335; color: #fff;">Gm</div>
+          <div class="tech-info">
+            <h4>Nodemailer + Gmail</h4>
+            <p>SMTP, magic links, lembretes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fluxo do Usuario -->
+  <section>
+    <div class="container">
+      <h2>Fluxo do <span>Usuario</span></h2>
+      <p class="section-subtitle">Da primeira visita ate a gestao completa das contas.</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--green);">1</div>
+          <div class="flow-content">
+            <h4>Acesso & Login</h4>
+            <p>Usuario acessa a landing page e escolhe: login com Google (1 clique), magic link por email, ou OTP via Telegram.</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--blue);">2</div>
+          <div class="flow-content">
+            <h4>Onboarding</h4>
+            <p>Na primeira vez, fluxo guiado em 2 passos: informar nome e cadastrar a primeira conta. Redirect automatico para usuarios novos.</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--amber);">3</div>
+          <div class="flow-content">
+            <h4>Dashboard</h4>
+            <p>Visao consolidada: contas vencidas, vencem hoje, proximos 7 dias. Calendario visual com dots coloridos. Totalizadores pendente/pago.</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--purple);">4</div>
+          <div class="flow-content">
+            <h4>Gestao de Contas</h4>
+            <p>Criar, editar, filtrar (status, categoria, busca), marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente.</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--red);">5</div>
+          <div class="flow-content">
+            <h4>Lembretes & Telegram</h4>
+            <p>Recebe lembrete D-1 por email ou Telegram. Pode gerenciar contas direto no Telegram com /contas, /nova e /pagar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modelo de Dados -->
+  <section style="background: white;">
+    <div class="container">
+      <h2>Modelo de <span>Dados</span></h2>
+      <p class="section-subtitle">Principais entidades do banco PostgreSQL via Prisma ORM.</p>
+
+      <div class="model-grid">
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(0,168,104,0.05);">
+            <span>&#128100;</span> User
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">name</span><span class="model-field-type">String?</span></div>
+            <div class="model-field"><span class="model-field-name">email</span><span class="model-field-type">String @unique</span></div>
+            <div class="model-field"><span class="model-field-name">telegramChatId</span><span class="model-field-type">String?</span></div>
+            <div class="model-field"><span class="model-field-name">notifyVia</span><span class="model-field-type">"email" | "telegram"</span></div>
+            <div class="model-field"><span class="model-field-name">bills</span><span class="model-field-type">Bill[]</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(59,130,246,0.05);">
+            <span>&#128179;</span> Bill
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">supplier</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">amount</span><span class="model-field-type">Int (centavos)</span></div>
+            <div class="model-field"><span class="model-field-name">dueDate</span><span class="model-field-type">DateTime</span></div>
+            <div class="model-field"><span class="model-field-name">category</span><span class="model-field-type">Category (enum)</span></div>
+            <div class="model-field"><span class="model-field-name">status</span><span class="model-field-type">PENDING | PAID | OVERDUE</span></div>
+            <div class="model-field"><span class="model-field-name">isRecurring</span><span class="model-field-type">Boolean</span></div>
+            <div class="model-field"><span class="model-field-name">recurringFreq</span><span class="model-field-type">Enum?</span></div>
+            <div class="model-field"><span class="model-field-name">deletedAt</span><span class="model-field-type">DateTime? (soft delete)</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(139,92,246,0.05);">
+            <span>&#128172;</span> Feedback
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">type</span><span class="model-field-type">feature | bug | other</span></div>
+            <div class="model-field"><span class="model-field-name">message</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">userId</span><span class="model-field-type">String (FK)</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(245,158,11,0.05);">
+            <span>&#128273;</span> TelegramOtp
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">chatId</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">code</span><span class="model-field-type">String (6 digitos)</span></div>
+            <div class="model-field"><span class="model-field-name">expires</span><span class="model-field-type">DateTime (TTL 10min)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seguranca -->
+  <section>
+    <div class="container">
+      <h2>Seguranca & <span>Boas Praticas</span></h2>
+      <p class="section-subtitle">Decisoes de seguranca tomadas no projeto.</p>
+
+      <ul class="security-list">
+        <li><span class="check">&#10003;</span> Autenticacao JWT com NextAuth v5 (sessao 30 dias)</li>
+        <li><span class="check">&#10003;</span> Server Actions com validacao Zod em todas as mutations</li>
+        <li><span class="check">&#10003;</span> Verificacao de userId em toda query (multi-tenant seguro)</li>
+        <li><span class="check">&#10003;</span> Soft delete (dados recuperaveis por 30 dias)</li>
+        <li><span class="check">&#10003;</span> CRON_SECRET para proteger API routes de cron</li>
+        <li><span class="check">&#10003;</span> Webhook Telegram com validacao de comandos</li>
+        <li><span class="check">&#10003;</span> Valores monetarios em centavos (sem float)</li>
+        <li><span class="check">&#10003;</span> Datas em UTC no banco, Sao_Paulo na UI</li>
+        <li><span class="check">&#10003;</span> Secrets em env vars (nunca no codigo)</li>
+        <li><span class="check">&#10003;</span> onDelete Cascade em Bill e Feedback</li>
+        <li><span class="check">&#10003;</span> Indices compostos para queries performaticas</li>
+        <li><span class="check">&#10003;</span> Transacao atomica em markBillAsPaid + recorrente</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Estrutura do Projeto -->
+  <section style="background: white;">
+    <div class="container">
+      <h2>Estrutura do <span>Projeto</span></h2>
+      <p class="section-subtitle">Organizacao dos arquivos no monolito Next.js.</p>
+
+      <div class="arch-diagram" style="font-family: 'Menlo', 'Consolas', monospace; font-size: 0.85rem; line-height: 1.8; color: var(--dark);">
+<pre style="margin:0; overflow-x: auto;">
+pagafacil/
++-- app/
+|   +-- (auth)/login/           <span style="color:var(--text-light);"># Landing page + login form</span>
+|   +-- (dashboard)/
+|   |   +-- page.tsx            <span style="color:var(--text-light);"># Dashboard principal (RSC)</span>
+|   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
+|   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Lista de contas com filtros</span>
+|   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
+|   |   +-- bills/[id]/edit/    <span style="color:var(--text-light);"># Editar conta</span>
+|   |   +-- onboarding/         <span style="color:var(--text-light);"># Fluxo primeiro acesso</span>
+|   |   +-- settings/           <span style="color:var(--text-light);"># Configuracoes Telegram</span>
+|   +-- api/
+|   |   +-- auth/[...nextauth]/ <span style="color:var(--text-light);"># NextAuth route handlers</span>
+|   |   +-- cron/reminders/     <span style="color:var(--text-light);"># Cron job D-1 lembretes</span>
+|   |   +-- telegram/webhook/   <span style="color:var(--text-light);"># Bot Telegram webhook</span>
+|   +-- layout.tsx              <span style="color:var(--text-light);"># Root layout</span>
+|   +-- globals.css             <span style="color:var(--text-light);"># Tailwind + calendar dots</span>
++-- components/
+|   +-- bill-calendar.tsx       <span style="color:var(--text-light);"># Calendario interativo</span>
+|   +-- bill-card.tsx           <span style="color:var(--text-light);"># Card de conta individual</span>
+|   +-- bill-filters.tsx        <span style="color:var(--text-light);"># Filtros status/categoria/busca</span>
+|   +-- bill-form.tsx           <span style="color:var(--text-light);"># Formulario criar/editar</span>
+|   +-- dashboard-nav.tsx       <span style="color:var(--text-light);"># Navegacao principal</span>
+|   +-- feedback-widget.tsx     <span style="color:var(--text-light);"># Widget de feedback flutuante</span>
+|   +-- login-form.tsx          <span style="color:var(--text-light);"># Form login multi-provider</span>
+|   +-- onboarding-steps.tsx    <span style="color:var(--text-light);"># Onboarding 2 passos</span>
+|   +-- settings-form.tsx       <span style="color:var(--text-light);"># Config Telegram + notificacao</span>
+|   +-- theme-toggle.tsx        <span style="color:var(--text-light);"># Toggle dark mode</span>
+|   +-- ui/                     <span style="color:var(--text-light);"># shadcn/ui components</span>
++-- lib/
+|   +-- actions.ts              <span style="color:var(--text-light);"># Server Actions (CRUD, mark paid)</span>
+|   +-- auth.ts                 <span style="color:var(--text-light);"># NextAuth config (3 providers)</span>
+|   +-- constants.ts            <span style="color:var(--text-light);"># Categorias, enums</span>
+|   +-- db.ts                   <span style="color:var(--text-light);"># Prisma client singleton</span>
+|   +-- format.ts               <span style="color:var(--text-light);"># Formatacao moeda, data, categoria</span>
+|   +-- telegram.ts             <span style="color:var(--text-light);"># Wrapper Telegram Bot API</span>
++-- prisma/
+|   +-- schema.prisma           <span style="color:var(--text-light);"># Schema do banco de dados</span>
++-- docs/
+    +-- PRD_Fase1.md            <span style="color:var(--text-light);"># Product Requirements Document</span>
+    +-- DECISIONS.md            <span style="color:var(--text-light);"># Log de decisoes tecnicas</span>
+    +-- CHANGELOG.md            <span style="color:var(--text-light);"># Historico de mudancas</span>
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deploy -->
+  <section>
+    <div class="container">
+      <h2>Deploy & <span>Infraestrutura</span></h2>
+      <p class="section-subtitle">100% serverless, 100% gratuito.</p>
+
+      <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+        <div class="card">
+          <div class="card-icon icon-green">&#9889;</div>
+          <h3>Vercel (Hobby)</h3>
+          <p>Deploy automatico serverless. Funcoes edge para middleware. Cron job diario para lembretes. URL: paga-facil-mvp.vercel.app</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-blue">&#128024;</div>
+          <h3>Neon PostgreSQL</h3>
+          <p>Banco serverless na regiao sa-east-1 (Sao Paulo). Free tier com 512MB. Connection pooling via Prisma.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-amber">&#128231;</div>
+          <h3>Gmail SMTP</h3>
+          <p>Envio de emails via Nodemailer + App Password. Limite ~500/dia no free tier. Usado para magic links e lembretes D-1.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-purple">&#129302;</div>
+          <h3>Telegram Bot API</h3>
+          <p>Bot @pagafacil_bot via webhook. Sem dependencias externas (fetch nativo). Gratis e sem limites de mensagens.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <strong>PagaFacil</strong> &mdash; MVP Fase 1 &mdash; Desenvolvido em 11 dias com Next.js, Prisma, Vercel & Telegram<br/>
+    <span style="opacity: 0.5; font-size: 0.8rem;">Documento gerado em Março 2026</span>
+  </footer>
+
+</body>
+</html>

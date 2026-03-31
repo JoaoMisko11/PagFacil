@@ -1,5 +1,25 @@
 # Changelog — PagaFácil
 
+## D11 - 2026-03-31 - Bot Telegram: Comandos de Contas
+### Feito
+- [x] Comando `/contas` — lista contas pendentes/vencidas dos próximos 30 dias
+- [x] Comando `/nova Fornecedor Valor DD/MM/AAAA Categoria` — cria conta direto pelo Telegram
+- [x] Comando `/pagar` — lista contas numeradas, usuário responde com número para marcar como paga
+- [x] Comando `/ajuda` — lista todos os comandos disponíveis
+- [x] Lógica de recorrência no `/pagar` (cria próxima parcela igual ao web app)
+- [x] Validação: comandos exigem conta vinculada, senão orienta o usuário
+- [x] Estado temporário (Map) para fluxo `/pagar` com expiração de 5 min
+
+### Pendente
+- [ ] Deploy na Vercel
+- [ ] Registrar comandos no BotFather (menu de comandos)
+- [ ] Testar fluxo completo em produção
+
+### Bugs Conhecidos
+- Estado do `/pagar` é in-memory (não sobrevive restart do serverless) — aceitável para MVP
+
+---
+
 ## D10 - 2026-03-30 - UX: Dashboard & Calendário
 ### Feito
 - [x] Fix: "Pendente mês" → "Pendente 30 dias" (rolling window, evita semana > mês no fim do mês)
