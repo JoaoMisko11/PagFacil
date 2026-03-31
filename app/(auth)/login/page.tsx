@@ -44,6 +44,11 @@ export default async function LoginPage() {
               <p className="text-sm font-medium text-foreground">Bot Telegram</p>
               <p className="text-xs text-muted-foreground">Crie e pague contas pelo chat</p>
             </div>
+            <div className="col-span-2 rounded-xl border border-border bg-card p-4 text-center">
+              <div className="mb-1 text-2xl">&#128196;</div>
+              <p className="text-sm font-medium text-foreground">Importe da planilha</p>
+              <p className="text-xs text-muted-foreground">Suba um Excel ou CSV e cadastre contas em lote</p>
+            </div>
           </div>
 
           {/* Login */}

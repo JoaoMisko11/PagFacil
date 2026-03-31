@@ -43,9 +43,14 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">Contas a Pagar</h2>
-        <Link href="/bills/new">
-          <Button>+ Nova Conta</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/bills/import">
+            <Button variant="outline">Importar</Button>
+          </Link>
+          <Link href="/bills/new">
+            <Button>+ Nova Conta</Button>
+          </Link>
+        </div>
       </div>
 
       <BillFilters

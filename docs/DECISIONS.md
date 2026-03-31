@@ -1,5 +1,11 @@
 # Decisões Técnicas — PagaFácil
 
+## D12 - 2026-03-31
+- **xlsx (SheetJS) para parse de planilhas:** Biblioteca madura (~500KB), suporta .xlsx, .xls e .csv sem depender de APIs externas. O parse roda no server action, sem expor dados no client.
+- **Upload + preview (não Google Drive API):** Integração com Google Drive exigiria OAuth separado, file picker e permissões complexas. Para MVP, o usuário baixa do Drive e faz upload — mesmo resultado com fração da complexidade.
+- **Mapeamento flexível de colunas:** Headers são encontrados por substring match (ex: coluna "Fornecedor/Supplier" ou "Nome" → fornecedor). Categorias aceitam variações e abreviações. Reduz erros de formatação do usuário.
+- **createMany em vez de loop de creates:** Uma única query INSERT para todas as contas válidas — mais rápido e usa uma única transação implícita. Limite de 500 linhas por importação para evitar timeouts no serverless.
+
 ## D11 - 2026-03-31
 - **Comandos do bot no webhook (não lib separada):** Toda a lógica dos comandos `/contas`, `/nova`, `/pagar` fica no handler do webhook. Como são poucos comandos e o código é linear, não justifica criar uma abstração de "command router" separada.
 - **`/nova` em formato inline (não conversacional):** Em vez de um fluxo multi-step (pergunta fornecedor, depois valor, etc.), o comando recebe tudo em uma linha: `/nova Enel 150,00 15/04/2026 FIXO`. Mais rápido para o usuário e sem necessidade de estado entre mensagens.

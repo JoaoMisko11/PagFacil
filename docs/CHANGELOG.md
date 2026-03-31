@@ -1,5 +1,27 @@
 # Changelog — PagaFácil
 
+## D12 - 2026-03-31 - Importação de Contas via Planilha
+### Feito
+- [x] Página `/bills/import` — upload de planilha Excel (.xlsx, .xls) ou CSV
+- [x] Parse com SheetJS (xlsx) — mapeamento flexível de colunas (fornecedor, valor, vencimento, categoria, obs)
+- [x] Preview em tabela com validação visual: linhas válidas (verde) e inválidas (vermelho) com mensagens de erro
+- [x] Importação em lote via `createMany` (até 500 contas por arquivo)
+- [x] Parse de valores em formato brasileiro (R$ 1.234,56 → centavos)
+- [x] Parse de datas DD/MM/AAAA
+- [x] Normalização flexível de categorias (aceita abreviações e variações)
+- [x] Botão "Importar" na página de contas
+- [x] Landing page atualizada com destaque da feature
+- [x] Build passando sem erros
+
+### Pendente
+- [ ] Deploy na Vercel
+- [ ] Modelo de planilha para download
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D11 - 2026-03-31 - Bot Telegram: Comandos de Contas
 ### Feito
 - [x] Comando `/contas` — lista contas pendentes/vencidas dos próximos 30 dias

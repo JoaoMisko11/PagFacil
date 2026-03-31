@@ -548,6 +548,12 @@
         </div>
 
         <div class="card">
+          <div class="card-icon icon-green">&#128196;</div>
+          <h3>Importacao por Planilha</h3>
+          <p>Upload de arquivo Excel (.xlsx, .xls) ou CSV para importacao em lote. Preview com validacao visual (linhas validas/invalidas), mapeamento flexivel de colunas e categorias. Ate 500 contas por importacao.</p>
+        </div>
+
+        <div class="card">
           <div class="card-icon icon-purple">&#128172;</div>
           <h3>Feedback Widget</h3>
           <p>Botao flutuante para envio de feedback direto (feature, bug, outro). Dados salvos no banco para analise durante fase de validacao.</p>
@@ -857,6 +863,7 @@ pagafacil/
 |   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
 |   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Lista de contas com filtros</span>
 |   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
+|   |   +-- bills/import/       <span style="color:var(--text-light);"># Importar contas via planilha</span>
 |   |   +-- bills/[id]/edit/    <span style="color:var(--text-light);"># Editar conta</span>
 |   |   +-- onboarding/         <span style="color:var(--text-light);"># Fluxo primeiro acesso</span>
 |   |   +-- settings/           <span style="color:var(--text-light);"># Configuracoes Telegram</span>
@@ -871,6 +878,7 @@ pagafacil/
 |   +-- bill-card.tsx           <span style="color:var(--text-light);"># Card de conta individual</span>
 |   +-- bill-filters.tsx        <span style="color:var(--text-light);"># Filtros status/categoria/busca</span>
 |   +-- bill-form.tsx           <span style="color:var(--text-light);"># Formulario criar/editar</span>
+|   +-- import-bills.tsx        <span style="color:var(--text-light);"># Upload e preview de planilha</span>
 |   +-- dashboard-nav.tsx       <span style="color:var(--text-light);"># Navegacao principal</span>
 |   +-- feedback-widget.tsx     <span style="color:var(--text-light);"># Widget de feedback flutuante</span>
 |   +-- login-form.tsx          <span style="color:var(--text-light);"># Form login multi-provider</span>
@@ -879,7 +887,7 @@ pagafacil/
 |   +-- theme-toggle.tsx        <span style="color:var(--text-light);"># Toggle dark mode</span>
 |   +-- ui/                     <span style="color:var(--text-light);"># shadcn/ui components</span>
 +-- lib/
-|   +-- actions.ts              <span style="color:var(--text-light);"># Server Actions (CRUD, mark paid)</span>
+|   +-- actions.ts              <span style="color:var(--text-light);"># Server Actions (CRUD, mark paid, import)</span>
 |   +-- auth.ts                 <span style="color:var(--text-light);"># NextAuth config (3 providers)</span>
 |   +-- constants.ts            <span style="color:var(--text-light);"># Categorias, enums</span>
 |   +-- db.ts                   <span style="color:var(--text-light);"># Prisma client singleton</span>
