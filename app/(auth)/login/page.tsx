@@ -23,21 +23,26 @@ export default async function LoginPage() {
           </div>
 
           {/* Benefícios */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#128203;</div>
               <p className="text-sm font-medium text-foreground">Cadastre contas</p>
-              <p className="text-xs text-muted-foreground">Valor, vencimento, fornecedor</p>
+              <p className="text-xs text-muted-foreground">Valor, vencimento e categoria</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <div className="mb-1 text-2xl">&#128197;</div>
+              <p className="text-sm font-medium text-foreground">Calendário visual</p>
+              <p className="text-xs text-muted-foreground">Veja tudo que vence no mês</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#128276;</div>
-              <p className="text-sm font-medium text-foreground">Receba lembretes</p>
-              <p className="text-xs text-muted-foreground">Email ou Telegram D-1</p>
+              <p className="text-sm font-medium text-foreground">Lembretes</p>
+              <p className="text-xs text-muted-foreground">Email e Telegram no D-1</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#9989;</div>
-              <p className="text-sm font-medium text-foreground">Marque como paga</p>
-              <p className="text-xs text-muted-foreground">Controle total com 1 toque</p>
+              <div className="mb-1 text-2xl">&#129302;</div>
+              <p className="text-sm font-medium text-foreground">Bot Telegram</p>
+              <p className="text-xs text-muted-foreground">Crie e pague contas pelo chat</p>
             </div>
           </div>
 
