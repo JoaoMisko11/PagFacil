@@ -81,8 +81,9 @@ export async function GET(request: Request) {
     const count = userData.bills.length
     const greeting = `Olá${userData.name ? `, ${userData.name}` : ""}!`
 
-    if (userData.notifyVia === "telegram" && userData.telegramChatId) {
-      // Envia via Telegram
+    const channels = userData.notifyVia.split(",")
+
+    if (channels.includes("telegram") && userData.telegramChatId) {
       try {
         await sendTelegramMessage(
           userData.telegramChatId,
@@ -92,8 +93,9 @@ export async function GET(request: Request) {
       } catch (err) {
         console.error(`Erro ao enviar Telegram para ${userData.telegramChatId}:`, err)
       }
-    } else {
-      // Envia via email
+    }
+
+    if (channels.includes("email")) {
       const subject =
         count === 1
           ? `Amanhã vence: ${userData.bills[0].supplier}`

@@ -1,5 +1,21 @@
 # Changelog — PagaFácil
 
+## D13 - 2026-04-01 - Notificações Multi-canal
+### Feito
+- [x] Configuração de lembretes permite marcar email e Telegram simultaneamente (checkboxes em vez de radio buttons)
+- [x] Server action aceita múltiplos canais e armazena como "email,telegram" no campo notifyVia
+- [x] Cron job de lembretes D-1 envia por todos os canais selecionados
+- [x] Validação: pelo menos um canal deve ser selecionado; Telegram exige Chat ID
+- [x] Arquitetura.html atualizado
+
+### Pendente
+- [ ] Atualizar landing page com destaque da feature
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D12 - 2026-03-31 - Importação via Planilha + Cadastro em Lote
 ### Feito
 - [x] Página `/bills/import` — upload de planilha Excel (.xlsx, .xls) ou CSV

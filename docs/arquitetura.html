@@ -468,7 +468,7 @@
       <h2>Visao <span>Geral</span></h2>
       <p class="section-subtitle">
         PagaFacil e um web app gratuito de gestao de contas a pagar. O usuario cadastra suas contas,
-        visualiza um dashboard inteligente e recebe lembretes automaticos por email ou Telegram.
+        visualiza um dashboard inteligente e recebe lembretes automaticos por email e/ou Telegram.
       </p>
 
       <div class="stats-row">
@@ -520,7 +520,7 @@
         <div class="card">
           <div class="card-icon icon-red">&#128276;</div>
           <h3>Lembretes Automaticos</h3>
-          <p>Notificacao D-1 (um dia antes do vencimento) via email ou Telegram, conforme preferencia do usuario. Cron job diario as 8h BRT via Vercel Cron.</p>
+          <p>Notificacao D-1 (um dia antes do vencimento) via email e/ou Telegram — o usuario pode marcar ambos os canais simultaneamente. Cron job diario as 8h BRT via Vercel Cron.</p>
         </div>
 
         <div class="card">
@@ -758,7 +758,7 @@
           <div class="flow-dot" style="background: var(--red);">5</div>
           <div class="flow-content">
             <h4>Lembretes & Telegram</h4>
-            <p>Recebe lembrete D-1 por email ou Telegram. Pode gerenciar contas direto no Telegram com /contas, /nova e /pagar.</p>
+            <p>Recebe lembrete D-1 por email e/ou Telegram (pode ativar ambos). Pode gerenciar contas direto no Telegram com /contas, /nova e /pagar.</p>
           </div>
         </div>
       </div>
@@ -781,7 +781,7 @@
             <div class="model-field"><span class="model-field-name">name</span><span class="model-field-type">String?</span></div>
             <div class="model-field"><span class="model-field-name">email</span><span class="model-field-type">String @unique</span></div>
             <div class="model-field"><span class="model-field-name">telegramChatId</span><span class="model-field-type">String?</span></div>
-            <div class="model-field"><span class="model-field-name">notifyVia</span><span class="model-field-type">"email" | "telegram"</span></div>
+            <div class="model-field"><span class="model-field-name">notifyVia</span><span class="model-field-type">"email" | "telegram" | "email,telegram"</span></div>
             <div class="model-field"><span class="model-field-name">bills</span><span class="model-field-type">Bill[]</span></div>
           </div>
         </div>

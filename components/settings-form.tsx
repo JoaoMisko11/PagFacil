@@ -24,6 +24,8 @@ export function SettingsForm({
     {} as ActionState
   )
 
+  const channels = notifyVia.split(",")
+
   return (
     <Card>
       <CardHeader>
@@ -59,15 +61,21 @@ export function SettingsForm({
           {/* Canal de notificação */}
           <div className="space-y-3">
             <Label>Receber lembretes por</Label>
+            <p className="text-xs text-muted-foreground">Você pode marcar mais de um canal.</p>
+            {state.errors?.notifyVia && (
+              <p className="text-xs text-destructive">
+                {state.errors.notifyVia[0]}
+              </p>
+            )}
             <div className="space-y-2">
               {!isTelegramOnlyUser && (
                 <label className="flex items-center gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-muted transition-colors">
                   <input
-                    type="radio"
+                    type="checkbox"
                     name="notifyVia"
                     value="email"
-                    defaultChecked={notifyVia === "email"}
-                    className="h-4 w-4 text-primary"
+                    defaultChecked={channels.includes("email")}
+                    className="h-4 w-4 text-primary rounded"
                   />
                   <div>
                     <p className="text-sm font-medium text-foreground">Email</p>
@@ -79,11 +87,11 @@ export function SettingsForm({
               )}
               <label className="flex items-center gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-muted transition-colors">
                 <input
-                  type="radio"
+                  type="checkbox"
                   name="notifyVia"
                   value="telegram"
-                  defaultChecked={notifyVia === "telegram"}
-                  className="h-4 w-4 text-primary"
+                  defaultChecked={channels.includes("telegram")}
+                  className="h-4 w-4 text-primary rounded"
                 />
                 <div>
                   <p className="text-sm font-medium text-foreground">Telegram</p>

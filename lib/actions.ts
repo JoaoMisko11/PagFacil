@@ -690,9 +690,14 @@ export async function updateNotificationPreferences(
 ): Promise<ActionState> {
   const userId = await getUserId()
   const telegramChatId = (formData.get("telegramChatId") as string)?.trim() || null
-  const notifyVia = formData.get("notifyVia") as string
+  const notifyViaValues = formData.getAll("notifyVia") as string[]
+  const notifyVia = notifyViaValues.filter((v) => ["email", "telegram"].includes(v)).join(",")
 
-  if (notifyVia === "telegram" && !telegramChatId) {
+  if (!notifyVia) {
+    return { errors: { notifyVia: ["Selecione pelo menos um canal de notificação"] } }
+  }
+
+  if (notifyVia.includes("telegram") && !telegramChatId) {
     return { errors: { telegramChatId: ["Informe seu Chat ID do Telegram"] } }
   }
 
@@ -734,7 +739,7 @@ export async function updateNotificationPreferences(
     where: { id: userId },
     data: {
       telegramChatId,
-      notifyVia: notifyVia === "telegram" ? "telegram" : "email",
+      notifyVia,
     },
   })
 
