@@ -12,7 +12,17 @@
       "Bash(git init:*)",
       "Bash(npx --yes shadcn@latest init -d)",
       "Bash(npx shadcn@latest add card input label select textarea badge dialog dropdown-menu calendar separator skeleton toast -y)",
-      "Bash(npx shadcn@latest add card input label select textarea badge dialog dropdown-menu calendar separator skeleton sonner popover -y)"
+      "Bash(npx shadcn@latest add card input label select textarea badge dialog dropdown-menu calendar separator skeleton sonner popover -y)",
+      "Bash(grep -r \"aria-\\\\|role=\" /Users/joaomisko/Desktop/DEV/PagFacil/app --include=*.tsx)",
+      "Bash(grep -r \"Skeleton\\\\|skeleton\\\\|Loading\" /Users/joaomisko/Desktop/DEV/PagFacil/components --include=*.tsx)",
+      "Bash(grep -r \"sonner\\\\|toast\\\\|Toast\" /Users/joaomisko/Desktop/DEV/PagFacil --include=*.tsx)",
+      "Bash(grep -r \"useToast\\\\|try\\\\s*{\\\\|catch\\\\|throw\\\\|error\\\\|Error\" /Users/joaomisko/Desktop/DEV/PagFacil/app --include=*.tsx)",
+      "Bash(grep -r \"empty\\\\|Empty\\\\|no data\\\\|No data\" /Users/joaomisko/Desktop/DEV/PagFacil/app /Users/joaomisko/Desktop/DEV/PagFacil/components --include=*.tsx)",
+      "Bash(grep -r \"pending\\\\|loading\\\\|disabled\" /Users/joaomisko/Desktop/DEV/PagFacil/components --include=*.tsx)",
+      "Bash(grep -r \"error\\\\|Error\" /Users/joaomisko/Desktop/DEV/PagFacil/components --include=*.tsx)",
+      "Bash(find /Users/joaomisko/Desktop/DEV/PagFacil -not -path */node_modules/* -not -path */.next/* -type f -name *.tsx -o -name *.ts)",
+      "Bash(ls /Users/joaomisko/Desktop/DEV/PagFacil/app/\\\\\\(dashboard\\\\\\)/)",
+      "Bash(git add:*)"
     ]
   }
 }
