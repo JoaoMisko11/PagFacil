@@ -219,6 +219,44 @@ async function ChecklistSection({ userId }: { userId: string }) {
   return <OnboardingChecklist items={items} />
 }
 
+async function PunctualityStreak({ userId }: { userId: string }) {
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+
+  const paidThisMonth = await db.bill.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      status: "PAID",
+      paidAt: { gte: startOfMonth, lte: endOfMonth },
+    },
+    select: { paidAt: true, dueDate: true },
+  })
+
+  const onTimeCount = paidThisMonth.filter(
+    (b) => b.paidAt && b.paidAt <= new Date(b.dueDate.getTime() + 86400000)
+  ).length
+
+  if (onTimeCount === 0) return null
+
+  const messages = [
+    { min: 1, icon: "✨", text: `${onTimeCount} conta${onTimeCount > 1 ? "s" : ""} paga${onTimeCount > 1 ? "s" : ""} em dia esse mês!` },
+    { min: 3, icon: "🔥", text: `${onTimeCount} contas pagas em dia! Bom ritmo!` },
+    { min: 5, icon: "⭐", text: `${onTimeCount} contas pagas em dia esse mês! Continue assim!` },
+    { min: 10, icon: "🏆", text: `${onTimeCount} contas pagas em dia! Você é referência!` },
+  ]
+
+  const message = [...messages].reverse().find((m) => onTimeCount >= m.min)!
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm">
+      <span className="text-lg">{message.icon}</span>
+      <span className="font-medium text-foreground">{message.text}</span>
+    </div>
+  )
+}
+
 async function InsightsSection({ userId }: { userId: string }) {
   const insights: { type: "pattern" | "tip"; message: string }[] = []
 
@@ -333,7 +371,17 @@ async function CalendarSection({ userId }: { userId: string }) {
 async function BillsSection({ userId }: { userId: string }) {
   const pendingBills = await getPendingBills(userId)
 
+  // Check if user has paid bills this month (for celebratory empty state)
   const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+  const paidThisMonthCount = pendingBills.length === 0
+    ? await db.bill.count({
+        where: { userId, deletedAt: null, status: "PAID", paidAt: { gte: monthStart, lte: monthEnd } },
+      })
+    : 0
+  const allPaidCelebration = pendingBills.length === 0 && paidThisMonthCount > 0
+
   const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
   const tomorrow = new Date(today.getTime() + 86400000)
   const endOfWeek = new Date(today)
@@ -393,13 +441,34 @@ async function BillsSection({ userId }: { userId: string }) {
 
       {pendingBills.length === 0 && (
         <div className="rounded-lg border bg-card p-8 text-center sm:p-12">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-            <span className="text-3xl">&#10003;</span>
-          </div>
-          <p className="text-lg font-semibold text-foreground">Tudo em dia!</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Nenhuma conta pendente no momento. Cadastre uma nova conta quando precisar.
-          </p>
+          {allPaidCelebration ? (
+            <>
+              <div className="celebrate-bounce mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                <span className="text-4xl">🎉</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">
+                Todas as contas do mês pagas!
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Você arrasou! {paidThisMonthCount} conta{paidThisMonthCount > 1 ? "s" : ""} paga{paidThisMonthCount > 1 ? "s" : ""} esse mês. Aproveite a tranquilidade.
+              </p>
+              <div className="celebrate-sparkles mx-auto mt-3 flex justify-center gap-1">
+                {["✨", "⭐", "✨"].map((s, i) => (
+                  <span key={i} className="animate-pulse text-lg" style={{ animationDelay: `${i * 200}ms` }}>{s}</span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+                <span className="text-3xl">&#10003;</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">Tudo em dia!</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Nenhuma conta pendente no momento. Cadastre uma nova conta quando precisar.
+              </p>
+            </>
+          )}
           <Link href="/bills/new" className="mt-5 inline-block">
             <Button className="h-11">+ Nova Conta</Button>
           </Link>
@@ -427,6 +496,37 @@ async function BillsSection({ userId }: { userId: string }) {
   )
 }
 
+// --- Greeting helpers ---
+
+function getGreeting(): string {
+  const hour = new Date().toLocaleString("en-US", {
+    timeZone: "America/Sao_Paulo",
+    hour: "numeric",
+    hour12: false,
+  })
+  const h = parseInt(hour, 10)
+  if (h >= 5 && h < 12) return "Bom dia"
+  if (h >= 12 && h < 18) return "Boa tarde"
+  return "Boa noite"
+}
+
+function getDayContext(): string {
+  const dayOfWeek = new Date().toLocaleString("en-US", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+  })
+  const dayMessages: Record<string, string> = {
+    Monday: "Começo de semana — bora organizar as contas!",
+    Tuesday: "Aqui está o resumo das suas contas a pagar.",
+    Wednesday: "Metade da semana! Confira suas contas.",
+    Thursday: "Quase sexta! Veja o que ainda precisa pagar.",
+    Friday: "Sextou! Deixe as contas em dia pro fim de semana.",
+    Saturday: "Bom descanso! Aqui está o resumo das suas contas.",
+    Sunday: "Domingo tranquilo. Confira suas contas para a semana.",
+  }
+  return dayMessages[dayOfWeek] ?? "Aqui está o resumo das suas contas a pagar."
+}
+
 // --- Main page ---
 
 export default async function DashboardPage() {
@@ -442,10 +542,10 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
-            Olá, {session.user.name}!
+            {getGreeting()}, {session.user.name}!
           </h2>
           <p className="text-sm text-muted-foreground">
-            Aqui está o resumo das suas contas a pagar.
+            {getDayContext()}
           </p>
         </div>
         <Link href="/bills/new" className="shrink-0">
@@ -459,6 +559,10 @@ export default async function DashboardPage() {
 
       <Suspense fallback={<SummaryCardsSkeleton />}>
         <SummaryCards userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PunctualityStreak userId={userId} />
       </Suspense>
 
       <Suspense fallback={null}>

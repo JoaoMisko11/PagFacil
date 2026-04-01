@@ -182,8 +182,11 @@ function CalendarBillItem({ bill, today }: { bill: CalendarBill; today: Date }) 
   function handleMarkPaid() {
     startTransition(async () => {
       try {
-        await markBillAsPaid(bill.id)
+        const result = await markBillAsPaid(bill.id)
         toast.success(`"${bill.supplier}" marcada como paga!`)
+        if (result.remainingPending === 0) {
+          window.dispatchEvent(new Event("pagafacil:all-paid"))
+        }
       } catch {
         toast.error("Erro ao marcar como paga.")
       }

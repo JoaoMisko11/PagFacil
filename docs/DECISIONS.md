@@ -1,5 +1,13 @@
 # Decisões Técnicas — PagaFácil
 
+## D16 - 2026-04-01
+- **Confetti CSS puro (sem canvas-confetti):** 30 `<span>` com `@keyframes` em vez de lib Canvas. Zero dependências, ~60 linhas. Suficiente para efeito celebratório — não é um jogo, é um momento de delight.
+- **Saudação via Intl.DateTimeFormat (sem date-fns):** `toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })` resolve timezone no server sem dependência extra. Roda a cada request (página é dinâmica de qualquer forma).
+- **Streak calculado client-side filter:** Prisma não suporta comparação campo-a-campo (`paidAt <= dueDate`). Para MVP com poucos bills/mês, fetch + filter em JS é pragmático e evita raw SQL.
+- **DisplayMode via React Context + localStorage:** Mesmo padrão do ThemeToggle existente. Sem DB/cookie — preferência puramente visual, aceitável perder entre dispositivos.
+- **Evento customizado para confetti:** `window.dispatchEvent(new Event("pagafacil:all-paid"))` evita prop drilling entre BillCard e ConfettiCelebration. Listener no layout, desacoplado.
+- **Page transitions via usePathname + rAF:** Funciona para navegações client-side (Link). Hard refresh renderiza direto sem transição — aceitável. Evita dependência de framer-motion (~30KB).
+
 ## D15 - 2026-04-01
 - **Gráfico SVG puro (sem recharts/chart.js):** Para manter zero dependências extras (~200KB economizados). Line chart simples com 6 pontos não justifica lib. SVG é server-renderable e funciona em qualquer browser.
 - **Smart insights via queries simples (sem ML):** Agrupa contas recorrentes pagas por fornecedor e calcula dia médio. Pragmático para MVP — insights baseados em padrões óbvios são mais úteis que predições complexas com dados insuficientes.

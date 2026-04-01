@@ -173,7 +173,7 @@ export async function restoreBill(billId: string): Promise<void> {
   revalidatePath("/bills/trash")
 }
 
-export async function markBillAsPaid(billId: string): Promise<void> {
+export async function markBillAsPaid(billId: string): Promise<{ remainingPending: number }> {
   const userId = await getUserId()
 
   try {
@@ -254,8 +254,13 @@ export async function markBillAsPaid(billId: string): Promise<void> {
     throw error
   }
 
+  const remainingPending = await db.bill.count({
+    where: { userId, deletedAt: null, status: "PENDING" },
+  })
+
   revalidatePath("/bills")
   revalidatePath("/")
+  return { remainingPending }
 }
 
 export async function markBillAsPending(billId: string): Promise<void> {

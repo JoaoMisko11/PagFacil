@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { DisplayModeToggle } from "@/components/display-mode-toggle"
 
 interface DashboardNavProps {
   user: {
@@ -63,6 +64,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
           <span className="hidden text-sm text-muted-foreground sm:inline">
             {user.name ?? user.email}
           </span>
+          <DisplayModeToggle />
           <ThemeToggle />
           <Button
             variant="outline"

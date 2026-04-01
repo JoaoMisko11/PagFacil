@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { useDisplayMode } from "@/components/display-mode-provider"
 
 const frequencyLabels: Record<string, string> = {
   WEEKLY: "Semanal",
@@ -50,6 +51,8 @@ export function BillCard({ bill }: BillCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(bill.status)
   const [isPending, startTransition] = useTransition()
+  const { mode } = useDisplayMode()
+  const compact = mode === "compact"
 
   const isPaid = optimisticStatus === "PAID"
   const isOverdue =
@@ -59,6 +62,10 @@ export function BillCard({ bill }: BillCardProps) {
 
   function handleTogglePaid() {
     const wasPaid = isPaid
+    // Haptic feedback ao marcar como paga (PWA)
+    if (!wasPaid && typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(50)
+    }
     startTransition(async () => {
       setOptimisticStatus(wasPaid ? "PENDING" : "PAID")
       try {
@@ -66,8 +73,11 @@ export function BillCard({ bill }: BillCardProps) {
           await markBillAsPending(bill.id)
           toast.success("Conta marcada como pendente")
         } else {
-          await markBillAsPaid(bill.id)
+          const result = await markBillAsPaid(bill.id)
           toast.success(`"${bill.supplier}" marcada como paga!`)
+          if (result.remainingPending === 0) {
+            window.dispatchEvent(new Event("pagafacil:all-paid"))
+          }
         }
       } catch {
         toast.error("Erro ao atualizar conta. Tente novamente.")
@@ -89,11 +99,11 @@ export function BillCard({ bill }: BillCardProps) {
 
   return (
     <Card className={isPaid ? "opacity-60" : ""}>
-      <CardContent className="p-3 sm:p-4">
+      <CardContent className={compact ? "p-2 sm:p-3" : "p-3 sm:p-4"}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className={`font-medium truncate text-sm sm:text-base ${isPaid ? "line-through" : ""}`}>
+              <p className={`font-medium truncate ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"} ${isPaid ? "line-through" : ""}`}>
                 {bill.supplier}
               </p>
               {bill.isRecurring && (
@@ -102,10 +112,10 @@ export function BillCard({ bill }: BillCardProps) {
                 </Badge>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+            <div className={`mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground ${compact ? "" : "sm:gap-2 sm:text-sm"}`}>
               <span>{formatDate(new Date(bill.dueDate))}</span>
               <span>·</span>
-              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${CATEGORY_MAP[bill.category]?.color ?? ""}`}>
+              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium ${compact ? "" : "sm:text-xs"} ${CATEGORY_MAP[bill.category]?.color ?? ""}`}>
                 {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
               </span>
               <Badge variant={variant} className="text-[10px] sm:text-xs">
@@ -114,16 +124,16 @@ export function BillCard({ bill }: BillCardProps) {
             </div>
           </div>
 
-          <p className={`text-base font-semibold whitespace-nowrap shrink-0 sm:text-lg ${isPaid ? "line-through text-muted-foreground" : ""}`}>
+          <p className={`font-semibold whitespace-nowrap shrink-0 ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"} ${isPaid ? "line-through text-muted-foreground" : ""}`}>
             {formatCurrency(bill.amount)}
           </p>
         </div>
 
-        <div className="mt-2 flex gap-1 border-t pt-2 sm:mt-3 sm:pt-3">
+        <div className={`flex gap-1 border-t ${compact ? "mt-1.5 pt-1.5" : "mt-2 pt-2 sm:mt-3 sm:pt-3"}`}>
           <Button
             variant="ghost"
             size="sm"
-            className="h-11 min-w-[44px] flex-1 text-xs sm:h-9 sm:flex-none sm:text-sm"
+            className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} flex-1 text-xs sm:h-9 sm:flex-none sm:text-sm`}
             onClick={handleTogglePaid}
             disabled={isPending}
           >
@@ -131,7 +141,7 @@ export function BillCard({ bill }: BillCardProps) {
           </Button>
 
           <Link href={`/bills/${bill.id}/edit`} className="flex-1 sm:flex-none">
-            <Button variant="ghost" size="sm" className="h-11 w-full min-w-[44px] text-xs sm:h-9 sm:text-sm">
+            <Button variant="ghost" size="sm" className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} w-full text-xs sm:h-9 sm:text-sm`}>
               ✏️ Editar
             </Button>
           </Link>
@@ -139,7 +149,7 @@ export function BillCard({ bill }: BillCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-11 min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive sm:h-9 sm:flex-none sm:text-sm"
+            className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} flex-1 text-xs text-destructive hover:text-destructive sm:h-9 sm:flex-none sm:text-sm`}
             onClick={() => setDialogOpen(true)}
           >
             🗑 Deletar

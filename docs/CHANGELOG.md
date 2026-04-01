@@ -1,5 +1,26 @@
 # Changelog — PagaFácil
 
+## D16 - 2026-04-01 - UX Fase 4: Delight (7/7 itens)
+### Feito
+- [x] **DL-1** Confetti CSS puro ao zerar contas pendentes — 30 partículas animadas, evento customizado `pagafacil:all-paid`, auto-remove após 3s
+- [x] **DL-2** Transições suaves entre páginas — fade+slide (200ms) via `usePathname` + `requestAnimationFrame`, sem dependências
+- [x] **DL-3** Saudação contextual no dashboard — "Bom dia/Boa tarde/Boa noite" + mensagem por dia da semana (timezone São Paulo)
+- [x] **DL-4** Streak de pontualidade — badge motivacional com 4 níveis (1+, 3+, 5+, 10+ contas pagas em dia no mês), ícones progressivos
+- [x] **DL-5** Haptic feedback no PWA — `navigator.vibrate(50)` ao marcar como paga, com feature detection
+- [x] **DL-6** Easter egg no empty state — ilustração celebratória animada quando todas as contas do mês estão pagas, com sparkles e bounce
+- [x] **DL-7** Modo compacto vs confortável — toggle na nav (ícone LayoutList/LayoutGrid), React Context + localStorage, padding/font reduzidos nos cards
+- [x] Arquitetura.html, DECISIONS.md e CHANGELOG.md atualizados
+- [x] Build passando sem erros
+
+### Pendente
+- [ ] Deploy na Vercel
+- [ ] Atualizar landing page com destaque da Fase 4
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D15 - 2026-04-01 - UX Fase 3: Diferenciação (7/7 itens)
 ### Feito
 - [x] **DF-1** Gráfico de tendência SVG no dashboard — linha pago/pendente dos últimos 6 meses, sem dependência externa
