@@ -570,6 +570,12 @@
           <h3>UX World-Class (Fase 2)</h3>
           <p>Optimistic UI ao marcar como paga (feedback instantaneo), Suspense streaming no dashboard (3 boundaries com skeletons), loading indicators na busca, drag-and-drop real na importacao, tabela responsiva (cards no mobile), onboarding em 3 passos com lembretes, pagina de lixeira com restauracao, e hierarchy visual nos summary cards com icones e cores de urgencia.</p>
         </div>
+
+        <div class="card">
+          <div class="card-icon icon-blue">&#128200;</div>
+          <h3>Diferenciacao (Fase 3)</h3>
+          <p>Grafico de tendencia SVG (6 meses pago/pendente), smart insights baseados em padroes de contas recorrentes, quick actions no calendario (criar conta, marcar como paga inline), checklist de onboarding persistente (4 marcos), relatorio mensal por email/Telegram, categorias com icones e cores, atalhos de teclado (n=nova, /=buscar).</p>
+        </div>
       </div>
     </div>
   </section>
@@ -890,6 +896,7 @@ pagafacil/
 |   +-- api/
 |   |   +-- auth/[...nextauth]/ <span style="color:var(--text-light);"># NextAuth route handlers</span>
 |   |   +-- cron/reminders/     <span style="color:var(--text-light);"># Cron job D-1 lembretes</span>
+|   |   +-- cron/monthly-report/ <span style="color:var(--text-light);"># Relatorio mensal (1o dia do mes)</span>
 |   |   +-- telegram/webhook/   <span style="color:var(--text-light);"># Bot Telegram webhook</span>
 |   +-- layout.tsx              <span style="color:var(--text-light);"># Root layout</span>
 |   +-- globals.css             <span style="color:var(--text-light);"># Tailwind + calendar dots</span>

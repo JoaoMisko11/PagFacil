@@ -1,5 +1,24 @@
 # Changelog — PagaFácil
 
+## D15 - 2026-04-01 - UX Fase 3: Diferenciação (7/7 itens)
+### Feito
+- [x] **DF-1** Gráfico de tendência SVG no dashboard — linha pago/pendente dos últimos 6 meses, sem dependência externa
+- [x] **DF-2** Smart insights — analisa padrões de contas recorrentes e exibe dicas ("X vence por volta do dia Y"), alerta de contas vencidas
+- [x] **DF-3** Quick actions no calendário — botão "Criar conta" em qualquer dia, botão "Paga" inline nas contas pendentes
+- [x] **DF-4** Checklist de onboarding persistente — 4 itens (lembretes, 3 contas, 1 paga, recorrente), progress bar, dismissível
+- [x] **DF-5** Relatório mensal por email/Telegram — cron job no 1º dia do mês com resumo de contas pagas/pendentes/vencidas
+- [x] **DF-6** Categorias com ícones e cores — cada categoria tem ícone e cor própria nos bill cards e calendário
+- [x] **DF-7** Atalhos de teclado — `n` = nova conta, `/` = buscar contas
+- [x] Arquitetura.html e DECISIONS.md atualizados
+
+### Pendente
+- [ ] Deploy na Vercel
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D14 - 2026-04-01 - UX Fase 2: Foundation (10/10 itens)
 ### Feito
 - [x] **FD-1** Optimistic UI ao marcar como paga — useOptimistic + useTransition, card muda instantaneamente e reverte se falhar

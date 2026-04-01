@@ -1,10 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import Link from "next/link"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatCategory } from "@/lib/format"
+import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/format"
+import { CATEGORY_MAP } from "@/lib/constants"
+import { markBillAsPaid } from "@/lib/actions"
+import { toast } from "sonner"
 import { ptBR } from "date-fns/locale"
 import type { DayMouseEventHandler } from "react-day-picker"
 
@@ -136,65 +141,80 @@ export function BillCalendar({ bills }: BillCalendarProps) {
         {/* Contas do dia selecionado */}
         {selectedDate && (
           <div className="mt-3 border-t pt-3">
-            <p className="mb-2 text-xs font-medium text-muted-foreground">
-              {selectedDate.toLocaleDateString("pt-BR", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                timeZone: "UTC",
-              })}
-            </p>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">
+                {selectedDate.toLocaleDateString("pt-BR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  timeZone: "UTC",
+                })}
+              </p>
+              <Link href={`/bills/new?date=${selectedKey}`}>
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  + Criar conta
+                </Button>
+              </Link>
+            </div>
             {selectedBills.length === 0 ? (
               <p className="text-xs text-muted-foreground">
                 Nenhuma conta neste dia.
               </p>
             ) : (
               <div className="space-y-2">
-                {selectedBills.map((bill) => {
-                  const isOverdue =
-                    bill.status === "PENDING" &&
-                    new Date(bill.dueDate) < today
-                  return (
-                    <div
-                      key={bill.id}
-                      className="flex items-center justify-between rounded-md border p-2 text-sm"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate font-medium">{bill.supplier}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatCategory(bill.category)}
-                          {bill.isRecurring && " · Recorrente"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-semibold">
-                          {formatCurrency(bill.amount)}
-                        </span>
-                        <Badge
-                          variant={
-                            bill.status === "PAID"
-                              ? "default"
-                              : isOverdue
-                                ? "destructive"
-                                : "outline"
-                          }
-                          className="text-[10px]"
-                        >
-                          {bill.status === "PAID"
-                            ? "Paga"
-                            : isOverdue
-                              ? "Vencida"
-                              : "Pendente"}
-                        </Badge>
-                      </div>
-                    </div>
-                  )
-                })}
+                {selectedBills.map((bill) => (
+                  <CalendarBillItem key={bill.id} bill={bill} today={today} />
+                ))}
               </div>
             )}
           </div>
         )}
       </CardContent>
     </Card>
+  )
+}
+
+function CalendarBillItem({ bill, today }: { bill: CalendarBill; today: Date }) {
+  const [isPending, startTransition] = useTransition()
+  const isOverdue = bill.status === "PENDING" && new Date(bill.dueDate) < today
+  const canMarkPaid = bill.status !== "PAID"
+
+  function handleMarkPaid() {
+    startTransition(async () => {
+      try {
+        await markBillAsPaid(bill.id)
+        toast.success(`"${bill.supplier}" marcada como paga!`)
+      } catch {
+        toast.error("Erro ao marcar como paga.")
+      }
+    })
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
+      <div className="min-w-0">
+        <p className="truncate font-medium">{bill.supplier}</p>
+        <p className="text-xs text-muted-foreground">
+          {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
+          {bill.isRecurring && " · Recorrente"}
+        </p>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="font-semibold">{formatCurrency(bill.amount)}</span>
+        {canMarkPaid ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-[10px] px-2"
+            onClick={handleMarkPaid}
+            disabled={isPending}
+          >
+            {isPending ? "..." : "Paga"}
+          </Button>
+        ) : (
+          <Badge variant="default" className="text-[10px]">Paga</Badge>
+        )}
+      </div>
+    </div>
   )
 }

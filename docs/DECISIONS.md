@@ -1,5 +1,12 @@
 # Decisões Técnicas — PagaFácil
 
+## D15 - 2026-04-01
+- **Gráfico SVG puro (sem recharts/chart.js):** Para manter zero dependências extras (~200KB economizados). Line chart simples com 6 pontos não justifica lib. SVG é server-renderable e funciona em qualquer browser.
+- **Smart insights via queries simples (sem ML):** Agrupa contas recorrentes pagas por fornecedor e calcula dia médio. Pragmático para MVP — insights baseados em padrões óbvios são mais úteis que predições complexas com dados insuficientes.
+- **Relatório mensal como cron separado:** Endpoint `/api/cron/monthly-report` roda no dia 1 às 12h UTC. Separado do reminder diário para isolamento de falhas e facilidade de debug.
+- **Checklist de onboarding server-side (sem DB extra):** Status calculado on-the-fly via queries existentes (count bills, check notifyVia). Dismissível via state local (reaparece em nova sessão se não completou). Evita schema change para algo temporário.
+- **Atalhos de teclado com event delegation:** Um listener global no layout que ignora inputs/textareas. Simples e sem dependência.
+
 ## D14 - 2026-04-01
 - **useOptimistic + useTransition para toggle de status:** Alternativa ao optimistic update manual com useState. useOptimistic é integrado com React 19 e reverte automaticamente quando a transition termina. useTransition previne double-clicks e mantém o estado consistente.
 - **React.cache para deduplicar queries no Suspense:** Com 3 Suspense boundaries no dashboard, SummaryCards e BillsSection precisam dos mesmos pendingBills. React.cache deduplica a query dentro do mesmo request sem precisar de estado global.

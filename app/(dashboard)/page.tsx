@@ -10,6 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/format"
 import { BillCard } from "@/components/bill-card"
 import { BillCalendar } from "@/components/bill-calendar"
+import { TrendChart } from "@/components/trend-chart"
+import { OnboardingChecklist } from "@/components/onboarding-checklist"
+import { SmartInsights } from "@/components/smart-insights"
 
 // Cached queries — deduplicadas dentro do mesmo request
 const getPendingBills = cache(async (userId: string) => {
@@ -173,6 +176,151 @@ async function SummaryCards({ userId }: { userId: string }) {
   )
 }
 
+function TrendChartSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="p-3 pb-0 sm:p-4 sm:pb-0">
+        <Skeleton className="h-4 w-32" />
+      </CardHeader>
+      <CardContent className="p-3 pt-2 sm:p-4 sm:pt-2">
+        <Skeleton className="h-28 w-full" />
+        <div className="mt-2 flex gap-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// --- Async streamed components ---
+
+async function ChecklistSection({ userId }: { userId: string }) {
+  const [user, billCount, paidCount, recurringCount] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: { notifyVia: true },
+    }),
+    db.bill.count({ where: { userId, deletedAt: null } }),
+    db.bill.count({ where: { userId, deletedAt: null, status: "PAID" } }),
+    db.bill.count({ where: { userId, deletedAt: null, isRecurring: true } }),
+  ])
+
+  const items = [
+    { label: "Configurar lembretes", done: !!user?.notifyVia, href: "/settings" },
+    { label: "Cadastrar 3 contas", done: billCount >= 3, href: "/bills/new" },
+    { label: "Marcar 1 conta como paga", done: paidCount >= 1, href: "/bills" },
+    { label: "Criar conta recorrente", done: recurringCount >= 1, href: "/bills/new" },
+  ]
+
+  const allDone = items.every((i) => i.done)
+  if (allDone) return null
+
+  return <OnboardingChecklist items={items} />
+}
+
+async function InsightsSection({ userId }: { userId: string }) {
+  const insights: { type: "pattern" | "tip"; message: string }[] = []
+
+  // Padrão: contas recorrentes que o usuário costuma pagar
+  const recurringPaid = await db.bill.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      isRecurring: true,
+      status: "PAID",
+    },
+    select: { supplier: true, amount: true, dueDate: true },
+    orderBy: { paidAt: "desc" },
+    take: 20,
+  })
+
+  // Agrupa por fornecedor e calcula dia médio de vencimento
+  const supplierStats = new Map<string, { count: number; totalAmount: number; days: number[] }>()
+  for (const bill of recurringPaid) {
+    const stats = supplierStats.get(bill.supplier) ?? { count: 0, totalAmount: 0, days: [] }
+    stats.count++
+    stats.totalAmount += bill.amount
+    stats.days.push(new Date(bill.dueDate).getUTCDate())
+    supplierStats.set(bill.supplier, stats)
+  }
+
+  for (const [supplier, stats] of supplierStats) {
+    if (stats.count >= 2) {
+      const avgDay = Math.round(stats.days.reduce((a, b) => a + b, 0) / stats.days.length)
+      const avgAmount = Math.round(stats.totalAmount / stats.count)
+      insights.push({
+        type: "pattern",
+        message: `"${supplier}" vence por volta do dia ${avgDay} (${formatCurrency(avgAmount)} em media).`,
+      })
+    }
+  }
+
+  // Dica: contas vencidas sem pagar
+  const overdueCount = await db.bill.count({
+    where: {
+      userId,
+      deletedAt: null,
+      status: "PENDING",
+      dueDate: { lt: new Date(new Date().toISOString().split("T")[0] + "T00:00:00Z") },
+    },
+  })
+
+  if (overdueCount > 0) {
+    insights.push({
+      type: "tip",
+      message: `Voce tem ${overdueCount} conta${overdueCount > 1 ? "s" : ""} vencida${overdueCount > 1 ? "s" : ""}. Regularize para manter o controle em dia.`,
+    })
+  }
+
+  if (insights.length === 0) return null
+  return <SmartInsights insights={insights.slice(0, 3)} />
+}
+
+async function TrendSection({ userId }: { userId: string }) {
+  const now = new Date()
+  const months: { label: string; paid: number; pending: number }[] = []
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const start = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0)
+    const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59)
+
+    const [paidAgg, pendingAgg] = await Promise.all([
+      db.bill.aggregate({
+        where: {
+          userId,
+          deletedAt: null,
+          status: "PAID",
+          paidAt: { gte: start, lte: end },
+        },
+        _sum: { amount: true },
+      }),
+      db.bill.aggregate({
+        where: {
+          userId,
+          deletedAt: null,
+          status: { in: ["PENDING", "PAID"] },
+          dueDate: { gte: start, lte: end },
+        },
+        _sum: { amount: true },
+      }),
+    ])
+
+    const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")
+    months.push({
+      label: label.charAt(0).toUpperCase() + label.slice(1),
+      paid: paidAgg._sum.amount ?? 0,
+      pending: pendingAgg._sum.amount ?? 0,
+    })
+  }
+
+  const hasData = months.some((m) => m.paid > 0 || m.pending > 0)
+  if (!hasData) return null
+
+  return <TrendChart data={months} />
+}
+
 async function CalendarSection({ userId }: { userId: string }) {
   const allBills = await getAllBills(userId)
   const calendarBills = allBills.map((b) => ({
@@ -305,8 +453,20 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      <Suspense fallback={null}>
+        <ChecklistSection userId={userId} />
+      </Suspense>
+
       <Suspense fallback={<SummaryCardsSkeleton />}>
         <SummaryCards userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <InsightsSection userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<TrendChartSkeleton />}>
+        <TrendSection userId={userId} />
       </Suspense>
 
       <Suspense fallback={<CalendarSkeleton />}>

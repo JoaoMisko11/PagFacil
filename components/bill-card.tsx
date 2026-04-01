@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { formatCurrency, formatDate, formatCategory } from "@/lib/format"
+import { formatCurrency, formatDate } from "@/lib/format"
+import { CATEGORY_MAP } from "@/lib/constants"
 import { markBillAsPaid, markBillAsPending, deleteBill } from "@/lib/actions"
 import {
   Dialog,
@@ -104,7 +105,9 @@ export function BillCard({ bill }: BillCardProps) {
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
               <span>{formatDate(new Date(bill.dueDate))}</span>
               <span>·</span>
-              <span>{formatCategory(bill.category)}</span>
+              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${CATEGORY_MAP[bill.category]?.color ?? ""}`}>
+                {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
+              </span>
               <Badge variant={variant} className="text-[10px] sm:text-xs">
                 {label}
               </Badge>
