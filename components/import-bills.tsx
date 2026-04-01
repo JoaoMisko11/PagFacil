@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { parseSpreadsheet, importBills } from "@/lib/actions"
 import type { ImportResult, ImportBillRow } from "@/lib/actions"
@@ -11,6 +11,10 @@ export function ImportBills() {
   const [rows, setRows] = useState<ImportBillRow[] | null>(null)
   const [importing, setImporting] = useState(false)
   const [result, setResult] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const dragCounterRef = useRef(0)
 
   const [parseState, parseAction, parsePending] = useActionState(
     async (prev: ImportResult, formData: FormData) => {
@@ -44,20 +48,68 @@ export function ImportBills() {
     setResult(null)
   }
 
+  function handleDragEnter(e: React.DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current++
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true)
+    }
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current--
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false)
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    dragCounterRef.current = 0
+
+    const files = e.dataTransfer.files
+    if (files.length > 0 && fileInputRef.current) {
+      fileInputRef.current.files = files
+      // Auto-submit the form
+      formRef.current?.requestSubmit()
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Upload */}
       {!rows && (
-        <form action={parseAction} className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
-            <div className="mb-4 text-4xl">📄</div>
+        <form ref={formRef} action={parseAction} className="space-y-4">
+          <div
+            className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            }`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="mb-4 text-4xl">{isDragging ? "&#128229;" : "&#128196;"}</div>
             <p className="mb-2 text-sm font-medium text-foreground">
-              Arraste sua planilha ou clique para selecionar
+              {isDragging ? "Solte o arquivo aqui" : "Arraste sua planilha ou clique para selecionar"}
             </p>
             <p className="mb-4 text-xs text-muted-foreground">
-              Formatos aceitos: .xlsx, .xls, .csv (máx. 5MB)
+              Formatos aceitos: .xlsx, .xls, .csv (max. 5MB)
             </p>
             <input
+              ref={fileInputRef}
               type="file"
               name="file"
               accept=".xlsx,.xls,.csv"
@@ -122,7 +174,8 @@ export function ImportBills() {
             </span>
           </div>
 
-          <div className="max-h-96 overflow-auto rounded-lg border border-border">
+          {/* Desktop: tabela */}
+          <div className="hidden sm:block max-h-96 overflow-auto rounded-lg border border-border">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-muted">
                 <tr className="border-b border-border text-left">
@@ -164,6 +217,36 @@ export function ImportBills() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile: cards */}
+          <div className="sm:hidden max-h-96 overflow-auto space-y-2">
+            {rows.map((row) => (
+              <div
+                key={row.row}
+                className={`rounded-lg border p-3 text-sm ${
+                  row.valid
+                    ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/20"
+                    : "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-medium">{row.supplier || "—"}</p>
+                  <span className="text-xs text-muted-foreground">#{row.row}</span>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                  <span>{row.amount || "—"}</span>
+                  <span>{row.dueDate || "—"}</span>
+                  <span>{row.category}</span>
+                </div>
+                {row.notes && (
+                  <p className="mt-1 text-xs text-muted-foreground truncate">{row.notes}</p>
+                )}
+                {!row.valid && (
+                  <p className="mt-1.5 text-xs text-destructive">{row.error}</p>
+                )}
+              </div>
+            ))}
           </div>
 
           {result && (

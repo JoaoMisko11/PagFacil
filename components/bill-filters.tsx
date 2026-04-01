@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import {
@@ -26,6 +26,7 @@ export function BillFilters({
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(currentQuery ?? "")
   const timeoutRef = useRef<NodeJS.Timeout>(null)
+  const [isSearching, startTransition] = useTransition()
 
   function updateFilter(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,7 +35,9 @@ export function BillFilters({
     } else {
       params.delete(key)
     }
-    router.push(`/bills?${params.toString()}`)
+    startTransition(() => {
+      router.push(`/bills?${params.toString()}`)
+    })
   }
 
   useEffect(() => {
@@ -47,12 +50,19 @@ export function BillFilters({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
-      <Input
-        placeholder="Buscar fornecedor..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-11 sm:h-9 sm:max-w-[200px]"
-      />
+      <div className="relative">
+        <Input
+          placeholder="Buscar fornecedor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-11 sm:h-9 sm:max-w-[200px]"
+        />
+        {isSearching && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+          </div>
+        )}
+      </div>
       <Select
         defaultValue={currentStatus ?? "ALL"}
         onValueChange={(v) => updateFilter("status", v ?? "ALL")}

@@ -1,5 +1,12 @@
 # Decisões Técnicas — PagaFácil
 
+## D14 - 2026-04-01
+- **useOptimistic + useTransition para toggle de status:** Alternativa ao optimistic update manual com useState. useOptimistic é integrado com React 19 e reverte automaticamente quando a transition termina. useTransition previne double-clicks e mantém o estado consistente.
+- **React.cache para deduplicar queries no Suspense:** Com 3 Suspense boundaries no dashboard, SummaryCards e BillsSection precisam dos mesmos pendingBills. React.cache deduplica a query dentro do mesmo request sem precisar de estado global.
+- **Lixeira com soft delete existente (30 dias):** O copy já prometia "pode ser desfeita em 30 dias". Implementamos a page /bills/trash que filtra deletedAt >= 30 dias atrás. Sem purge automático por ora (aceitável para MVP).
+- **Drag-and-drop com counter pattern:** dragCounter evita flickering quando o mouse passa sobre filhos do dropzone. Auto-submit via requestSubmit() ao soltar arquivo elimina clique extra.
+- **Tabela mobile via hidden/sm:block:** Duas renderizações (cards mobile + tabela desktop) em vez de tabela responsiva complexa. Mais código mas zero CSS hack, e cada layout é otimizado para seu contexto.
+
 ## D12 - 2026-03-31
 - **xlsx (SheetJS) para parse de planilhas:** Biblioteca madura (~500KB), suporta .xlsx, .xls e .csv sem depender de APIs externas. O parse roda no server action, sem expor dados no client.
 - **Upload + preview (não Google Drive API):** Integração com Google Drive exigiria OAuth separado, file picker e permissões complexas. Para MVP, o usuário baixa do Drive e faz upload — mesmo resultado com fração da complexidade.

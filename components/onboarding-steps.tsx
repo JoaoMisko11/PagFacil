@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,15 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { updateUserName, createBillOnboarding, type ActionState } from "@/lib/actions"
+import { updateUserName, createBillOnboarding, updateNotificationPreferences, type ActionState } from "@/lib/actions"
 import { CATEGORIES } from "@/lib/constants"
 
 interface OnboardingStepsProps {
-  step: "name" | "bill"
+  step: "name" | "bill" | "reminders"
+  userEmail?: string | null
 }
 
-export function OnboardingSteps({ step }: OnboardingStepsProps) {
+export function OnboardingSteps({ step, userEmail }: OnboardingStepsProps) {
   if (step === "name") return <NameStep />
+  if (step === "reminders") return <RemindersStep userEmail={userEmail} />
   return <BillStep />
 }
 
@@ -159,9 +162,92 @@ function BillStep() {
           )}
 
           <Button type="submit" className="h-12 w-full text-base" disabled={pending}>
-            {pending ? "Salvando..." : "Cadastrar e começar"}
+            {pending ? "Salvando..." : "Continuar"}
           </Button>
         </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+function RemindersStep({ userEmail }: { userEmail?: string | null }) {
+  const router = useRouter()
+  const [state, formAction, pending] = useActionState(updateNotificationPreferences, {})
+  const isTelegramUser = !userEmail || userEmail.endsWith("@pagafacil.local")
+
+  if (state.message === "Preferências salvas!") {
+    router.push("/")
+    return null
+  }
+
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">Quer receber lembretes?</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Enviamos um lembrete 1 dia antes do vencimento para você nunca esquecer.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form action={formAction} className="space-y-4">
+          <div className="space-y-3">
+            {!isTelegramUser && (
+              <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                <input
+                  type="checkbox"
+                  name="notifyVia"
+                  value="email"
+                  defaultChecked
+                  className="h-5 w-5 rounded"
+                />
+                <div>
+                  <p className="font-medium text-sm">Email</p>
+                  <p className="text-xs text-muted-foreground">
+                    Receba lembretes no seu email
+                  </p>
+                </div>
+              </label>
+            )}
+
+            <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+              <input
+                type="checkbox"
+                name="notifyVia"
+                value="telegram"
+                defaultChecked={isTelegramUser}
+                className="h-5 w-5 rounded"
+              />
+              <div>
+                <p className="font-medium text-sm">Telegram</p>
+                <p className="text-xs text-muted-foreground">
+                  Receba lembretes no Telegram (configure depois em Lembretes)
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {state.errors?.notifyVia && (
+            <p className="text-sm text-destructive">{state.errors.notifyVia[0]}</p>
+          )}
+          {state.errors?.telegramChatId && (
+            <p className="text-sm text-destructive">{state.errors.telegramChatId[0]}</p>
+          )}
+          {state.message && state.message !== "Preferências salvas!" && (
+            <p className="text-sm text-destructive">{state.message}</p>
+          )}
+
+          <Button type="submit" className="h-12 w-full text-base" disabled={pending}>
+            {pending ? "Salvando..." : "Ativar lembretes"}
+          </Button>
+        </form>
+
+        <Button
+          variant="ghost"
+          className="mt-3 h-12 w-full text-sm text-muted-foreground"
+          onClick={() => router.push("/")}
+        >
+          Pular por agora
+        </Button>
       </CardContent>
     </Card>
   )

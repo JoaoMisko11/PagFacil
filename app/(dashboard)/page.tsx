@@ -1,45 +1,27 @@
+import { Suspense } from "react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { cache } from "react"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/format"
 import { BillCard } from "@/components/bill-card"
 import { BillCalendar } from "@/components/bill-calendar"
 
-export default async function DashboardPage() {
-  const session = await auth()
-  const userId = session!.user!.id
-
-  // Redireciona usuários novos (sem nome) para onboarding
-  if (!session?.user?.name) {
-    redirect("/onboarding")
-  }
-
-  const now = new Date()
-  const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
-  const tomorrow = new Date(today.getTime() + 86400000)
-  const endOfWeek = new Date(today)
-  endOfWeek.setDate(endOfWeek.getDate() + 7)
-  const endOf30Days = new Date(today)
-  endOf30Days.setDate(endOf30Days.getDate() + 30)
-
-  const pendingBills = await db.bill.findMany({
-    where: {
-      userId,
-      deletedAt: null,
-      status: "PENDING",
-    },
+// Cached queries — deduplicadas dentro do mesmo request
+const getPendingBills = cache(async (userId: string) => {
+  return db.bill.findMany({
+    where: { userId, deletedAt: null, status: "PENDING" },
     orderBy: { dueDate: "asc" },
   })
+})
 
-  // Todas as contas (incluindo pagas) para o calendário
-  const allBills = await db.bill.findMany({
-    where: {
-      userId,
-      deletedAt: null,
-    },
+const getAllBills = cache(async (userId: string) => {
+  return db.bill.findMany({
+    where: { userId, deletedAt: null },
     orderBy: { dueDate: "asc" },
     select: {
       id: true,
@@ -51,19 +33,83 @@ export default async function DashboardPage() {
       isRecurring: true,
     },
   })
+})
 
-  const calendarBills = allBills.map((b) => ({
-    ...b,
-    dueDate: b.dueDate.toISOString(),
-  }))
+// --- Skeleton fallbacks ---
+
+function SummaryCardsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+            <Skeleton className="h-4 w-24" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+            <Skeleton className="h-8 w-20" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function CalendarSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+        <Skeleton className="h-4 w-20" />
+      </CardHeader>
+      <CardContent className="p-2 sm:p-4 sm:pt-0">
+        <Skeleton className="mx-auto h-64 w-full max-w-xs" />
+      </CardContent>
+    </Card>
+  )
+}
+
+function BillsSkeleton() {
+  return (
+    <div className="space-y-2">
+      <Skeleton className="h-5 w-32" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-56" />
+              </div>
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <div className="mt-3 flex gap-2 border-t pt-3">
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-20" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+// --- Async streamed components ---
+
+async function SummaryCards({ userId }: { userId: string }) {
+  const pendingBills = await getPendingBills(userId)
+
+  const now = new Date()
+  const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
+  const endOfWeek = new Date(today)
+  endOfWeek.setDate(endOfWeek.getDate() + 7)
+  const endOf30Days = new Date(today)
+  endOf30Days.setDate(endOf30Days.getDate() + 30)
 
   const overdue = pendingBills.filter((b) => b.dueDate < today)
-  const dueToday = pendingBills.filter(
-    (b) => b.dueDate >= today && b.dueDate < tomorrow
-  )
-  const dueThisWeek = pendingBills.filter(
-    (b) => b.dueDate >= tomorrow && b.dueDate <= endOfWeek
-  )
+  const dueToday = pendingBills.filter((b) => {
+    const tomorrow = new Date(today.getTime() + 86400000)
+    return b.dueDate >= today && b.dueDate < tomorrow
+  })
 
   const totalWeek = pendingBills
     .filter((b) => b.dueDate <= endOfWeek)
@@ -73,75 +119,88 @@ export default async function DashboardPage() {
     .filter((b) => b.dueDate <= endOf30Days)
     .reduce((sum, b) => sum + b.amount, 0)
 
-  const totalBills = pendingBills.length
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <Card>
+        <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground sm:text-sm">
+            <span className="text-base">&#128197;</span>
+            Pendente semana
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+          <p className="text-lg font-bold text-foreground sm:text-2xl">{formatCurrency(totalWeek)}</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground sm:text-sm">
+            <span className="text-base">&#128198;</span>
+            Pendente 30 dias
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+          <p className="text-lg font-bold text-foreground sm:text-2xl">{formatCurrency(totalMonth)}</p>
+        </CardContent>
+      </Card>
+      <Card className={overdue.length > 0 ? "border-destructive bg-destructive/5" : ""}>
+        <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-xs font-medium sm:text-sm text-muted-foreground">
+            <span className="text-base">&#9888;&#65039;</span>
+            Vencidas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+          <p className={`text-lg font-bold sm:text-2xl ${overdue.length > 0 ? "text-destructive" : "text-foreground"}`}>
+            {overdue.length}
+          </p>
+        </CardContent>
+      </Card>
+      <Card className={dueToday.length > 0 ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20" : ""}>
+        <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-xs font-medium sm:text-sm text-muted-foreground">
+            <span className="text-base">&#9203;</span>
+            Vencem hoje
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+          <p className={`text-lg font-bold sm:text-2xl ${dueToday.length > 0 ? "text-amber-600" : "text-foreground"}`}>
+            {dueToday.length}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+async function CalendarSection({ userId }: { userId: string }) {
+  const allBills = await getAllBills(userId)
+  const calendarBills = allBills.map((b) => ({
+    ...b,
+    dueDate: b.dueDate.toISOString(),
+  }))
+  return <BillCalendar bills={calendarBills} />
+}
+
+async function BillsSection({ userId }: { userId: string }) {
+  const pendingBills = await getPendingBills(userId)
+
+  const now = new Date()
+  const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
+  const tomorrow = new Date(today.getTime() + 86400000)
+  const endOfWeek = new Date(today)
+  endOfWeek.setDate(endOfWeek.getDate() + 7)
+
+  const overdue = pendingBills.filter((b) => b.dueDate < today)
+  const dueToday = pendingBills.filter(
+    (b) => b.dueDate >= today && b.dueDate < tomorrow
+  )
+  const dueThisWeek = pendingBills.filter(
+    (b) => b.dueDate >= tomorrow && b.dueDate <= endOfWeek
+  )
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
-            Olá, {session?.user?.name ?? "bem-vindo"}!
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Aqui está o resumo das suas contas a pagar.
-          </p>
-        </div>
-        <Link href="/bills/new" className="shrink-0">
-          <Button size="sm" className="sm:size-default">+ Nova Conta</Button>
-        </Link>
-      </div>
-
-      {/* Resumo */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        <Card>
-          <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
-              Pendente semana
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-            <p className="text-lg font-bold text-foreground sm:text-2xl">{formatCurrency(totalWeek)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
-              Pendente 30 dias
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-            <p className="text-lg font-bold text-foreground sm:text-2xl">{formatCurrency(totalMonth)}</p>
-          </CardContent>
-        </Card>
-        <Card className={overdue.length > 0 ? "border-destructive/50" : ""}>
-          <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
-              Vencidas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-            <p className={`text-lg font-bold sm:text-2xl ${overdue.length > 0 ? "text-destructive" : "text-foreground"}`}>
-              {overdue.length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className={dueToday.length > 0 ? "border-amber-400/50" : ""}>
-          <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
-              Vencem hoje
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-            <p className={`text-lg font-bold sm:text-2xl ${dueToday.length > 0 ? "text-amber-600" : "text-foreground"}`}>
-              {dueToday.length}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Calendário */}
-      <BillCalendar bills={calendarBills} />
-
+    <>
       {/* Vencidas */}
       {overdue.length > 0 && (
         <section>
@@ -216,6 +275,47 @@ export default async function DashboardPage() {
           </Link>
         </div>
       )}
+    </>
+  )
+}
+
+// --- Main page ---
+
+export default async function DashboardPage() {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!session?.user?.name || !userId) {
+    redirect("/onboarding")
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
+            Olá, {session.user.name}!
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Aqui está o resumo das suas contas a pagar.
+          </p>
+        </div>
+        <Link href="/bills/new" className="shrink-0">
+          <Button size="sm" className="sm:size-default">+ Nova Conta</Button>
+        </Link>
+      </div>
+
+      <Suspense fallback={<SummaryCardsSkeleton />}>
+        <SummaryCards userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<CalendarSkeleton />}>
+        <CalendarSection userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<BillsSkeleton />}>
+        <BillsSection userId={userId} />
+      </Suspense>
     </div>
   )
 }

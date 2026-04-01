@@ -15,10 +15,12 @@ interface BillsPageProps {
 
 export default async function BillsPage({ searchParams }: BillsPageProps) {
   const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) throw new Error("Não autenticado")
   const params = await searchParams
 
   const where: Record<string, unknown> = {
-    userId: session!.user!.id,
+    userId,
     deletedAt: null,
   }
 
@@ -44,6 +46,9 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-bold text-foreground">Contas a Pagar</h2>
         <div className="flex flex-wrap gap-2">
+          <Link href="/bills/trash">
+            <Button variant="ghost" size="sm" className="text-muted-foreground">Lixeira</Button>
+          </Link>
           <Link href="/bills/batch">
             <Button variant="outline" size="sm">+ Lote</Button>
           </Link>

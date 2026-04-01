@@ -564,6 +564,12 @@
           <h3>Feedback Widget</h3>
           <p>Botao flutuante para envio de feedback direto (feature, bug, outro). Dados salvos no banco para analise durante fase de validacao.</p>
         </div>
+
+        <div class="card">
+          <div class="card-icon icon-green">&#9889;</div>
+          <h3>UX World-Class (Fase 2)</h3>
+          <p>Optimistic UI ao marcar como paga (feedback instantaneo), Suspense streaming no dashboard (3 boundaries com skeletons), loading indicators na busca, drag-and-drop real na importacao, tabela responsiva (cards no mobile), onboarding em 3 passos com lembretes, pagina de lixeira com restauracao, e hierarchy visual nos summary cards com icones e cores de urgencia.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -877,8 +883,9 @@ pagafacil/
 |   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
 |   |   +-- bills/import/       <span style="color:var(--text-light);"># Importar contas via planilha</span>
 |   |   +-- bills/batch/        <span style="color:var(--text-light);"># Cadastro em lote (tabela editavel)</span>
+|   |   +-- bills/trash/         <span style="color:var(--text-light);"># Lixeira (contas deletadas 30d)</span>
 |   |   +-- bills/[id]/edit/    <span style="color:var(--text-light);"># Editar conta</span>
-|   |   +-- onboarding/         <span style="color:var(--text-light);"># Fluxo primeiro acesso</span>
+|   |   +-- onboarding/         <span style="color:var(--text-light);"># Fluxo primeiro acesso (3 passos)</span>
 |   |   +-- settings/           <span style="color:var(--text-light);"># Configuracoes Telegram</span>
 |   +-- api/
 |   |   +-- auth/[...nextauth]/ <span style="color:var(--text-light);"># NextAuth route handlers</span>

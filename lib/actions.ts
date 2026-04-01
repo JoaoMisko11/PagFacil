@@ -156,6 +156,23 @@ export async function deleteBill(billId: string): Promise<void> {
   revalidatePath("/bills")
 }
 
+export async function restoreBill(billId: string): Promise<void> {
+  const userId = await getUserId()
+
+  try {
+    await db.bill.update({
+      where: { id: billId, userId },
+      data: { deletedAt: null },
+    })
+  } catch (error) {
+    console.error("Erro ao restaurar conta:", error)
+    throw error
+  }
+
+  revalidatePath("/bills")
+  revalidatePath("/bills/trash")
+}
+
 export async function markBillAsPaid(billId: string): Promise<void> {
   const userId = await getUserId()
 
@@ -353,7 +370,7 @@ export async function createBillOnboarding(
     return { message: "Erro ao salvar conta. Tente novamente." }
   }
 
-  redirect("/")
+  redirect("/onboarding?step=reminders")
 }
 
 // --- Importação de planilha ---

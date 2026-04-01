@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useOptimistic, useTransition } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -47,25 +47,31 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 export function BillCard({ bill }: BillCardProps) {
   const [deleting, setDeleting] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(bill.status)
+  const [isPending, startTransition] = useTransition()
 
-  const isPaid = bill.status === "PAID"
+  const isPaid = optimisticStatus === "PAID"
   const isOverdue =
-    bill.status === "PENDING" && new Date(bill.dueDate) < new Date(new Date().toDateString())
-  const status = isOverdue ? "OVERDUE" : bill.status
+    optimisticStatus === "PENDING" && new Date(bill.dueDate) < new Date(new Date().toDateString())
+  const status = isOverdue ? "OVERDUE" : optimisticStatus
   const { label, variant } = statusConfig[status] ?? statusConfig.PENDING
 
-  async function handleTogglePaid() {
-    try {
-      if (isPaid) {
-        await markBillAsPending(bill.id)
-        toast.success("Conta marcada como pendente")
-      } else {
-        await markBillAsPaid(bill.id)
-        toast.success(`"${bill.supplier}" marcada como paga!`)
+  function handleTogglePaid() {
+    const wasPaid = isPaid
+    startTransition(async () => {
+      setOptimisticStatus(wasPaid ? "PENDING" : "PAID")
+      try {
+        if (wasPaid) {
+          await markBillAsPending(bill.id)
+          toast.success("Conta marcada como pendente")
+        } else {
+          await markBillAsPaid(bill.id)
+          toast.success(`"${bill.supplier}" marcada como paga!`)
+        }
+      } catch {
+        toast.error("Erro ao atualizar conta. Tente novamente.")
       }
-    } catch {
-      toast.error("Erro ao atualizar conta. Tente novamente.")
-    }
+    })
   }
 
   async function handleDelete() {
@@ -116,6 +122,7 @@ export function BillCard({ bill }: BillCardProps) {
             size="sm"
             className="h-11 min-w-[44px] flex-1 text-xs sm:h-9 sm:flex-none sm:text-sm"
             onClick={handleTogglePaid}
+            disabled={isPending}
           >
             {isPaid ? "↩ Desfazer" : "✓ Paga"}
           </Button>

@@ -1,5 +1,28 @@
 # Changelog — PagaFácil
 
+## D14 - 2026-04-01 - UX Fase 2: Foundation (10/10 itens)
+### Feito
+- [x] **FD-1** Optimistic UI ao marcar como paga — useOptimistic + useTransition, card muda instantaneamente e reverte se falhar
+- [x] **FD-2** Suspense + streaming no Dashboard — 3 boundaries (summary, calendario, contas) com skeletons, queries deduplicadas via React.cache
+- [x] **FD-3** Error boundaries com retry — error.tsx em /bills e /settings, removido non-null assertions (session!.user!.id)
+- [x] **FD-4** Onboarding step 3 — configurar lembretes (email/Telegram) apos cadastrar primeira conta, com opcao "Pular por agora"
+- [x] **FD-5** Pagina de Lixeira (/bills/trash) — lista contas deletadas nos ultimos 30 dias com botao "Restaurar", server action restoreBill
+- [x] **FD-6** Hierarchy visual dos summary cards — icones, background colorido e borda forte nos cards de urgencia (Vencidas = vermelho, Vencem hoje = amber)
+- [x] **FD-7** Search com loading indicator — spinner inline no input durante debounce + navegacao via useTransition
+- [x] **FD-8** Pagina /login/verify melhorada — icone visual, dica de spam, countdown, botao "Voltar e tentar novamente"
+- [x] **FD-9** Drag-and-drop real na importacao — onDragEnter/Leave/Over/Drop com visual feedback, auto-submit ao soltar arquivo
+- [x] **FD-10** Tabela de importacao responsiva — cards empilhados no mobile (sm:hidden), tabela no desktop (hidden sm:block)
+- [x] Arquitetura.html atualizado com novas features e rota /bills/trash
+
+### Pendente
+- [ ] Atualizar landing page com destaque das novas features
+- [ ] Deploy na Vercel
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D13 - 2026-04-01 - Notificações Multi-canal + UX Quick Wins
 ### Feito
 - [x] Configuração de lembretes permite marcar email e Telegram simultaneamente (checkboxes em vez de radio buttons)
