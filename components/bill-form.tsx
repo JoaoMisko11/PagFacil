@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 import { type ActionState } from "@/lib/actions"
 import { CATEGORIES, RECURRENCE_FREQUENCIES } from "@/lib/constants"
 
@@ -182,6 +183,11 @@ export function BillForm({
           )}
 
           <div className="flex gap-3">
+            <Link href="/bills">
+              <Button type="button" variant="outline" className="h-11">
+                Cancelar
+              </Button>
+            </Link>
             <Button type="submit" disabled={pending} className="h-11 flex-1">
               {pending ? "Salvando..." : submitLabel}
             </Button>

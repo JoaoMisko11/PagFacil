@@ -1,15 +1,27 @@
 # Changelog — PagaFácil
 
-## D13 - 2026-04-01 - Notificações Multi-canal
+## D13 - 2026-04-01 - Notificações Multi-canal + UX Quick Wins
 ### Feito
 - [x] Configuração de lembretes permite marcar email e Telegram simultaneamente (checkboxes em vez de radio buttons)
 - [x] Server action aceita múltiplos canais e armazena como "email,telegram" no campo notifyVia
 - [x] Cron job de lembretes D-1 envia por todos os canais selecionados
 - [x] Validação: pelo menos um canal deve ser selecionado; Telegram exige Chat ID
+- [x] **UX Audit completo** — docs/UX_AUDIT.md com 45 issues, benchmark competitivo, roadmap 4 fases, 7 design principles
+- [x] **QW-1** loading.tsx com skeleton screens no dashboard e lista de contas
+- [x] **QW-2** error.tsx branded com botão "Tentar novamente"
+- [x] **QW-3** Removido userScalable: false (WCAG 1.4.4)
+- [x] **QW-4** Substituído alert() por erro inline no login Telegram
+- [x] **QW-5** Toast de sucesso/erro ao marcar como paga e ao deletar conta
+- [x] **QW-6** Botões da página /bills com flex-wrap para mobile
+- [x] **QW-7** Nav "Config" renomeado para "Lembretes"
+- [x] **QW-8** Botão "Cancelar" adicionado no formulário de conta
+- [x] **QW-9** aria-label no botão de remover linha do cadastro em lote
+- [x] **QW-10** Texto de confiança/segurança na landing page
 - [x] Arquitetura.html atualizado
 
 ### Pendente
-- [ ] Atualizar landing page com destaque da feature
+- [ ] Atualizar landing page com destaque da feature multi-canal
+- [ ] Deploy na Vercel
 
 ### Bugs Conhecidos
 - Nenhum novo

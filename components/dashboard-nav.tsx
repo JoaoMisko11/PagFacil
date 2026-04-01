@@ -55,7 +55,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              Config
+              Lembretes
             </Link>
           </div>
         </div>

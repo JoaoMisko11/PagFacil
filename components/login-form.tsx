@@ -19,6 +19,7 @@ export function LoginForm() {
   const [otpCode, setOtpCode] = useState("")
   const [otpSent, setOtpSent] = useState(false)
   const [telegramLoading, setTelegramLoading] = useState(false)
+  const [telegramError, setTelegramError] = useState("")
 
   const [otpState, otpAction] = useActionState(
     async (prevState: ActionState, formData: FormData) => {
@@ -44,6 +45,7 @@ export function LoginForm() {
 
   async function handleTelegramLogin(e: React.FormEvent) {
     e.preventDefault()
+    setTelegramError("")
     setTelegramLoading(true)
     const result = await signIn("telegram-otp", {
       chatId,
@@ -53,7 +55,7 @@ export function LoginForm() {
     })
     if (result?.error) {
       setTelegramLoading(false)
-      alert("Código inválido ou expirado. Tente novamente.")
+      setTelegramError("Código inválido ou expirado. Tente novamente.")
     } else {
       window.location.href = "/"
     }
@@ -189,6 +191,9 @@ export function LoginForm() {
                     Enviamos um código de 6 dígitos para seu Telegram.
                   </p>
                 </div>
+                {telegramError && (
+                  <p className="text-xs text-destructive">{telegramError}</p>
+                )}
                 <Button
                   type="submit"
                   className="w-full"

@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 const frequencyLabels: Record<string, string> = {
   WEEKLY: "Semanal",
@@ -54,17 +55,29 @@ export function BillCard({ bill }: BillCardProps) {
   const { label, variant } = statusConfig[status] ?? statusConfig.PENDING
 
   async function handleTogglePaid() {
-    if (isPaid) {
-      await markBillAsPending(bill.id)
-    } else {
-      await markBillAsPaid(bill.id)
+    try {
+      if (isPaid) {
+        await markBillAsPending(bill.id)
+        toast.success("Conta marcada como pendente")
+      } else {
+        await markBillAsPaid(bill.id)
+        toast.success(`"${bill.supplier}" marcada como paga!`)
+      }
+    } catch {
+      toast.error("Erro ao atualizar conta. Tente novamente.")
     }
   }
 
   async function handleDelete() {
     setDeleting(true)
-    await deleteBill(bill.id)
-    setDialogOpen(false)
+    try {
+      await deleteBill(bill.id)
+      toast.success("Conta deletada")
+      setDialogOpen(false)
+    } catch {
+      toast.error("Erro ao deletar conta. Tente novamente.")
+      setDeleting(false)
+    }
   }
 
   return (

@@ -193,6 +193,7 @@ export function BatchBillForm() {
                 disabled={rows.length <= 1}
                 className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-30 sm:h-9 sm:w-9"
                 title="Remover linha"
+                aria-label={`Remover linha ${i + 1}`}
               >
                 &times;
               </button>

@@ -54,10 +54,16 @@ export default async function LoginPage() {
           {/* Login */}
           <LoginForm />
 
-          {/* Social proof */}
-          <p className="text-center text-xs text-muted-foreground">
-            Feito para MEIs e pessoas fisicas que querem sair da planilha.
-          </p>
+          {/* Trust + Social proof */}
+          <div className="space-y-2 text-center text-xs text-muted-foreground">
+            <p className="flex items-center justify-center gap-1.5">
+              <span>&#128274;</span>
+              Seus dados protegidos. Nao compartilhamos com terceiros.
+            </p>
+            <p>
+              Feito para MEIs e pessoas fisicas que querem sair da planilha.
+            </p>
+          </div>
         </div>
       </div>
 
