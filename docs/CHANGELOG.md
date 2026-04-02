@@ -1,17 +1,19 @@
 # Changelog — PagaFácil
 
-## D18 - 2026-04-02 - Separação Gestão vs Pagamentos
+## D18 - 2026-04-02 - Separação Dashboard / Pagamentos / Contas
 ### Feito
-- [x] Navegação renomeada: "Dashboard" → "Pagamentos", "Contas" → "Minhas Contas"
+- [x] Nova rota `/pagamentos` — lista por urgência (vencidas, hoje, semana, futuras) + marcar como paga
+- [x] Dashboard limpo — mantém resumo, gráfico, calendário, insights, streak. Sem lista de contas.
+- [x] Navegação com 3 abas: **Dashboard**, **Pagamentos**, **Contas**
 - [x] Novo componente `BillManageCard` — card de gestão sem ação "marcar como paga" (editar + deletar)
 - [x] Página `/bills` reestruturada: contas agrupadas por categoria, recorrentes colapsadas em entrada única
 - [x] Contas recorrentes mostram: frequência, nº de parcelas, total já pago, próximo vencimento
-- [x] Subtítulo orientativo: "Para pagar, use a aba Pagamentos"
 - [x] Arquitetura.html e CHANGELOG.md atualizados
 
-### Conceito
-- **Pagamentos** (Dashboard) = visão operacional — o que pagar agora, marcar como paga
-- **Minhas Contas** (/bills) = gestão/cadastro — CRUD, importar, organizar por categoria
+### Conceito — 3 telas, 3 intenções
+- **Dashboard** (/) = visão geral — como estou? resumo, gráficos, calendário
+- **Pagamentos** (/pagamentos) = ação — o que preciso pagar agora? marcar como paga
+- **Contas** (/bills) = gestão — quais contas eu tenho? CRUD, importar, organizar
 
 ### Pendente
 - [ ] Deploy na Vercel

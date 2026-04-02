@@ -36,6 +36,16 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
+              Dashboard
+            </Link>
+            <Link
+              href="/pagamentos"
+              className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
+                pathname === "/pagamentos"
+                  ? "bg-secondary text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
               Pagamentos
             </Link>
             <Link
@@ -46,7 +56,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              Minhas Contas
+              Contas
             </Link>
             <Link
               href="/settings"

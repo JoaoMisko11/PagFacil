@@ -609,8 +609,9 @@
           <div class="arch-layer">
             <div class="arch-layer-title">Frontend — React Server Components + Client Components</div>
             <div class="arch-items">
-              <div class="arch-item highlight">Pagamentos / Dashboard (RSC)</div>
-              <div class="arch-item highlight">Minhas Contas — Gestao (RSC)</div>
+              <div class="arch-item highlight">Dashboard — Resumo (RSC)</div>
+              <div class="arch-item highlight">Pagamentos — Acao (RSC)</div>
+              <div class="arch-item highlight">Contas — Gestao (RSC)</div>
               <div class="arch-item">Formularios (Client)</div>
               <div class="arch-item">Calendario (Client)</div>
               <div class="arch-item">Filtros (Client)</div>
@@ -759,21 +760,29 @@
         <div class="flow-step">
           <div class="flow-dot" style="background: var(--amber);">3</div>
           <div class="flow-content">
-            <h4>Pagamentos (Dashboard)</h4>
-            <p>Visao operacional: contas vencidas, vencem hoje, proximos 7 dias. Calendario visual com dots coloridos. Totalizadores pendente/pago. Marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente.</p>
+            <h4>Dashboard</h4>
+            <p>Visao geral: resumo financeiro, graficos de tendencia, calendario com dots, insights e streak de pontualidade. Sem lista de contas — foco em entender a situacao.</p>
           </div>
         </div>
 
         <div class="flow-step">
           <div class="flow-dot" style="background: var(--purple);">4</div>
           <div class="flow-content">
-            <h4>Minhas Contas (Gestao)</h4>
-            <p>Cadastro e gestao de contas agrupadas por categoria. Contas recorrentes aparecem como entrada unica com historico de parcelas. Criar, editar, deletar, importar, cadastro em lote. Sem acao de pagamento — para pagar, use a aba Pagamentos.</p>
+            <h4>Pagamentos</h4>
+            <p>Contas organizadas por urgencia: vencidas, hoje, proximos 7 dias, futuras. Marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente.</p>
           </div>
         </div>
 
         <div class="flow-step">
-          <div class="flow-dot" style="background: var(--red);">5</div>
+          <div class="flow-dot" style="background: var(--blue);">5</div>
+          <div class="flow-content">
+            <h4>Contas (Gestao)</h4>
+            <p>Cadastro e gestao de contas agrupadas por categoria. Contas recorrentes aparecem como entrada unica. Criar, editar, deletar, importar, cadastro em lote.</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--red);">6</div>
           <div class="flow-content">
             <h4>Lembretes & Telegram</h4>
             <p>Recebe lembrete D-1 por email e/ou Telegram (pode ativar ambos). Pode gerenciar contas direto no Telegram com /contas, /nova e /pagar.</p>
@@ -889,9 +898,10 @@ pagafacil/
 +-- app/
 |   +-- (auth)/login/           <span style="color:var(--text-light);"># Landing page + login form</span>
 |   +-- (dashboard)/
-|   |   +-- page.tsx            <span style="color:var(--text-light);"># Pagamentos — Dashboard principal (RSC)</span>
+|   |   +-- page.tsx            <span style="color:var(--text-light);"># Dashboard — resumo, graficos, calendario (RSC)</span>
 |   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
-|   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Minhas Contas — gestao agrupada por categoria</span>
+|   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># Pagamentos — lista por urgencia + marcar paga</span>
+|   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Contas — gestao agrupada por categoria</span>
 |   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
 |   |   +-- bills/import/       <span style="color:var(--text-light);"># Importar contas via planilha</span>
 |   |   +-- bills/batch/        <span style="color:var(--text-light);"># Cadastro em lote (tabela editavel)</span>
