@@ -1,5 +1,26 @@
 # Changelog — PagaFácil
 
+## D18 - 2026-04-02 - Separação Gestão vs Pagamentos
+### Feito
+- [x] Navegação renomeada: "Dashboard" → "Pagamentos", "Contas" → "Minhas Contas"
+- [x] Novo componente `BillManageCard` — card de gestão sem ação "marcar como paga" (editar + deletar)
+- [x] Página `/bills` reestruturada: contas agrupadas por categoria, recorrentes colapsadas em entrada única
+- [x] Contas recorrentes mostram: frequência, nº de parcelas, total já pago, próximo vencimento
+- [x] Subtítulo orientativo: "Para pagar, use a aba Pagamentos"
+- [x] Arquitetura.html e CHANGELOG.md atualizados
+
+### Conceito
+- **Pagamentos** (Dashboard) = visão operacional — o que pagar agora, marcar como paga
+- **Minhas Contas** (/bills) = gestão/cadastro — CRUD, importar, organizar por categoria
+
+### Pendente
+- [ ] Deploy na Vercel
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D17 - 2026-04-01 - Gráfico de barras no dashboard
 ### Feito
 - [x] Substituído gráfico de linha SVG por gráfico de barras lado a lado (pago vs pendente)

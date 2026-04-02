@@ -36,7 +36,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              Dashboard
+              Pagamentos
             </Link>
             <Link
               href="/bills"
@@ -46,7 +46,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              Contas
+              Minhas Contas
             </Link>
             <Link
               href="/settings"
