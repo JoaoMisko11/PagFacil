@@ -135,7 +135,7 @@
   }
 }
 
-/* Calendar bill dots */
+/* Calendar bill dots — enhanced */
 .bill-dot-red,
 .bill-dot-amber,
 .bill-dot-blue {
@@ -149,18 +149,55 @@
   bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9);
+  transition: transform 0.15s ease;
+}
+.bill-dot-red:hover::after,
+.bill-dot-amber:hover::after,
+.bill-dot-blue:hover::after {
+  transform: translateX(-50%) scale(1.4);
 }
 .bill-dot-red::after {
   background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(239,68,68,0.4);
 }
 .bill-dot-amber::after {
   background-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(245,158,11,0.4);
 }
 .bill-dot-blue::after {
   background-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(59,130,246,0.4);
+}
+
+/* Dark mode dot ring */
+.dark .bill-dot-red::after {
+  box-shadow: 0 0 0 2px rgba(32,37,42,0.9), 0 0 6px rgba(239,68,68,0.5);
+}
+.dark .bill-dot-amber::after {
+  box-shadow: 0 0 0 2px rgba(32,37,42,0.9), 0 0 6px rgba(245,158,11,0.5);
+}
+.dark .bill-dot-blue::after {
+  box-shadow: 0 0 0 2px rgba(32,37,42,0.9), 0 0 6px rgba(59,130,246,0.5);
+}
+
+/* Calendar day hover for days with bills */
+.bill-dot-red > button:hover,
+.bill-dot-amber > button:hover,
+.bill-dot-blue > button:hover {
+  background-color: rgba(0,168,104,0.08) !important;
+}
+
+/* Selected day slide-in animation */
+@keyframes calendar-detail-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.calendar-detail-enter {
+  animation: calendar-detail-in 0.25s ease-out;
 }
 
 /* Confetti particles */
