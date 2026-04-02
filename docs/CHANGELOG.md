@@ -1,5 +1,23 @@
 # Changelog — PagaFácil
 
+## D17 - 2026-04-01 - Gráfico de barras no dashboard
+### Feito
+- [x] Substituído gráfico de linha SVG por gráfico de barras lado a lado (pago vs pendente)
+- [x] Adicionado eixo Y com valores de referência
+- [x] Adicionado tooltips interativos (hover/touch) com valores por mês
+- [x] Destaque visual no mês ativo (demais ficam com opacidade reduzida)
+- [x] Proporção melhor (h-28/h-36) e barras com altura mínima para valores pequenos
+- [x] Resumo inferior atualiza ao passar o mouse nos meses
+- [x] Arquitetura.html e CHANGELOG.md atualizados
+
+### Pendente
+- Nenhum
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D16 - 2026-04-01 - UX Fase 4: Delight (7/7 itens)
 ### Feito
 - [x] **DL-1** Confetti CSS puro ao zerar contas pendentes — 30 partículas animadas, evento customizado `pagafacil:all-paid`, auto-remove após 3s

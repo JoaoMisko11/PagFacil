@@ -22,7 +22,8 @@
       "Bash(grep -r \"error\\\\|Error\" /Users/joaomisko/Desktop/DEV/PagFacil/components --include=*.tsx)",
       "Bash(find /Users/joaomisko/Desktop/DEV/PagFacil -not -path */node_modules/* -not -path */.next/* -type f -name *.tsx -o -name *.ts)",
       "Bash(ls /Users/joaomisko/Desktop/DEV/PagFacil/app/\\\\\\(dashboard\\\\\\)/)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(vercel whoami:*)"
     ]
   }
 }
