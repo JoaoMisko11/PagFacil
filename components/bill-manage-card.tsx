@@ -31,10 +31,6 @@ interface BillManageCardProps {
   amount: number
   isRecurring: boolean
   recurrenceFrequency?: string | null
-  /** Quantidade de instâncias (pagas + pendentes) */
-  instanceCount: number
-  /** Total já pago em centavos */
-  totalPaid: number
   /** ID da próxima conta pendente (para editar) */
   nextPendingId?: string
   /** ID de qualquer instância (para editar se não tem pendente) */
@@ -49,8 +45,6 @@ export function BillManageCard({
   amount,
   isRecurring,
   recurrenceFrequency,
-  instanceCount,
-  totalPaid,
   nextPendingId,
   anyId,
   nextDueDate,
@@ -92,18 +86,6 @@ export function BillManageCard({
               <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${cat?.color ?? ""}`}>
                 {cat?.icon} {cat?.label ?? category}
               </span>
-              {isRecurring && instanceCount > 1 && (
-                <>
-                  <span>·</span>
-                  <span>{instanceCount} parcelas</span>
-                </>
-              )}
-              {totalPaid > 0 && (
-                <>
-                  <span>·</span>
-                  <span>{formatCurrency(totalPaid)} pago</span>
-                </>
-              )}
               {nextDueDate && (
                 <>
                   <span>·</span>

@@ -4,7 +4,6 @@ import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { BillManageCard } from "@/components/bill-manage-card"
 import { BillFilters } from "@/components/bill-filters"
-import { CATEGORY_MAP } from "@/lib/constants"
 
 interface BillsPageProps {
   searchParams: Promise<{
@@ -52,8 +51,6 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
       amount: number
       isRecurring: boolean
       recurrenceFrequency: string | null
-      instanceCount: number
-      totalPaid: number
       nextPendingId?: string
       anyId: string
       nextDueDate: Date | null
@@ -62,20 +59,17 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
 
   for (const bill of bills) {
     const key = bill.isRecurring
-      ? `${bill.supplier}::${bill.category}::recurring`
+      ? `${bill.supplier}::recurring`
       : `${bill.id}` // não-recorrentes mantêm entrada individual
 
     const existing = groups.get(key)
 
     if (existing) {
-      existing.instanceCount++
-      if (bill.status === "PAID") {
-        existing.totalPaid += bill.amount
-      }
       if (bill.status === "PENDING" && !existing.nextPendingId) {
         existing.nextPendingId = bill.id
         existing.nextDueDate = bill.dueDate
-        existing.amount = bill.amount // usar valor da próxima pendente
+        existing.amount = bill.amount
+        existing.category = bill.category // usar categoria da próxima pendente
       }
     } else {
       groups.set(key, {
@@ -84,8 +78,6 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
         amount: bill.amount,
         isRecurring: bill.isRecurring,
         recurrenceFrequency: bill.recurrenceFrequency,
-        instanceCount: 1,
-        totalPaid: bill.status === "PAID" ? bill.amount : 0,
         nextPendingId: bill.status === "PENDING" ? bill.id : undefined,
         anyId: bill.id,
         nextDueDate: bill.status === "PENDING" ? bill.dueDate : null,
@@ -95,19 +87,6 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
 
   const groupedBills = Array.from(groups.values())
 
-  // Agrupar por categoria para a visualização
-  const byCategory = new Map<string, typeof groupedBills>()
-  for (const g of groupedBills) {
-    const list = byCategory.get(g.category) ?? []
-    list.push(g)
-    byCategory.set(g.category, list)
-  }
-
-  // Ordenar categorias pela ordem do CATEGORY_MAP
-  const categoryOrder = ["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "OUTRO"]
-  const sortedCategories = Array.from(byCategory.entries()).sort(
-    (a, b) => categoryOrder.indexOf(a[0]) - categoryOrder.indexOf(b[0])
-  )
 
   return (
     <div className="space-y-4">
@@ -150,36 +129,20 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {sortedCategories.map(([category, items]) => {
-            const cat = CATEGORY_MAP[category]
-            return (
-              <section key={category}>
-                <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted-foreground sm:text-base">
-                  <span>{cat?.icon}</span>
-                  <span>{cat?.label ?? category}</span>
-                  <span className="text-xs font-normal">({items.length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {items.map((item) => (
-                    <BillManageCard
-                      key={item.anyId}
-                      supplier={item.supplier}
-                      category={item.category}
-                      amount={item.amount}
-                      isRecurring={item.isRecurring}
-                      recurrenceFrequency={item.recurrenceFrequency}
-                      instanceCount={item.instanceCount}
-                      totalPaid={item.totalPaid}
-                      nextPendingId={item.nextPendingId}
-                      anyId={item.anyId}
-                      nextDueDate={item.nextDueDate}
-                    />
-                  ))}
-                </div>
-              </section>
-            )
-          })}
+        <div className="space-y-2">
+          {groupedBills.map((item) => (
+            <BillManageCard
+              key={item.anyId}
+              supplier={item.supplier}
+              category={item.category}
+              amount={item.amount}
+              isRecurring={item.isRecurring}
+              recurrenceFrequency={item.recurrenceFrequency}
+              nextPendingId={item.nextPendingId}
+              anyId={item.anyId}
+              nextDueDate={item.nextDueDate}
+            />
+          ))}
         </div>
       )}
     </div>
