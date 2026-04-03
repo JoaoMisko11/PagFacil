@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { BillForm } from "@/components/bill-form"
 import { updateBill } from "@/lib/actions"
 import { formatDateInput } from "@/lib/format"
+import { getFamilyUserIds } from "@/lib/family"
 
 interface EditBillPageProps {
   params: Promise<{ id: string }>
@@ -13,10 +14,12 @@ interface EditBillPageProps {
 
 export default async function EditBillPage({ params }: EditBillPageProps) {
   const session = await auth()
+  if (!session?.user?.id) throw new Error("Não autenticado")
   const { id } = await params
+  const userIds = await getFamilyUserIds(session.user.id)
 
-  const bill = await db.bill.findUnique({
-    where: { id, userId: session!.user!.id, deletedAt: null },
+  const bill = await db.bill.findFirst({
+    where: { id, userId: { in: userIds }, deletedAt: null },
   })
 
   if (!bill) notFound()

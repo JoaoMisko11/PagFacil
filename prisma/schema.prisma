@@ -16,6 +16,7 @@ model User {
   image          String?
   telegramChatId String?    @unique
   notifyVia      String     @default("email") // "email" | "telegram"
+  familyId       String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   bills          Bill[]
@@ -23,6 +24,22 @@ model User {
   sessions       Session[]
   feedbacks      Feedback[]
   telegramOtps   TelegramOtp[]
+  familyInvites  FamilyInvite[]
+
+  @@index([familyId])
+}
+
+model FamilyInvite {
+  id         String    @id @default(cuid())
+  token      String    @unique @default(cuid())
+  familyId   String
+  invitedBy  String
+  inviter    User      @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([token])
 }
 
 model Bill {

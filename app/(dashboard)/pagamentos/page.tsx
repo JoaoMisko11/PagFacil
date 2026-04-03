@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BillCard } from "@/components/bill-card"
 import { PagamentosTabs } from "@/components/pagamentos-tabs"
+import { getFamilyUserIds } from "@/lib/family"
 
 // --- Skeleton ---
 
@@ -39,9 +40,9 @@ function BillsSkeleton() {
 
 // --- Async section ---
 
-async function PagamentosSection({ userId, tab }: { userId: string; tab: string }) {
+async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: string }) {
   const pendingBills = await db.bill.findMany({
-    where: { userId, deletedAt: null, status: "PENDING" },
+    where: { userId: { in: userIds }, deletedAt: null, status: "PENDING" },
     orderBy: { dueDate: "asc" },
   })
 
@@ -83,7 +84,7 @@ async function PagamentosSection({ userId, tab }: { userId: string; tab: string 
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
   const paidThisMonthCount = pendingBills.length === 0
     ? await db.bill.count({
-        where: { userId, deletedAt: null, status: "PAID", paidAt: { gte: monthStart, lte: monthEnd } },
+        where: { userId: { in: userIds }, deletedAt: null, status: "PAID", paidAt: { gte: monthStart, lte: monthEnd } },
       })
     : 0
   const allPaidCelebration = pendingBills.length === 0 && paidThisMonthCount > 0
@@ -155,6 +156,7 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
     redirect("/onboarding")
   }
 
+  const userIds = await getFamilyUserIds(userId)
   const params = await searchParams
   const tab = params.tab || "month"
 
@@ -175,7 +177,7 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
       </div>
 
       <Suspense fallback={<BillsSkeleton />}>
-        <PagamentosSection userId={userId} tab={tab} />
+        <PagamentosSection userIds={userIds} tab={tab} />
       </Suspense>
     </div>
   )

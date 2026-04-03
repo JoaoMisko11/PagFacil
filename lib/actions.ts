@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { sendTelegramMessage } from "@/lib/telegram"
+import { getFamilyUserIds } from "@/lib/family"
 
 const billSchema = z.object({
   supplier: z.string().trim().min(1, "Fornecedor é obrigatório"),
@@ -102,6 +103,14 @@ async function getUserId(): Promise<string> {
   return session.user.id
 }
 
+async function assertBillAccess(billId: string, userIds: string[]) {
+  const bill = await db.bill.findFirst({
+    where: { id: billId, userId: { in: userIds } },
+  })
+  if (!bill) throw new Error("Conta não encontrada")
+  return bill
+}
+
 export async function createBill(
   _prevState: ActionState,
   formData: FormData
@@ -166,6 +175,7 @@ export async function updateBill(
   formData: FormData
 ): Promise<ActionState> {
   const userId = await getUserId()
+  const userIds = await getFamilyUserIds(userId)
 
   const parsed = billSchema.safeParse({
     supplier: formData.get("supplier"),
@@ -183,8 +193,9 @@ export async function updateBill(
   }
 
   try {
+    await assertBillAccess(billId, userIds)
     await db.bill.update({
-      where: { id: billId, userId },
+      where: { id: billId },
       data: {
         supplier: parsed.data.supplier,
         amount: parsed.data.amount,
@@ -208,10 +219,12 @@ export async function updateBill(
 
 export async function deleteBill(billId: string): Promise<void> {
   const userId = await getUserId()
+  const userIds = await getFamilyUserIds(userId)
 
   try {
+    await assertBillAccess(billId, userIds)
     await db.bill.update({
-      where: { id: billId, userId },
+      where: { id: billId },
       data: { deletedAt: new Date() },
     })
   } catch (error) {
@@ -224,10 +237,12 @@ export async function deleteBill(billId: string): Promise<void> {
 
 export async function restoreBill(billId: string): Promise<void> {
   const userId = await getUserId()
+  const userIds = await getFamilyUserIds(userId)
 
   try {
+    await assertBillAccess(billId, userIds)
     await db.bill.update({
-      where: { id: billId, userId },
+      where: { id: billId },
       data: { deletedAt: null },
     })
   } catch (error) {
@@ -241,11 +256,10 @@ export async function restoreBill(billId: string): Promise<void> {
 
 export async function markBillAsPaid(billId: string): Promise<{ remainingPending: number }> {
   const userId = await getUserId()
+  const userIds = await getFamilyUserIds(userId)
 
   try {
-    const bill = await db.bill.findUniqueOrThrow({
-      where: { id: billId, userId },
-    })
+    const bill = await assertBillAccess(billId, userIds)
 
     if (bill.isRecurring) {
       const freq = bill.recurrenceFrequency ?? "MONTHLY"
@@ -253,7 +267,7 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
       // Busca a última parcela pendente para saber até onde já existem instâncias
       const lastPending = await db.bill.findFirst({
         where: {
-          userId,
+          userId: { in: userIds },
           supplier: bill.supplier,
           isRecurring: true,
           deletedAt: null,
@@ -268,7 +282,7 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
 
       const ops = [
         db.bill.update({
-          where: { id: billId, userId },
+          where: { id: billId },
           data: { status: "PAID", paidAt: new Date() },
         }),
         ...futureDates.map((d) =>
@@ -282,7 +296,7 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
               isRecurring: true,
               recurrenceFrequency: bill.recurrenceFrequency,
               recurrenceEndDate: bill.recurrenceEndDate,
-              userId,
+              userId: bill.userId, // mantém o dono original
             },
           })
         ),
@@ -291,7 +305,7 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
       await db.$transaction(ops)
     } else {
       await db.bill.update({
-        where: { id: billId, userId },
+        where: { id: billId },
         data: { status: "PAID", paidAt: new Date() },
       })
     }
@@ -301,7 +315,7 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
   }
 
   const remainingPending = await db.bill.count({
-    where: { userId, deletedAt: null, status: "PENDING" },
+    where: { userId: { in: userIds }, deletedAt: null, status: "PENDING" },
   })
 
   revalidatePath("/bills")
@@ -311,10 +325,12 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
 
 export async function markBillAsPending(billId: string): Promise<void> {
   const userId = await getUserId()
+  const userIds = await getFamilyUserIds(userId)
 
   try {
+    await assertBillAccess(billId, userIds)
     await db.bill.update({
-      where: { id: billId, userId },
+      where: { id: billId },
       data: { status: "PENDING", paidAt: null },
     })
   } catch (error) {

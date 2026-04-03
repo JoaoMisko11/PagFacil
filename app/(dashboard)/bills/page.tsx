@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { BillManageCard } from "@/components/bill-manage-card"
 import { BillFilters } from "@/components/bill-filters"
+import { getFamilyUserIds } from "@/lib/family"
 
 interface BillsPageProps {
   searchParams: Promise<{
@@ -17,10 +18,11 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) throw new Error("Não autenticado")
+  const userIds = await getFamilyUserIds(userId)
   const params = await searchParams
 
   const where: Record<string, unknown> = {
-    userId,
+    userId: { in: userIds },
     deletedAt: null,
   }
 

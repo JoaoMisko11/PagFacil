@@ -12,18 +12,19 @@ import { BillCalendar } from "@/components/bill-calendar"
 import { TrendChart } from "@/components/trend-chart"
 import { OnboardingChecklist } from "@/components/onboarding-checklist"
 import { SmartInsights } from "@/components/smart-insights"
+import { getFamilyUserIds } from "@/lib/family"
 
 // Cached queries — deduplicadas dentro do mesmo request
-const getPendingBills = cache(async (userId: string) => {
+const getPendingBills = cache(async (userIds: string[]) => {
   return db.bill.findMany({
-    where: { userId, deletedAt: null, status: "PENDING" },
+    where: { userId: { in: userIds }, deletedAt: null, status: "PENDING" },
     orderBy: { dueDate: "asc" },
   })
 })
 
-const getAllBills = cache(async (userId: string) => {
+const getAllBills = cache(async (userIds: string[]) => {
   return db.bill.findMany({
-    where: { userId, deletedAt: null },
+    where: { userId: { in: userIds }, deletedAt: null },
     orderBy: { dueDate: "asc" },
     select: {
       id: true,
@@ -72,8 +73,8 @@ function CalendarSkeleton() {
 
 // --- Async streamed components ---
 
-async function SummaryCards({ userId }: { userId: string }) {
-  const pendingBills = await getPendingBills(userId)
+async function SummaryCards({ userIds }: { userIds: string[] }) {
+  const pendingBills = await getPendingBills(userIds)
 
   const now = new Date()
   const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
@@ -169,15 +170,15 @@ function TrendChartSkeleton() {
 
 // --- Async streamed components ---
 
-async function ChecklistSection({ userId }: { userId: string }) {
+async function ChecklistSection({ userId, userIds }: { userId: string; userIds: string[] }) {
   const [user, billCount, paidCount, recurringCount] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       select: { notifyVia: true },
     }),
-    db.bill.count({ where: { userId, deletedAt: null } }),
-    db.bill.count({ where: { userId, deletedAt: null, status: "PAID" } }),
-    db.bill.count({ where: { userId, deletedAt: null, isRecurring: true } }),
+    db.bill.count({ where: { userId: { in: userIds }, deletedAt: null } }),
+    db.bill.count({ where: { userId: { in: userIds }, deletedAt: null, status: "PAID" } }),
+    db.bill.count({ where: { userId: { in: userIds }, deletedAt: null, isRecurring: true } }),
   ])
 
   const items = [
@@ -193,14 +194,14 @@ async function ChecklistSection({ userId }: { userId: string }) {
   return <OnboardingChecklist items={items} />
 }
 
-async function PunctualityStreak({ userId }: { userId: string }) {
+async function PunctualityStreak({ userIds }: { userIds: string[] }) {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
   const paidThisMonth = await db.bill.findMany({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: null,
       status: "PAID",
       paidAt: { gte: startOfMonth, lte: endOfMonth },
@@ -231,13 +232,13 @@ async function PunctualityStreak({ userId }: { userId: string }) {
   )
 }
 
-async function InsightsSection({ userId }: { userId: string }) {
+async function InsightsSection({ userIds }: { userIds: string[] }) {
   const insights: { type: "pattern" | "tip"; message: string }[] = []
 
   // Padrão: contas recorrentes que o usuário costuma pagar
   const recurringPaid = await db.bill.findMany({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: null,
       isRecurring: true,
       status: "PAID",
@@ -271,7 +272,7 @@ async function InsightsSection({ userId }: { userId: string }) {
   // Dica: contas vencidas sem pagar
   const overdueCount = await db.bill.count({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: null,
       status: "PENDING",
       dueDate: { lt: new Date(new Date().toISOString().split("T")[0] + "T00:00:00Z") },
@@ -289,7 +290,7 @@ async function InsightsSection({ userId }: { userId: string }) {
   return <SmartInsights insights={insights.slice(0, 3)} />
 }
 
-async function TrendSection({ userId }: { userId: string }) {
+async function TrendSection({ userIds }: { userIds: string[] }) {
   const now = new Date()
   const months: { label: string; paid: number; pending: number }[] = []
 
@@ -301,7 +302,7 @@ async function TrendSection({ userId }: { userId: string }) {
     const [paidAgg, pendingAgg] = await Promise.all([
       db.bill.aggregate({
         where: {
-          userId,
+          userId: { in: userIds },
           deletedAt: null,
           status: "PAID",
           dueDate: { gte: start, lte: end },
@@ -310,7 +311,7 @@ async function TrendSection({ userId }: { userId: string }) {
       }),
       db.bill.aggregate({
         where: {
-          userId,
+          userId: { in: userIds },
           deletedAt: null,
           status: { in: ["PENDING", "PAID"] },
           dueDate: { gte: start, lte: end },
@@ -333,8 +334,8 @@ async function TrendSection({ userId }: { userId: string }) {
   return <TrendChart data={months} />
 }
 
-async function CalendarSection({ userId }: { userId: string }) {
-  const allBills = await getAllBills(userId)
+async function CalendarSection({ userIds }: { userIds: string[] }) {
+  const allBills = await getAllBills(userIds)
   const calendarBills = allBills.map((b) => ({
     ...b,
     dueDate: b.dueDate.toISOString(),
@@ -384,6 +385,8 @@ export default async function DashboardPage() {
     redirect("/onboarding")
   }
 
+  const userIds = await getFamilyUserIds(userId)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -401,27 +404,27 @@ export default async function DashboardPage() {
       </div>
 
       <Suspense fallback={null}>
-        <ChecklistSection userId={userId} />
+        <ChecklistSection userId={userId} userIds={userIds} />
       </Suspense>
 
       <Suspense fallback={<SummaryCardsSkeleton />}>
-        <SummaryCards userId={userId} />
+        <SummaryCards userIds={userIds} />
       </Suspense>
 
       <Suspense fallback={null}>
-        <PunctualityStreak userId={userId} />
+        <PunctualityStreak userIds={userIds} />
       </Suspense>
 
       <Suspense fallback={null}>
-        <InsightsSection userId={userId} />
+        <InsightsSection userIds={userIds} />
       </Suspense>
 
       <Suspense fallback={<TrendChartSkeleton />}>
-        <TrendSection userId={userId} />
+        <TrendSection userIds={userIds} />
       </Suspense>
 
       <Suspense fallback={<CalendarSkeleton />}>
-        <CalendarSection userId={userId} />
+        <CalendarSection userIds={userIds} />
       </Suspense>
 
       <div className="text-center">

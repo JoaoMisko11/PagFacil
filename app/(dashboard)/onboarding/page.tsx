@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { OnboardingSteps } from "@/components/onboarding-steps"
+import { getFamilyUserIds } from "@/lib/family"
 
 interface OnboardingPageProps {
   searchParams: Promise<{ step?: string }>
@@ -18,8 +19,9 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
     select: { name: true, email: true },
   })
 
+  const userIds = await getFamilyUserIds(session.user.id)
   const billCount = await db.bill.count({
-    where: { userId: session.user.id, deletedAt: null },
+    where: { userId: { in: userIds }, deletedAt: null },
   })
 
   // Determina o step atual

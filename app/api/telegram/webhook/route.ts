@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { db } from "@/lib/db"
+import { getFamilyUserIds } from "@/lib/family"
 import type { Category } from "@prisma/client"
 
 // Estado temporário para fluxo /pagar (chatId → lista de bills)
@@ -34,10 +35,11 @@ async function findUserByChatId(chatId: string) {
 async function handleContas(chatId: string, userId: string) {
   const now = new Date()
   const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+  const userIds = await getFamilyUserIds(userId)
 
   const bills = await db.bill.findMany({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: null,
       status: { in: ["PENDING", "OVERDUE"] },
       dueDate: { lte: in30Days },
@@ -172,9 +174,10 @@ async function handleNova(chatId: string, userId: string, args: string) {
 
 // ─── /pagar ────────────────────────────────────────────────
 async function handlePagar(chatId: string, userId: string) {
+  const userIds = await getFamilyUserIds(userId)
   const bills = await db.bill.findMany({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: null,
       status: { in: ["PENDING", "OVERDUE"] },
     },
@@ -225,8 +228,9 @@ async function handlePaySelection(chatId: string, userId: string, num: number) {
   paySessionMap.delete(chatId)
 
   try {
-    const bill = await db.bill.findUnique({
-      where: { id: billId, userId },
+    const userIds = await getFamilyUserIds(userId)
+    const bill = await db.bill.findFirst({
+      where: { id: billId, userId: { in: userIds } },
     })
 
     if (!bill || bill.status === "PAID") {
@@ -236,7 +240,7 @@ async function handlePaySelection(chatId: string, userId: string, num: number) {
 
     // Marca como paga (lógica simplificada — sem recorrência aqui para manter simples)
     await db.bill.update({
-      where: { id: billId, userId },
+      where: { id: billId },
       data: { status: "PAID", paidAt: new Date() },
     })
 
@@ -286,7 +290,7 @@ async function handlePaySelection(chatId: string, userId: string, num: number) {
             isRecurring: true,
             recurrenceFrequency: bill.recurrenceFrequency,
             recurrenceEndDate: bill.recurrenceEndDate,
-            userId,
+            userId: bill.userId, // mantém o dono original
           },
         })
       }

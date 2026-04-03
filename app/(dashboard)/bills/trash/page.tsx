@@ -3,18 +3,20 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { TrashBillCard } from "@/components/trash-bill-card"
+import { getFamilyUserIds } from "@/lib/family"
 
 export default async function TrashPage() {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) throw new Error("Não autenticado")
+  const userIds = await getFamilyUserIds(userId)
 
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
   const deletedBills = await db.bill.findMany({
     where: {
-      userId,
+      userId: { in: userIds },
       deletedAt: { not: null, gte: thirtyDaysAgo },
     },
     orderBy: { deletedAt: "desc" },
