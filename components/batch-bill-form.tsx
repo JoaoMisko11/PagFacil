@@ -107,12 +107,16 @@ export function BatchBillForm() {
       </div>
 
       {/* Linhas */}
-      <div className="space-y-3 sm:space-y-1">
+      <div className="space-y-3 sm:space-y-2">
         {rows.map((row, i) => (
           <div
             key={i}
-            className={`grid gap-2 rounded-lg border p-3 sm:grid-cols-[1fr_120px_140px_130px_1fr_80px_40px] sm:border-0 sm:p-0 ${
-              errors[i] ? "border-destructive/50 sm:border-destructive/0" : "border-border"
+            className={`grid gap-2 rounded-lg border p-3 transition-all sm:grid-cols-[1fr_120px_140px_130px_1fr_80px_40px] sm:p-2 ${
+              row.isRecurring
+                ? "border-l-4 border-l-green-500 border-t-green-200 border-r-green-200 border-b-green-200 bg-green-50/50 dark:border-l-green-400 dark:border-t-green-900/30 dark:border-r-green-900/30 dark:border-b-green-900/30 dark:bg-green-950/20"
+                : errors[i]
+                  ? "border-destructive/50"
+                  : "border-border"
             }`}
           >
             <div>
@@ -176,15 +180,19 @@ export function BatchBillForm() {
             </div>
             <div className="flex items-center gap-2">
               <label className="mb-1 block text-xs text-muted-foreground sm:hidden">Recorrente</label>
-              <input
-                type="checkbox"
-                checked={row.isRecurring}
-                onChange={(e) => updateRow(i, "isRecurring", e.target.checked)}
-                className="h-4 w-4 rounded border-border accent-primary"
-              />
-              <span className="text-xs text-muted-foreground sm:hidden">
-                {row.isRecurring ? "Sim" : "Não"}
-              </span>
+              <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                row.isRecurring
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={row.isRecurring}
+                  onChange={(e) => updateRow(i, "isRecurring", e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-border accent-green-600"
+                />
+                {row.isRecurring ? "Recorrente" : "Única"}
+              </label>
             </div>
             <div className="flex items-start justify-end sm:justify-center">
               <button
@@ -201,13 +209,17 @@ export function BatchBillForm() {
 
             {/* Campos de recorrência */}
             {row.isRecurring && (
-              <div className="col-span-full grid grid-cols-2 gap-2 rounded-md bg-muted/50 p-2 sm:col-span-full sm:ml-0">
+              <div className="col-span-full grid grid-cols-[auto_1fr_1fr] items-center gap-3 rounded-md border border-green-200 bg-green-50/80 p-3 dark:border-green-800/40 dark:bg-green-950/30 sm:col-span-full">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                  <span className="text-xs font-semibold whitespace-nowrap">Repetir</span>
+                </div>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Frequência</label>
+                  <label className="mb-1 block text-xs font-medium text-green-700 dark:text-green-300">Frequência</label>
                   <select
                     value={row.recurrenceFrequency}
                     onChange={(e) => updateRow(i, "recurrenceFrequency", e.target.value)}
-                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    className="h-9 w-full rounded-md border border-green-200 bg-white px-2 text-sm dark:border-green-800 dark:bg-green-950/50"
                   >
                     {RECURRENCE_FREQUENCIES.map((f) => (
                       <option key={f.value} value={f.value}>
@@ -217,12 +229,12 @@ export function BatchBillForm() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Data de fim (opcional)</label>
+                  <label className="mb-1 block text-xs font-medium text-green-700 dark:text-green-300">Data de fim (opcional)</label>
                   <Input
                     type="date"
                     value={row.recurrenceEndDate}
                     onChange={(e) => updateRow(i, "recurrenceEndDate", e.target.value)}
-                    className="h-9"
+                    className="h-9 border-green-200 dark:border-green-800"
                   />
                 </div>
               </div>
