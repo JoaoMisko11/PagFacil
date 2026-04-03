@@ -3,22 +3,22 @@
 import { useState, useEffect, useRef, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
+const CATEGORIES = [
+  { value: "FIXO", label: "Fixo" },
+  { value: "VARIAVEL", label: "Variável" },
+  { value: "IMPOSTO", label: "Imposto" },
+  { value: "FORNECEDOR", label: "Fornecedor" },
+  { value: "ASSINATURA", label: "Assinatura" },
+  { value: "OUTRO", label: "Outro" },
+] as const
 
 interface BillFiltersProps {
-  currentStatus?: string
   currentCategory?: string
   currentQuery?: string
 }
 
 export function BillFilters({
-  currentStatus,
   currentCategory,
   currentQuery,
 }: BillFiltersProps) {
@@ -26,11 +26,15 @@ export function BillFilters({
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(currentQuery ?? "")
   const timeoutRef = useRef<NodeJS.Timeout>(null)
-  const [isSearching, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
-  function updateFilter(key: string, value: string) {
+  const activeCategories = new Set(
+    currentCategory ? currentCategory.split(",") : []
+  )
+
+  function updateParams(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
-    if (value && value !== "ALL") {
+    if (value) {
       params.set(key, value)
     } else {
       params.delete(key)
@@ -40,8 +44,18 @@ export function BillFilters({
     })
   }
 
+  function toggleCategory(cat: string) {
+    const next = new Set(activeCategories)
+    if (next.has(cat)) {
+      next.delete(cat)
+    } else {
+      next.add(cat)
+    }
+    updateParams("category", Array.from(next).join(","))
+  }
+
   useEffect(() => {
-    timeoutRef.current = setTimeout(() => updateFilter("q", search), 300)
+    timeoutRef.current = setTimeout(() => updateParams("q", search), 300)
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
@@ -49,50 +63,31 @@ export function BillFilters({
   }, [search])
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
-      <div className="relative">
-        <Input
-          placeholder="Buscar fornecedor..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-11 sm:h-9 sm:max-w-[200px]"
-        />
-        {isSearching && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-          </div>
-        )}
+    <div className="space-y-2">
+      <Input
+        placeholder="Buscar fornecedor..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="h-11 sm:h-9 sm:max-w-[280px]"
+      />
+      <div className="flex flex-wrap gap-1.5">
+        {CATEGORIES.map((cat) => {
+          const isActive = activeCategories.has(cat.value)
+          return (
+            <button
+              key={cat.value}
+              onClick={() => toggleCategory(cat.value)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                isActive
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {cat.label}
+            </button>
+          )
+        })}
       </div>
-      <Select
-        defaultValue={currentStatus ?? "ALL"}
-        onValueChange={(v) => updateFilter("status", v ?? "ALL")}
-      >
-        <SelectTrigger className="h-11 sm:h-9 sm:max-w-[160px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          <SelectItem value="PENDING">Pendentes</SelectItem>
-          <SelectItem value="PAID">Pagas</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select
-        defaultValue={currentCategory ?? "ALL"}
-        onValueChange={(v) => updateFilter("category", v ?? "ALL")}
-      >
-        <SelectTrigger className="h-11 sm:h-9 sm:max-w-[160px]">
-          <SelectValue placeholder="Categoria" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todas</SelectItem>
-          <SelectItem value="FIXO">Fixo</SelectItem>
-          <SelectItem value="VARIAVEL">Variável</SelectItem>
-          <SelectItem value="IMPOSTO">Imposto</SelectItem>
-          <SelectItem value="FORNECEDOR">Fornecedor</SelectItem>
-          <SelectItem value="ASSINATURA">Assinatura</SelectItem>
-          <SelectItem value="OUTRO">Outro</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   )
 }

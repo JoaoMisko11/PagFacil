@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/lib/format"
 import { CATEGORY_MAP } from "@/lib/constants"
 import { deleteBill } from "@/lib/actions"
+import { useDisplayMode } from "@/components/display-mode-provider"
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,8 @@ export function BillManageCard({
 }: BillManageCardProps) {
   const [deleting, setDeleting] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const { mode } = useDisplayMode()
+  const compact = mode === "compact"
 
   const editId = nextPendingId ?? anyId
   const cat = CATEGORY_MAP[category]
@@ -69,11 +72,11 @@ export function BillManageCard({
 
   return (
     <Card>
-      <CardContent className="p-3 sm:p-4">
+      <CardContent className={compact ? "p-2 sm:p-3" : "p-3 sm:p-4"}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-medium sm:text-base">
+              <p className={`truncate font-medium ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
                 {supplier}
               </p>
               {isRecurring && (
@@ -82,27 +85,29 @@ export function BillManageCard({
                 </Badge>
               )}
             </div>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
-              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${cat?.color ?? ""}`}>
-                {cat?.icon} {cat?.label ?? category}
-              </span>
-              {nextDueDate && (
-                <>
-                  <span>·</span>
-                  <span>Próx: {formatDate(new Date(nextDueDate))}</span>
-                </>
-              )}
-            </div>
+            {!compact && (
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+                <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${cat?.color ?? ""}`}>
+                  {cat?.icon} {cat?.label ?? category}
+                </span>
+                {nextDueDate && (
+                  <>
+                    <span>·</span>
+                    <span>Próx: {formatDate(new Date(nextDueDate))}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
-          <p className="shrink-0 whitespace-nowrap text-base font-semibold sm:text-lg">
+          <p className={`shrink-0 whitespace-nowrap font-semibold ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"}`}>
             {formatCurrency(amount)}
           </p>
         </div>
 
-        <div className="mt-2 flex gap-1 border-t pt-2 sm:mt-3 sm:pt-3">
+        <div className={`flex gap-1 border-t ${compact ? "mt-1.5 pt-1.5" : "mt-2 pt-2 sm:mt-3 sm:pt-3"}`}>
           <Link href={`/bills/${editId}/edit`} className="flex-1 sm:flex-none">
-            <Button variant="ghost" size="sm" className="h-11 w-full min-w-[44px] text-xs sm:h-9 sm:text-sm">
+            <Button variant="ghost" size="sm" className={`w-full min-w-[44px] text-xs ${compact ? "h-8 sm:h-8" : "h-11 sm:h-9"} sm:text-sm`}>
               ✏️ Editar
             </Button>
           </Link>
@@ -110,7 +115,7 @@ export function BillManageCard({
           <Button
             variant="ghost"
             size="sm"
-            className="h-11 min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive sm:h-9 sm:flex-none sm:text-sm"
+            className={`min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive ${compact ? "h-8 sm:h-8" : "h-11 sm:h-9"} sm:flex-none sm:text-sm`}
             onClick={() => setDialogOpen(true)}
           >
             🗑 Deletar

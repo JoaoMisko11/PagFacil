@@ -7,7 +7,6 @@ import { BillFilters } from "@/components/bill-filters"
 
 interface BillsPageProps {
   searchParams: Promise<{
-    status?: string
     category?: string
     q?: string
   }>
@@ -24,12 +23,13 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
     deletedAt: null,
   }
 
-  if (params.status && params.status !== "ALL") {
-    where.status = params.status
-  }
-
-  if (params.category && params.category !== "ALL") {
-    where.category = params.category
+  if (params.category) {
+    const cats = params.category.split(",").filter(Boolean)
+    if (cats.length === 1) {
+      where.category = cats[0]
+    } else if (cats.length > 1) {
+      where.category = { in: cats }
+    }
   }
 
   if (params.q) {
@@ -114,7 +114,6 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
       </div>
 
       <BillFilters
-        currentStatus={params.status}
         currentCategory={params.category}
         currentQuery={params.q}
       />
@@ -123,7 +122,7 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
         <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
           <p className="text-lg font-medium">Nenhuma conta encontrada</p>
           <p className="mt-1 text-sm">
-            {params.status || params.category || params.q
+            {params.category || params.q
               ? "Tente mudar os filtros."
               : "Cadastre sua primeira conta clicando no botão acima."}
           </p>
