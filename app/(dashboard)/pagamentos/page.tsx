@@ -56,26 +56,21 @@ async function PagamentosSection({ userId }: { userId: string }) {
   const allPaidCelebration = pendingBills.length === 0 && paidThisMonthCount > 0
 
   const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
-  const tomorrow = new Date(today.getTime() + 86400000)
-  const endOfWeek = new Date(today)
-  endOfWeek.setDate(endOfWeek.getDate() + 7)
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0)
 
   const overdue = pendingBills.filter((b) => b.dueDate < today)
-  const dueToday = pendingBills.filter(
-    (b) => b.dueDate >= today && b.dueDate < tomorrow
+  const thisMonth = pendingBills.filter(
+    (b) => b.dueDate >= today && b.dueDate < nextMonthStart
   )
-  const dueThisWeek = pendingBills.filter(
-    (b) => b.dueDate >= tomorrow && b.dueDate <= endOfWeek
-  )
-  const dueLater = pendingBills.filter((b) => b.dueDate > endOfWeek)
+  const future = pendingBills.filter((b) => b.dueDate >= nextMonthStart)
 
   return (
     <>
-      {/* Vencidas */}
+      {/* Vencidos */}
       {overdue.length > 0 && (
         <section>
           <h3 className="mb-2 text-base font-semibold text-destructive sm:text-lg">
-            Vencidas ({overdue.length})
+            Vencidos ({overdue.length})
           </h3>
           <div className="space-y-2">
             {overdue.map((bill) => (
@@ -85,42 +80,28 @@ async function PagamentosSection({ userId }: { userId: string }) {
         </section>
       )}
 
-      {/* Hoje */}
-      {dueToday.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-base font-semibold text-amber-600 sm:text-lg">
-            Vencem hoje ({dueToday.length})
-          </h3>
-          <div className="space-y-2">
-            {dueToday.map((bill) => (
-              <BillCard key={bill.id} bill={bill} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Próximos 7 dias */}
-      {dueThisWeek.length > 0 && (
+      {/* Mês atual */}
+      {thisMonth.length > 0 && (
         <section>
           <h3 className="mb-2 text-base font-semibold text-primary sm:text-lg">
-            Próximos 7 dias ({dueThisWeek.length})
+            Este mês ({thisMonth.length})
           </h3>
           <div className="space-y-2">
-            {dueThisWeek.map((bill) => (
+            {thisMonth.map((bill) => (
               <BillCard key={bill.id} bill={bill} />
             ))}
           </div>
         </section>
       )}
 
-      {/* Futuras */}
-      {dueLater.length > 0 && (
+      {/* Pagamentos futuros */}
+      {future.length > 0 && (
         <section>
           <h3 className="mb-2 text-base font-semibold text-muted-foreground sm:text-lg">
-            Futuras ({dueLater.length})
+            Pagamentos futuros ({future.length})
           </h3>
           <div className="space-y-2">
-            {dueLater.map((bill) => (
+            {future.map((bill) => (
               <BillCard key={bill.id} bill={bill} />
             ))}
           </div>

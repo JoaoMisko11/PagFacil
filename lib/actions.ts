@@ -43,6 +43,59 @@ export type ActionState = {
   message?: string
 }
 
+const RECURRING_HORIZON_DAYS = 90
+
+function computeNextDueDate(current: Date, freq: string): Date {
+  const d = new Date(current)
+  switch (freq) {
+    case "WEEKLY":
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7, 12, 0, 0)
+    case "BIWEEKLY":
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 14, 12, 0, 0)
+    case "YEARLY": {
+      const next = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate(), 12, 0, 0)
+      if (next.getMonth() !== d.getMonth()) {
+        next.setDate(0)
+        next.setHours(12, 0, 0, 0)
+      }
+      return next
+    }
+    case "MONTHLY":
+    default: {
+      const nextMonth = d.getMonth() + 1
+      const next = new Date(d.getFullYear(), nextMonth, d.getDate(), 12, 0, 0)
+      if (next.getMonth() !== nextMonth % 12) {
+        next.setDate(0)
+        next.setHours(12, 0, 0, 0)
+      }
+      return next
+    }
+  }
+}
+
+function generateFutureDates(
+  startDate: Date,
+  freq: string,
+  endDate: Date | null,
+): Date[] {
+  const horizon = new Date()
+  horizon.setDate(horizon.getDate() + RECURRING_HORIZON_DAYS)
+  horizon.setHours(23, 59, 59, 999)
+
+  const limit = endDate && endDate < horizon ? endDate : horizon
+  const dates: Date[] = []
+  let current = startDate
+
+  while (true) {
+    const next = computeNextDueDate(current, freq)
+    if (next > limit) break
+    dates.push(next)
+    current = next
+  }
+
+  return dates
+}
+
 async function getUserId(): Promise<string> {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Não autenticado")
@@ -70,22 +123,35 @@ export async function createBill(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
+  const dueDate = new Date(parsed.data.dueDate + "T12:00:00Z")
+  const freq = parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null
+  const endDate = parsed.data.isRecurring && parsed.data.recurrenceEndDate
+    ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
+    : null
+
+  const baseBill = {
+    supplier: parsed.data.supplier,
+    amount: parsed.data.amount,
+    category: parsed.data.category,
+    notes: parsed.data.notes || null,
+    isRecurring: parsed.data.isRecurring,
+    recurrenceFrequency: freq,
+    recurrenceEndDate: endDate,
+    userId,
+  }
+
   try {
-    await db.bill.create({
-      data: {
-        supplier: parsed.data.supplier,
-        amount: parsed.data.amount,
-        dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
-        category: parsed.data.category,
-        notes: parsed.data.notes || null,
-        isRecurring: parsed.data.isRecurring,
-        recurrenceFrequency: parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null,
-        recurrenceEndDate: parsed.data.isRecurring && parsed.data.recurrenceEndDate
-          ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
-          : null,
-        userId,
-      },
-    })
+    if (parsed.data.isRecurring && freq) {
+      const futureDates = generateFutureDates(dueDate, freq, endDate)
+      await db.bill.createMany({
+        data: [
+          { ...baseBill, dueDate },
+          ...futureDates.map((d) => ({ ...baseBill, dueDate: d })),
+        ],
+      })
+    } else {
+      await db.bill.create({ data: { ...baseBill, dueDate } })
+    }
   } catch (error) {
     console.error("Erro ao criar conta:", error)
     return { message: "Erro ao salvar conta. Tente novamente." }
@@ -182,55 +248,35 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
     })
 
     if (bill.isRecurring) {
-      const d = new Date(bill.dueDate)
       const freq = bill.recurrenceFrequency ?? "MONTHLY"
 
-      let nextDueDate: Date
-      switch (freq) {
-        case "WEEKLY":
-          nextDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7, 12, 0, 0)
-          break
-        case "BIWEEKLY":
-          nextDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 14, 12, 0, 0)
-          break
-        case "YEARLY":
-          nextDueDate = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate(), 12, 0, 0)
-          // Overflow check (ex: 29 fev em ano não-bissexto)
-          if (nextDueDate.getMonth() !== d.getMonth()) {
-            nextDueDate.setDate(0)
-            nextDueDate.setHours(12, 0, 0, 0)
-          }
-          break
-        case "MONTHLY":
-        default: {
-          const nextMonth = d.getMonth() + 1
-          nextDueDate = new Date(d.getFullYear(), nextMonth, d.getDate(), 12, 0, 0)
-          if (nextDueDate.getMonth() !== nextMonth % 12) {
-            nextDueDate.setDate(0)
-            nextDueDate.setHours(12, 0, 0, 0)
-          }
-          break
-        }
-      }
+      // Busca a última parcela pendente para saber até onde já existem instâncias
+      const lastPending = await db.bill.findFirst({
+        where: {
+          userId,
+          supplier: bill.supplier,
+          isRecurring: true,
+          deletedAt: null,
+          status: "PENDING",
+          id: { not: billId },
+        },
+        orderBy: { dueDate: "desc" },
+      })
 
-      // Se tem data de fim e a próxima parcela passaria dela, não cria
-      const shouldCreateNext =
-        !bill.recurrenceEndDate || nextDueDate <= bill.recurrenceEndDate
+      const lastDate = lastPending?.dueDate ?? bill.dueDate
+      const futureDates = generateFutureDates(lastDate, freq, bill.recurrenceEndDate)
 
       const ops = [
         db.bill.update({
           where: { id: billId, userId },
           data: { status: "PAID", paidAt: new Date() },
         }),
-      ]
-
-      if (shouldCreateNext) {
-        ops.push(
+        ...futureDates.map((d) =>
           db.bill.create({
             data: {
               supplier: bill.supplier,
               amount: bill.amount,
-              dueDate: nextDueDate,
+              dueDate: d,
               category: bill.category,
               notes: bill.notes,
               isRecurring: true,
@@ -239,8 +285,8 @@ export async function markBillAsPaid(billId: string): Promise<{ remainingPending
               userId,
             },
           })
-        )
-      }
+        ),
+      ]
 
       await db.$transaction(ops)
     } else {
@@ -354,22 +400,35 @@ export async function createBillOnboarding(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
+  const dueDate = new Date(parsed.data.dueDate + "T12:00:00Z")
+  const freq = parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null
+  const endDate = parsed.data.isRecurring && parsed.data.recurrenceEndDate
+    ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
+    : null
+
+  const baseBill = {
+    supplier: parsed.data.supplier,
+    amount: parsed.data.amount,
+    category: parsed.data.category,
+    notes: parsed.data.notes || null,
+    isRecurring: parsed.data.isRecurring,
+    recurrenceFrequency: freq,
+    recurrenceEndDate: endDate,
+    userId,
+  }
+
   try {
-    await db.bill.create({
-      data: {
-        supplier: parsed.data.supplier,
-        amount: parsed.data.amount,
-        dueDate: new Date(parsed.data.dueDate + "T12:00:00Z"),
-        category: parsed.data.category,
-        notes: parsed.data.notes || null,
-        isRecurring: parsed.data.isRecurring,
-        recurrenceFrequency: parsed.data.isRecurring ? (parsed.data.recurrenceFrequency ?? "MONTHLY") : null,
-        recurrenceEndDate: parsed.data.isRecurring && parsed.data.recurrenceEndDate
-          ? new Date(parsed.data.recurrenceEndDate + "T12:00:00Z")
-          : null,
-        userId,
-      },
-    })
+    if (parsed.data.isRecurring && freq) {
+      const futureDates = generateFutureDates(dueDate, freq, endDate)
+      await db.bill.createMany({
+        data: [
+          { ...baseBill, dueDate },
+          ...futureDates.map((d) => ({ ...baseBill, dueDate: d })),
+        ],
+      })
+    } else {
+      await db.bill.create({ data: { ...baseBill, dueDate } })
+    }
   } catch (error) {
     console.error("Erro ao criar conta (onboarding):", error)
     return { message: "Erro ao salvar conta. Tente novamente." }
@@ -624,19 +683,34 @@ export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchRe
   }
 
   try {
-    await db.bill.createMany({
-      data: validBills.map((b) => ({
+    type CategoryType = "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO"
+    type FreqType = "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY" | null
+
+    const allBillsData = validBills.flatMap((b) => {
+      const dueDate = new Date(b.dueDate + "T12:00:00Z")
+      const endDate = b.recurrenceEndDate ? new Date(b.recurrenceEndDate + "T12:00:00Z") : null
+      const base = {
         supplier: b.supplier,
         amount: b.amount,
-        dueDate: new Date(b.dueDate + "T12:00:00Z"),
-        category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO",
+        category: b.category as CategoryType,
         notes: b.notes,
         isRecurring: b.isRecurring,
-        recurrenceFrequency: b.recurrenceFrequency as "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY" | null,
-        recurrenceEndDate: b.recurrenceEndDate ? new Date(b.recurrenceEndDate + "T12:00:00Z") : null,
+        recurrenceFrequency: b.recurrenceFrequency as FreqType,
+        recurrenceEndDate: endDate,
         userId,
-      })),
+      }
+
+      if (b.isRecurring && b.recurrenceFrequency) {
+        const futureDates = generateFutureDates(dueDate, b.recurrenceFrequency, endDate)
+        return [
+          { ...base, dueDate },
+          ...futureDates.map((d) => ({ ...base, dueDate: d })),
+        ]
+      }
+      return [{ ...base, dueDate }]
     })
+
+    await db.bill.createMany({ data: allBillsData })
   } catch (error) {
     console.error("Erro ao cadastrar contas em lote:", error)
     return { message: "Erro ao salvar contas. Tente novamente." }
