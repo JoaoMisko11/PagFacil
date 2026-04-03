@@ -25,7 +25,7 @@ const billSchema = z.object({
       (val) => !isNaN(new Date(val + "T00:00:00Z").getTime()),
       "Data de vencimento inválida"
     ),
-  category: z.enum(["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "OUTRO"]),
+  category: z.enum(["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "FUNCIONARIO", "OUTRO"]),
   notes: z.string().optional(),
   isRecurring: z.coerce.boolean().optional().default(false),
   recurrenceFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "YEARLY"]).optional(),
@@ -397,7 +397,7 @@ export type ImportResult = {
   message?: string
 }
 
-const VALID_CATEGORIES = ["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "OUTRO"]
+const VALID_CATEGORIES = ["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "FUNCIONARIO", "OUTRO"]
 
 function parseBrazilianDate(value: string): string | null {
   // Aceita DD/MM/AAAA ou DD-MM-AAAA
@@ -539,7 +539,7 @@ export async function importBills(rows: ImportBillRow[]): Promise<ImportResult> 
         supplier: r.supplier,
         amount: parseBrazilianAmount(r.amount),
         dueDate: new Date(parseBrazilianDate(r.dueDate)! + "T12:00:00Z"),
-        category: normalizeCategory(r.category) as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "OUTRO",
+        category: normalizeCategory(r.category) as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO",
         notes: r.notes || null,
         isRecurring: false,
         userId,
@@ -629,7 +629,7 @@ export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchRe
         supplier: b.supplier,
         amount: b.amount,
         dueDate: new Date(b.dueDate + "T12:00:00Z"),
-        category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "OUTRO",
+        category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO",
         notes: b.notes,
         isRecurring: b.isRecurring,
         recurrenceFrequency: b.recurrenceFrequency as "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY" | null,

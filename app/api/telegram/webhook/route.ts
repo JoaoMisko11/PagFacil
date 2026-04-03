@@ -75,7 +75,7 @@ async function handleNova(chatId: string, userId: string, args: string) {
       chatId,
       "📝 <b>Como usar:</b>\n\n" +
         "<code>/nova Fornecedor 150,00 15/04/2026 FIXO</code>\n\n" +
-        "<b>Categorias:</b> FIXO, VARIAVEL, IMPOSTO, FORNECEDOR, ASSINATURA, OUTRO\n\n" +
+        "<b>Categorias:</b> FIXO, VARIAVEL, IMPOSTO, FORNECEDOR, ASSINATURA, FUNCIONARIO, OUTRO\n\n" +
         "Obs: a categoria é opcional (padrão: OUTRO)"
     )
     return
