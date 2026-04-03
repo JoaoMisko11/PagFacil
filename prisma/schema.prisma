@@ -54,6 +54,7 @@ enum Category {
   IMPOSTO
   FORNECEDOR
   ASSINATURA
+  FUNCIONARIO
   OUTRO
 }
 

@@ -21,6 +21,7 @@ const categoryLabels: Record<string, string> = {
   IMPOSTO: "Imposto",
   FORNECEDOR: "Fornecedor",
   ASSINATURA: "Assinatura",
+  FUNCIONARIO: "Funcionário",
   OUTRO: "Outro",
 }
 

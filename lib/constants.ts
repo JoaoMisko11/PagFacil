@@ -4,6 +4,7 @@ export const CATEGORIES = [
   { value: "IMPOSTO", label: "Imposto", icon: "🏛️", color: "text-red-600 bg-red-50 dark:bg-red-950/30" },
   { value: "FORNECEDOR", label: "Fornecedor", icon: "🤝", color: "text-amber-600 bg-amber-50 dark:bg-amber-950/30" },
   { value: "ASSINATURA", label: "Assinatura", icon: "🔄", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" },
+  { value: "FUNCIONARIO", label: "Funcionário", icon: "👤", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30" },
   { value: "OUTRO", label: "Outro", icon: "📋", color: "text-slate-600 bg-slate-50 dark:bg-slate-950/30" },
 ] as const
 
