@@ -9,6 +9,7 @@ interface BillsPageProps {
   searchParams: Promise<{
     category?: string
     q?: string
+    sort?: string
   }>
 }
 
@@ -36,9 +37,28 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
     where.supplier = { contains: params.q, mode: "insensitive" }
   }
 
+  const sortParam = params.sort || "dueDate"
+  let orderBy: Record<string, string>
+  switch (sortParam) {
+    case "createdAt":
+      orderBy = { createdAt: "desc" }
+      break
+    case "az":
+      orderBy = { supplier: "asc" }
+      break
+    case "za":
+      orderBy = { supplier: "desc" }
+      break
+    case "category":
+      orderBy = { category: "asc" }
+      break
+    default:
+      orderBy = { dueDate: "asc" }
+  }
+
   const bills = await db.bill.findMany({
     where,
-    orderBy: { dueDate: "asc" },
+    orderBy,
   })
 
   // Agrupar por fornecedor + categoria (chave composta)
@@ -116,6 +136,7 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
       <BillFilters
         currentCategory={params.category}
         currentQuery={params.q}
+        currentSort={params.sort}
       />
 
       {groupedBills.length === 0 ? (

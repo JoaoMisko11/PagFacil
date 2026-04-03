@@ -13,14 +13,24 @@ const CATEGORIES = [
   { value: "OUTRO", label: "Outro" },
 ] as const
 
+const SORT_OPTIONS = [
+  { value: "dueDate", label: "Vencimento" },
+  { value: "createdAt", label: "Data de criação" },
+  { value: "az", label: "A → Z" },
+  { value: "za", label: "Z → A" },
+  { value: "category", label: "Categoria" },
+] as const
+
 interface BillFiltersProps {
   currentCategory?: string
   currentQuery?: string
+  currentSort?: string
 }
 
 export function BillFilters({
   currentCategory,
   currentQuery,
+  currentSort,
 }: BillFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -64,12 +74,25 @@ export function BillFilters({
 
   return (
     <div className="space-y-2">
-      <Input
-        placeholder="Buscar fornecedor..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-11 sm:h-9 sm:max-w-[280px]"
-      />
+      <div className="flex gap-2">
+        <Input
+          placeholder="Buscar fornecedor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-9 flex-1"
+        />
+        <select
+          value={currentSort || "dueDate"}
+          onChange={(e) => updateParams("sort", e.target.value === "dueDate" ? "" : e.target.value)}
+          className="h-9 rounded-md border border-border bg-background px-3 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="flex flex-wrap gap-1.5">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategories.has(cat.value)
