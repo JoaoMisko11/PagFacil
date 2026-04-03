@@ -85,19 +85,17 @@ export function BillManageCard({
                 </Badge>
               )}
             </div>
-            {!compact && (
-              <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
-                <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium sm:text-xs ${cat?.color ?? ""}`}>
-                  {cat?.icon} {cat?.label ?? category}
-                </span>
-                {nextDueDate && (
-                  <>
-                    <span>·</span>
-                    <span>Próx: {formatDate(new Date(nextDueDate))}</span>
-                  </>
-                )}
-              </div>
-            )}
+            <div className={`mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground ${compact ? "" : "sm:gap-2 sm:text-sm"}`}>
+              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium ${compact ? "" : "sm:text-xs"} ${cat?.color ?? ""}`}>
+                {cat?.icon} {cat?.label ?? category}
+              </span>
+              {nextDueDate && (
+                <>
+                  <span>·</span>
+                  <span>Próx: {formatDate(new Date(nextDueDate))}</span>
+                </>
+              )}
+            </div>
           </div>
 
           <p className={`shrink-0 whitespace-nowrap font-semibold ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"}`}>
