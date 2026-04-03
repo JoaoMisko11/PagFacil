@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BillCard } from "@/components/bill-card"
+import { PagamentosTabs } from "@/components/pagamentos-tabs"
 
 // --- Skeleton ---
 
@@ -38,23 +39,13 @@ function BillsSkeleton() {
 
 // --- Async section ---
 
-async function PagamentosSection({ userId }: { userId: string }) {
+async function PagamentosSection({ userId, tab }: { userId: string; tab: string }) {
   const pendingBills = await db.bill.findMany({
     where: { userId, deletedAt: null, status: "PENDING" },
     orderBy: { dueDate: "asc" },
   })
 
-  // Celebração quando tudo pago
   const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-  const paidThisMonthCount = pendingBills.length === 0
-    ? await db.bill.count({
-        where: { userId, deletedAt: null, status: "PAID", paidAt: { gte: monthStart, lte: monthEnd } },
-      })
-    : 0
-  const allPaidCelebration = pendingBills.length === 0 && paidThisMonthCount > 0
-
   const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0)
 
@@ -64,52 +55,50 @@ async function PagamentosSection({ userId }: { userId: string }) {
   )
   const future = pendingBills.filter((b) => b.dueDate >= nextMonthStart)
 
+  const counts = {
+    overdue: overdue.length,
+    month: thisMonth.length,
+    future: future.length,
+    all: pendingBills.length,
+  }
+
+  let visibleBills: typeof pendingBills
+  switch (tab) {
+    case "overdue":
+      visibleBills = overdue
+      break
+    case "future":
+      visibleBills = future
+      break
+    case "all":
+      visibleBills = pendingBills
+      break
+    case "month":
+    default:
+      visibleBills = thisMonth
+  }
+
+  // Celebração quando tudo pago
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+  const paidThisMonthCount = pendingBills.length === 0
+    ? await db.bill.count({
+        where: { userId, deletedAt: null, status: "PAID", paidAt: { gte: monthStart, lte: monthEnd } },
+      })
+    : 0
+  const allPaidCelebration = pendingBills.length === 0 && paidThisMonthCount > 0
+
   return (
     <>
-      {/* Vencidos */}
-      {overdue.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-base font-semibold text-destructive sm:text-lg">
-            Vencidos ({overdue.length})
-          </h3>
-          <div className="space-y-2">
-            {overdue.map((bill) => (
-              <BillCard key={bill.id} bill={bill} />
-            ))}
-          </div>
-        </section>
-      )}
+      <PagamentosTabs current={tab} counts={counts} />
 
-      {/* Mês atual */}
-      {thisMonth.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-base font-semibold text-primary sm:text-lg">
-            Este mês ({thisMonth.length})
-          </h3>
-          <div className="space-y-2">
-            {thisMonth.map((bill) => (
-              <BillCard key={bill.id} bill={bill} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Pagamentos futuros */}
-      {future.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-base font-semibold text-muted-foreground sm:text-lg">
-            Pagamentos futuros ({future.length})
-          </h3>
-          <div className="space-y-2">
-            {future.map((bill) => (
-              <BillCard key={bill.id} bill={bill} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Tudo em dia / Celebração */}
-      {pendingBills.length === 0 && (
+      {visibleBills.length > 0 ? (
+        <div className="space-y-2">
+          {visibleBills.map((bill) => (
+            <BillCard key={bill.id} bill={bill} />
+          ))}
+        </div>
+      ) : pendingBills.length === 0 ? (
         <div className="rounded-lg border bg-card p-8 text-center sm:p-12">
           {allPaidCelebration ? (
             <>
@@ -143,6 +132,10 @@ async function PagamentosSection({ userId }: { userId: string }) {
             <Button className="h-11">+ Nova Conta</Button>
           </Link>
         </div>
+      ) : (
+        <div className="rounded-lg border bg-card p-6 text-center text-muted-foreground">
+          <p className="text-sm">Nenhuma conta nesta aba.</p>
+        </div>
       )}
     </>
   )
@@ -150,7 +143,11 @@ async function PagamentosSection({ userId }: { userId: string }) {
 
 // --- Main page ---
 
-export default async function PagamentosPage() {
+interface PagamentosPageProps {
+  searchParams: Promise<{ tab?: string }>
+}
+
+export default async function PagamentosPage({ searchParams }: PagamentosPageProps) {
   const session = await auth()
   const userId = session?.user?.id
 
@@ -158,15 +155,18 @@ export default async function PagamentosPage() {
     redirect("/onboarding")
   }
 
+  const params = await searchParams
+  const tab = params.tab || "month"
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
             Pagamentos
           </h2>
           <p className="text-sm text-muted-foreground">
-            Contas organizadas por urgência. Marque como paga ao quitar.
+            Marque como paga ao quitar.
           </p>
         </div>
         <Link href="/bills/new" className="shrink-0">
@@ -175,7 +175,7 @@ export default async function PagamentosPage() {
       </div>
 
       <Suspense fallback={<BillsSkeleton />}>
-        <PagamentosSection userId={userId} />
+        <PagamentosSection userId={userId} tab={tab} />
       </Suspense>
     </div>
   )
