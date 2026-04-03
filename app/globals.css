@@ -138,12 +138,14 @@
 /* Calendar bill dots — enhanced */
 .bill-dot-red,
 .bill-dot-amber,
-.bill-dot-blue {
+.bill-dot-blue,
+.bill-dot-green {
   position: relative;
 }
 .bill-dot-red::after,
 .bill-dot-amber::after,
-.bill-dot-blue::after {
+.bill-dot-blue::after,
+.bill-dot-green::after {
   content: "";
   position: absolute;
   bottom: 2px;
@@ -157,7 +159,8 @@
 }
 .bill-dot-red:hover::after,
 .bill-dot-amber:hover::after,
-.bill-dot-blue:hover::after {
+.bill-dot-blue:hover::after,
+.bill-dot-green:hover::after {
   transform: translateX(-50%) scale(1.4);
 }
 .bill-dot-red::after {
@@ -172,6 +175,10 @@
   background-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(59,130,246,0.4);
 }
+.bill-dot-green::after {
+  background-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 6px rgba(34,197,94,0.4);
+}
 
 /* Dark mode dot ring */
 .dark .bill-dot-red::after {
@@ -183,11 +190,15 @@
 .dark .bill-dot-blue::after {
   box-shadow: 0 0 0 2px rgba(32,37,42,0.9), 0 0 6px rgba(59,130,246,0.5);
 }
+.dark .bill-dot-green::after {
+  box-shadow: 0 0 0 2px rgba(32,37,42,0.9), 0 0 6px rgba(34,197,94,0.5);
+}
 
 /* Calendar day hover for days with bills */
 .bill-dot-red > button:hover,
 .bill-dot-amber > button:hover,
-.bill-dot-blue > button:hover {
+.bill-dot-blue > button:hover,
+.bill-dot-green > button:hover {
   background-color: rgba(0,168,104,0.08) !important;
 }
 

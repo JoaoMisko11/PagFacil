@@ -46,10 +46,13 @@ export function BillCalendar({ bills }: BillCalendarProps) {
   const overdueDates: Date[] = []
   const todayDates: Date[] = []
   const upcomingDates: Date[] = []
+  const paidDates: Date[] = []
 
-  for (const [dateStr] of billsByDay) {
+  for (const [dateStr, dayBills] of billsByDay) {
     const d = new Date(dateStr + "T00:00:00")
-    if (d < today) overdueDates.push(d)
+    const allPaid = dayBills.every((b) => b.status === "PAID")
+    if (allPaid) paidDates.push(d)
+    else if (d < today) overdueDates.push(d)
     else if (d.getTime() === today.getTime()) todayDates.push(d)
     else upcomingDates.push(d)
   }
@@ -108,11 +111,13 @@ export function BillCalendar({ bills }: BillCalendarProps) {
               overdue: overdueDates,
               dueToday: todayDates,
               upcoming: upcomingDates,
+              paid: paidDates,
             }}
             modifiersClassNames={{
               overdue: "bill-dot-red",
               dueToday: "bill-dot-amber",
               upcoming: "bill-dot-blue",
+              paid: "bill-dot-green",
             }}
           />
         </div>
@@ -144,6 +149,10 @@ export function BillCalendar({ bills }: BillCalendarProps) {
 
         {/* Legenda — melhorada com glow */}
         <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
+            Paga
+          </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]" />
             Vencida
