@@ -304,7 +304,7 @@ async function TrendSection({ userId }: { userId: string }) {
           userId,
           deletedAt: null,
           status: "PAID",
-          paidAt: { gte: start, lte: end },
+          dueDate: { gte: start, lte: end },
         },
         _sum: { amount: true },
       }),
