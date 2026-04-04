@@ -1,6 +1,6 @@
 # Changelog — PagaFácil
 
-## D19 - 2026-04-03 - Family Link, Categoria Funcionário e Melhorias
+## D19 - 2026-04-03 - Landing Page, Rotas e Documentação
 ### Feito
 - [x] **Family Link** — compartilhamento de contas entre usuários via convite (`/family`, `/invite/family`)
 - [x] Model `FamilyInvite` + campo `familyId` no User com migration aplicada
@@ -18,9 +18,15 @@
 - [x] Build: `prisma migrate deploy` no build da Vercel
 - [x] CHANGELOG.md, README.md, arquitetura.html e landing page atualizados
 - [x] Hook de pre-push criado para lembrar de atualizar docs
+- [x] **Landing page na raiz** (`/`) — hero, features, FAQ, pricing, comparação, mobile-responsive
+- [x] Dashboard movido de `/` para `/dashboard`
+- [x] Middleware atualizado: `/` e `/landing.html` como rotas públicas
+- [x] Todas as referências `redirect("/")` e `callbackUrl: "/"` atualizadas para `/dashboard`
+- [x] Domínio **pagafacil.work** configurado — metadataBase atualizado
+- [x] Componente `LandingPage` em React (components/landing-page.tsx)
 
 ### Pendente
-- [ ] Deploy na Vercel
+- [ ] Deploy na Vercel com novo domínio
 
 ### Bugs Conhecidos
 - Nenhum novo

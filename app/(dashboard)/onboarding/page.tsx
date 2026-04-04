@@ -34,7 +34,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   } else if (billCount === 0) {
     step = "bill"
   } else {
-    redirect("/")
+    redirect("/dashboard")
   }
 
   const stepNumber = step === "name" ? 1 : step === "bill" ? 2 : 3

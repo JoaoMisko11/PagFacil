@@ -14,6 +14,8 @@ export function middleware(request: NextRequest) {
 
   // Rotas públicas — não precisa de auth
   if (
+    pathname === "/" ||
+    pathname === "/landing.html" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||

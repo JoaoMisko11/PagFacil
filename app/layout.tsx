@@ -15,8 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "PagaFácil — Contas a Pagar",
-  description: "Gerencie suas contas a pagar sem planilha. Grátis para MEIs e pessoas físicas.",
+  title: "PagaFácil — Contas a pagar sem complicação",
+  description: "Organize suas contas a pagar de forma simples e gratuita. Dashboard inteligente, lembretes automáticos, Telegram bot e mais. Para MEIs e pessoas físicas.",
+  metadataBase: new URL("https://pagafacil.work"),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

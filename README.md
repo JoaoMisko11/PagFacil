@@ -2,7 +2,7 @@
 
 Gestao de contas a pagar para MEIs e pessoas fisicas. Gratis, simples, sem planilha.
 
-**Live:** https://paga-facil-mvp.vercel.app
+**Live:** https://pagafacil.work
 
 ## O que e
 
@@ -68,10 +68,11 @@ O app roda em `http://localhost:3005`.
 
 ```
 app/
-  (auth)/login/              # Landing page + login
+  page.tsx                   # Landing page (raiz do dominio)
+  (auth)/login/              # Login form
   (auth)/login/verify/       # Verificacao magic link
   (dashboard)/
-    page.tsx                 # Dashboard (resumo, graficos, calendario)
+    dashboard/page.tsx       # Dashboard (resumo, graficos, calendario)
     pagamentos/page.tsx      # Pagamentos (por urgencia, marcar paga)
     bills/page.tsx           # Contas (gestao, CRUD)
     bills/new/               # Nova conta

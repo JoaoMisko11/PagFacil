@@ -21,7 +21,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
     <nav className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-3 sm:gap-6">
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-2">
+          <Link href="/dashboard" className="flex items-center gap-1.5 sm:gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <span className="text-sm font-bold text-primary-foreground">P</span>
             </div>
@@ -29,9 +29,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
           </Link>
           <div className="flex gap-1 text-sm">
             <Link
-              href="/"
+              href="/dashboard"
               className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
-                pathname === "/"
+                pathname === "/dashboard"
                   ? "bg-secondary text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}

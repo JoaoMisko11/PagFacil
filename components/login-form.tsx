@@ -35,12 +35,12 @@ export function LoginForm() {
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault()
     setEmailLoading(true)
-    await signIn("nodemailer", { email, callbackUrl: "/" })
+    await signIn("nodemailer", { email, callbackUrl: "/dashboard" })
   }
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true)
-    await signIn("google", { callbackUrl: "/" })
+    await signIn("google", { callbackUrl: "/dashboard" })
   }
 
   async function handleTelegramLogin(e: React.FormEvent) {
@@ -50,14 +50,14 @@ export function LoginForm() {
     const result = await signIn("telegram-otp", {
       chatId,
       code: otpCode,
-      callbackUrl: "/",
+      callbackUrl: "/dashboard",
       redirect: false,
     })
     if (result?.error) {
       setTelegramLoading(false)
       setTelegramError("Código inválido ou expirado. Tente novamente.")
     } else {
-      window.location.href = "/"
+      window.location.href = "/dashboard"
     }
   }
 

@@ -928,9 +928,10 @@
 <pre style="margin:0; overflow-x: auto;">
 pagafacil/
 +-- app/
-|   +-- (auth)/login/           <span style="color:var(--text-light);"># Landing page + login form</span>
+|   +-- page.tsx                <span style="color:var(--text-light);"># Landing page (raiz do dominio)</span>
+|   +-- (auth)/login/           <span style="color:var(--text-light);"># Login form (Google, Email, Telegram)</span>
 |   +-- (dashboard)/
-|   |   +-- page.tsx            <span style="color:var(--text-light);"># Dashboard — resumo, graficos, calendario (RSC)</span>
+|   |   +-- dashboard/page.tsx  <span style="color:var(--text-light);"># Dashboard — resumo, graficos, calendario (RSC)</span>
 |   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
 |   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># Pagamentos — lista por urgencia + marcar paga</span>
 |   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Contas — gestao agrupada por categoria</span>
@@ -959,6 +960,7 @@ pagafacil/
 |   +-- batch-bill-form.tsx     <span style="color:var(--text-light);"># Tabela editavel cadastro em lote</span>
 |   +-- dashboard-nav.tsx       <span style="color:var(--text-light);"># Navegacao principal</span>
 |   +-- feedback-widget.tsx     <span style="color:var(--text-light);"># Widget de feedback flutuante</span>
+|   +-- landing-page.tsx        <span style="color:var(--text-light);"># Landing page completa (React)</span>
 |   +-- login-form.tsx          <span style="color:var(--text-light);"># Form login multi-provider</span>
 |   +-- onboarding-steps.tsx    <span style="color:var(--text-light);"># Onboarding 2 passos</span>
 |   +-- family-settings.tsx     <span style="color:var(--text-light);"># Family Link (convite, membros)</span>
@@ -993,7 +995,7 @@ pagafacil/
         <div class="card">
           <div class="card-icon icon-green">&#9889;</div>
           <h3>Vercel (Hobby)</h3>
-          <p>Deploy automatico serverless. Funcoes edge para middleware. Cron job diario para lembretes. URL: paga-facil-mvp.vercel.app</p>
+          <p>Deploy automatico serverless. Funcoes edge para middleware. Cron job diario para lembretes. URL: pagafacil.work</p>
         </div>
 
         <div class="card">
