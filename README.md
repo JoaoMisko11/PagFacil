@@ -53,7 +53,7 @@ npm install
 cp .env.example .env.local
 # Preencha: DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,
 # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SMTP_USER, SMTP_PASSWORD,
-# TELEGRAM_BOT_TOKEN, CRON_SECRET
+# TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, CRON_SECRET
 
 # Rode as migrations
 npx prisma migrate dev
@@ -105,6 +105,17 @@ npx prisma studio        # Editor visual do banco
 npx prisma migrate dev   # Nova migration
 npx vercel deploy --prod # Deploy para Vercel
 ```
+
+## Seguranca
+
+- Webhook Telegram autenticado via `secret_token`
+- OTP com rate limit (max 5 tentativas por codigo, max 3 codigos ativos)
+- Tokens de convite familia criptograficamente seguros (`crypto.randomBytes`)
+- Sanitizacao HTML em mensagens Telegram
+- Cron endpoints protegidos por Bearer token + header Vercel
+- Importacao de planilha re-validada server-side
+- CSRF protection via `allowedOrigins`
+- Veja `CODE_REVIEW_AND_EVOLUTION_GUIDE.md` para o review completo
 
 ## Status
 
