@@ -1,5 +1,32 @@
 # Changelog — PagaFácil
 
+## D19 - 2026-04-03 - Family Link, Categoria Funcionário e Melhorias
+### Feito
+- [x] **Family Link** — compartilhamento de contas entre usuários via convite (`/family`, `/invite/family`)
+- [x] Model `FamilyInvite` + campo `familyId` no User com migration aplicada
+- [x] Componente `FamilySettings` — gerar link, listar membros, sair da família
+- [x] Nova categoria **FUNCIONARIO** com ícone e cor própria
+- [x] Validação Zod e webhook Telegram atualizados para incluir FUNCIONARIO
+- [x] **Pré-geração de parcelas recorrentes** (90 dias à frente) em vez de gerar uma por vez
+- [x] Tela de pagamentos reorganizada com **tabs** (Vencidas, Hoje, Semana, Futuras)
+- [x] Ordenação na tela de contas com select compacto
+- [x] Tela de contas simplificada: remove seções por categoria, usa toggle chips em vez de filtro de status
+- [x] Ícone de categoria restaurado nos cards (inclusive modo compact)
+- [x] Fix: calendário mostra dot verde quando todas as contas do dia estão pagas
+- [x] Fix: gráfico de evolução usa `dueDate` em vez de `paidAt` para série "pago"
+- [x] Fix: melhora visual do formulário de lote para contas recorrentes
+- [x] Build: `prisma migrate deploy` no build da Vercel
+- [x] CHANGELOG.md, README.md, arquitetura.html e landing page atualizados
+- [x] Hook de pre-push criado para lembrar de atualizar docs
+
+### Pendente
+- [ ] Deploy na Vercel
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D18 - 2026-04-02 - Separação Dashboard / Pagamentos / Contas
 ### Feito
 - [x] Nova rota `/pagamentos` — lista por urgência (vencidas, hoje, semana, futuras) + marcar como paga

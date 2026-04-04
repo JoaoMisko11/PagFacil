@@ -10,7 +10,8 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup-hooks": "cp scripts/hooks/* .git/hooks/ && chmod +x .git/hooks/*"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

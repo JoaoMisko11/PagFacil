@@ -473,7 +473,7 @@
 
       <div class="stats-row">
         <div class="stat">
-          <div class="stat-value">11</div>
+          <div class="stat-value">19</div>
           <div class="stat-label">Dias de desenvolvimento</div>
         </div>
         <div class="stat">
@@ -502,7 +502,7 @@
         <div class="card">
           <div class="card-icon icon-green">&#128203;</div>
           <h3>CRUD de Contas</h3>
-          <p>Cadastro completo com fornecedor, valor (R$), vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Outro) e observacoes. Edicao, exclusao com soft delete e recuperacao.</p>
+          <p>Cadastro completo com fornecedor, valor (R$), vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario, Outro) e observacoes. Edicao, exclusao com soft delete e recuperacao.</p>
         </div>
 
         <div class="card">
@@ -526,7 +526,7 @@
         <div class="card">
           <div class="card-icon icon-purple">&#128257;</div>
           <h3>Contas Recorrentes</h3>
-          <p>Ao marcar como paga, gera automaticamente a proxima parcela. Frequencia configuravel: semanal, quinzenal, mensal ou anual. Data de fim opcional.</p>
+          <p>Pre-geracao de parcelas (90 dias a frente). Frequencia configuravel: semanal, quinzenal, mensal ou anual. Data de fim opcional. Tela de pagamentos com tabs por urgencia.</p>
         </div>
 
         <div class="card">
@@ -563,6 +563,12 @@
           <div class="card-icon icon-purple">&#128172;</div>
           <h3>Feedback Widget</h3>
           <p>Botao flutuante para envio de feedback direto (feature, bug, outro). Dados salvos no banco para analise durante fase de validacao.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon icon-green">&#128106;</div>
+          <h3>Family Link</h3>
+          <p>Compartilhe contas com outra pessoa via link de convite. Ambos veem e gerenciam as mesmas contas. Convite com expiracao, pagina dedicada /family para gerenciar membros e sair da familia.</p>
         </div>
 
         <div class="card">
@@ -617,6 +623,7 @@
               <div class="arch-item">Filtros (Client)</div>
               <div class="arch-item">Onboarding (Client)</div>
               <div class="arch-item">Configuracoes (Client)</div>
+              <div class="arch-item">Family Link (Client)</div>
             </div>
           </div>
 
@@ -632,6 +639,8 @@
               <div class="arch-item">Auth (NextAuth v5)</div>
               <div class="arch-item">Telegram Webhook</div>
               <div class="arch-item">Cron Reminders</div>
+              <div class="arch-item">Cron Monthly Report</div>
+              <div class="arch-item">Family Invite</div>
             </div>
           </div>
 
@@ -788,6 +797,14 @@
             <p>Recebe lembrete D-1 por email e/ou Telegram (pode ativar ambos). Pode gerenciar contas direto no Telegram com /contas, /nova e /pagar.</p>
           </div>
         </div>
+
+        <div class="flow-step">
+          <div class="flow-dot" style="background: var(--green);">7</div>
+          <div class="flow-content">
+            <h4>Family Link</h4>
+            <p>Convida outra pessoa via link para compartilhar contas. Ambos veem e gerenciam as mesmas contas. Gerencia membros na pagina /family.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -809,6 +826,7 @@
             <div class="model-field"><span class="model-field-name">email</span><span class="model-field-type">String @unique</span></div>
             <div class="model-field"><span class="model-field-name">telegramChatId</span><span class="model-field-type">String?</span></div>
             <div class="model-field"><span class="model-field-name">notifyVia</span><span class="model-field-type">"email" | "telegram" | "email,telegram"</span></div>
+            <div class="model-field"><span class="model-field-name">familyId</span><span class="model-field-type">String?</span></div>
             <div class="model-field"><span class="model-field-name">bills</span><span class="model-field-type">Bill[]</span></div>
           </div>
         </div>
@@ -851,6 +869,20 @@
             <div class="model-field"><span class="model-field-name">chatId</span><span class="model-field-type">String</span></div>
             <div class="model-field"><span class="model-field-name">code</span><span class="model-field-type">String (6 digitos)</span></div>
             <div class="model-field"><span class="model-field-name">expires</span><span class="model-field-type">DateTime (TTL 10min)</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(0,168,104,0.05);">
+            <span>&#128106;</span> FamilyInvite
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">token</span><span class="model-field-type">String @unique</span></div>
+            <div class="model-field"><span class="model-field-name">familyId</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">invitedBy</span><span class="model-field-type">String (FK User)</span></div>
+            <div class="model-field"><span class="model-field-name">expiresAt</span><span class="model-field-type">DateTime</span></div>
+            <div class="model-field"><span class="model-field-name">acceptedAt</span><span class="model-field-type">DateTime?</span></div>
           </div>
         </div>
       </div>
@@ -908,7 +940,9 @@ pagafacil/
 |   |   +-- bills/trash/         <span style="color:var(--text-light);"># Lixeira (contas deletadas 30d)</span>
 |   |   +-- bills/[id]/edit/    <span style="color:var(--text-light);"># Editar conta</span>
 |   |   +-- onboarding/         <span style="color:var(--text-light);"># Fluxo primeiro acesso (3 passos)</span>
+|   |   +-- family/page.tsx     <span style="color:var(--text-light);"># Family Link (compartilhar contas)</span>
 |   |   +-- settings/           <span style="color:var(--text-light);"># Configuracoes Telegram</span>
+|   +-- invite/family/          <span style="color:var(--text-light);"># Aceitar convite Family Link</span>
 |   +-- api/
 |   |   +-- auth/[...nextauth]/ <span style="color:var(--text-light);"># NextAuth route handlers</span>
 |   |   +-- cron/reminders/     <span style="color:var(--text-light);"># Cron job D-1 lembretes</span>
@@ -927,6 +961,7 @@ pagafacil/
 |   +-- feedback-widget.tsx     <span style="color:var(--text-light);"># Widget de feedback flutuante</span>
 |   +-- login-form.tsx          <span style="color:var(--text-light);"># Form login multi-provider</span>
 |   +-- onboarding-steps.tsx    <span style="color:var(--text-light);"># Onboarding 2 passos</span>
+|   +-- family-settings.tsx     <span style="color:var(--text-light);"># Family Link (convite, membros)</span>
 |   +-- settings-form.tsx       <span style="color:var(--text-light);"># Config Telegram + notificacao</span>
 |   +-- theme-toggle.tsx        <span style="color:var(--text-light);"># Toggle dark mode</span>
 |   +-- ui/                     <span style="color:var(--text-light);"># shadcn/ui components</span>
@@ -983,8 +1018,8 @@ pagafacil/
   </section>
 
   <footer>
-    <strong>PagaFacil</strong> &mdash; MVP Fase 1 &mdash; Desenvolvido em 11 dias com Next.js, Prisma, Vercel & Telegram<br/>
-    <span style="opacity: 0.5; font-size: 0.8rem;">Documento gerado em Março 2026</span>
+    <strong>PagaFacil</strong> &mdash; MVP Fase 1 &mdash; Desenvolvido em 19 dias com Next.js, Prisma, Vercel & Telegram<br/>
+    <span style="opacity: 0.5; font-size: 0.8rem;">Documento atualizado em Abril 2026</span>
   </footer>
 
 </body>

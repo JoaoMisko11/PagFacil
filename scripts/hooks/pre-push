@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# Pre-push hook: avisa se arquivos de código foram alterados sem atualizar os docs.
+# Verifica commits que serão pushados (não presentes no remote).
+#
+# Instalar: npm run setup-hooks  (ou  cp scripts/hooks/* .git/hooks/ && chmod +x .git/hooks/*)
+#
+
+remote="$1"
+
+# Pega o range de commits a serem pushados
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # Novo branch — compara com main
+    range="main...$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  # Arquivos de código alterados (exclui docs, config, assets)
+  code_files=$(git diff --name-only "$range" 2>/dev/null | grep -E '\.(tsx?|prisma|css)$' | grep -v 'docs/' || true)
+
+  if [ -z "$code_files" ]; then
+    exit 0
+  fi
+
+  # Verifica se os docs foram atualizados junto
+  doc_files=$(git diff --name-only "$range" 2>/dev/null || true)
+  missing_docs=""
+
+  echo "$doc_files" | grep -q 'docs/CHANGELOG.md' || missing_docs="$missing_docs\n  - docs/CHANGELOG.md"
+  echo "$doc_files" | grep -q 'README.md' || missing_docs="$missing_docs\n  - README.md"
+  echo "$doc_files" | grep -q 'docs/arquitetura.html' || missing_docs="$missing_docs\n  - docs/arquitetura.html"
+
+  if [ -n "$missing_docs" ]; then
+    echo ""
+    echo "⚠️  ATENÇÃO: Você alterou código mas não atualizou:"
+    echo "$missing_docs"
+    echo ""
+    echo "Docs que devem ser atualizados a cada mudança:"
+    echo "  1. docs/CHANGELOG.md — registrar o que mudou"
+    echo "  2. README.md — features, estrutura, tech stack"
+    echo "  3. docs/arquitetura.html — funcionalidades, modelo, rotas"
+    echo "  4. app/(auth)/login/page.tsx — landing page (se feature nova)"
+    echo ""
+    echo "Para pular esta verificação (emergência): git push --no-verify"
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0

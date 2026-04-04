@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PagaFacil — Contas a pagar sem complicacao</title>
+  <meta name="description" content="Organize suas contas a pagar de forma simples e gratuita. Dashboard inteligente, lembretes automaticos, Telegram bot e muito mais. Feito para MEIs e pessoas fisicas." />
+  <meta name="theme-color" content="#00A868" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="PagaFacil — Contas a pagar sem complicacao" />
+  <meta property="og:description" content="Organize suas contas a pagar de forma simples e gratuita. Dashboard inteligente, lembretes e Telegram bot." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://paga-facil-mvp.vercel.app" />
+
+  <style>
+    /* ======= Reset & Variables ======= */
+    :root {
+      --green: #00A868;
+      --green-light: #00C978;
+      --green-dark: #008B55;
+      --green-50: rgba(0,168,104,0.08);
+      --green-100: rgba(0,168,104,0.15);
+      --dark: #0f172a;
+      --dark-2: #1e293b;
+      --dark-3: #334155;
+      --white: #ffffff;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --radius: 16px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--gray-700);
+      line-height: 1.6;
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ======= Utilities ======= */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section {
+      padding: 96px 0;
+    }
+
+    .section-dark {
+      background: var(--gray-50);
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 56px;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 4px 14px rgba(0,168,104,0.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--green-light);
+      box-shadow: 0 6px 20px rgba(0,168,104,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--green);
+      border: 2px solid var(--green);
+    }
+
+    .btn-outline:hover {
+      background: var(--green-50);
+    }
+
+    .btn-white {
+      background: white;
+      color: var(--green-dark);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-white:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-1px);
+    }
+
+    .btn-lg {
+      font-size: 1.1rem;
+      padding: 16px 40px;
+      border-radius: 14px;
+    }
+
+    /* ======= Nav ======= */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      transition: box-shadow 0.3s;
+    }
+
+    .nav.scrolled {
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--gray-900);
+    }
+
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--green);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-cta .btn {
+      padding: 10px 24px;
+      font-size: 0.9rem;
+    }
+
+    .nav-mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .nav-mobile-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--gray-700);
+      margin: 6px 0;
+      transition: all 0.3s;
+    }
+
+    /* ======= Hero ======= */
+    .hero {
+      padding: 140px 0 100px;
+      background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,168,104,0.07) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      color: var(--green-dark);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-description {
+      font-size: 1.2rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .hero-social-proof {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--gray-500);
+    }
+
+    .hero-avatars {
+      display: flex;
+    }
+
+    .hero-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid white;
+      margin-left: -8px;
+      background: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gray-600);
+    }
+
+    .hero-avatar:first-child { margin-left: 0; background: #dbeafe; color: var(--blue); }
+    .hero-avatar:nth-child(2) { background: #dcfce7; color: var(--green-dark); }
+    .hero-avatar:nth-child(3) { background: #fef3c7; color: #b45309; }
+    .hero-avatar:nth-child(4) { background: #ede9fe; color: var(--purple); }
+
+    /* Hero mockup */
+    .hero-mockup {
+      position: relative;
+    }
+
+    .hero-mockup-frame {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl), 0 0 0 1px var(--gray-200);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .hero-mockup-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .hero-mockup-url {
+      flex: 1;
+      background: var(--gray-100);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      font-family: monospace;
+    }
+
+    .mockup-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mockup-greeting {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .mockup-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .mockup-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .mockup-card-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .mockup-card-label {
+      font-size: 0.65rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mockup-chart {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 12px;
+      height: 100px;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .mockup-bar {
+      width: 20px;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.5s;
+    }
+
+    .mockup-bar-green { background: var(--green); }
+    .mockup-bar-gray { background: var(--gray-300, #cbd5e1); }
+
+    .mockup-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mockup-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+    }
+
+    .mockup-list-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mockup-list-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .mockup-list-name {
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .mockup-list-value {
+      font-weight: 700;
+      color: var(--gray-900);
+      font-size: 0.8rem;
+    }
+
+    .mockup-list-btn {
+      background: var(--green-50);
+      color: var(--green);
+      border: 1px solid var(--green-100);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    /* Floating elements */
+    .hero-float {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: float-y 3s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    .hero-float-1 {
+      top: -10px;
+      right: -20px;
+      color: var(--green-dark);
+    }
+
+    .hero-float-2 {
+      bottom: 40px;
+      left: -30px;
+      color: var(--blue);
+      animation-delay: 1s;
+    }
+
+    @keyframes float-y {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ======= Logos / Trust ======= */
+    .trust-bar {
+      padding: 48px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .trust-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gray-400);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .trust-icon {
+      font-size: 1.5rem;
+    }
+
+    /* ======= Features ======= */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--green);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--green-100);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    .icon-bg-green { background: rgba(0,168,104,0.1); }
+    .icon-bg-blue { background: rgba(59,130,246,0.1); }
+    .icon-bg-amber { background: rgba(245,158,11,0.1); }
+    .icon-bg-red { background: rgba(239,68,68,0.1); }
+    .icon-bg-purple { background: rgba(139,92,246,0.1); }
+
+    /* ======= How it works ======= */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: 15%;
+      right: 15%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green) 0%, var(--blue) 50%, var(--purple) 100%);
+      opacity: 0.2;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      margin: 0 auto 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ======= Comparison ======= */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .comparison-card {
+      border-radius: var(--radius);
+      padding: 36px;
+      position: relative;
+    }
+
+    .comparison-old {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+    }
+
+    .comparison-new {
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      color: white;
+      box-shadow: 0 8px 32px rgba(0,168,104,0.3);
+    }
+
+    .comparison-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .comparison-old h3 { color: var(--gray-600); }
+    .comparison-new h3 { color: white; }
+
+    .comparison-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comparison-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .comparison-old .comparison-list li { color: var(--gray-500); }
+    .comparison-new .comparison-list li { color: rgba(255,255,255,0.9); }
+
+    .comparison-icon {
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-size: 1rem;
+    }
+
+    /* ======= Channels ======= */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .channel-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .channel-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .channel-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
+    .channel-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .channel-card p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ======= Pricing ======= */
+    .pricing-card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 2px solid var(--green);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-tag {
+      position: absolute;
+      top: 20px;
+      right: -32px;
+      background: var(--green);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 40px;
+      transform: rotate(45deg);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .pricing-price {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .pricing-period {
+      font-size: 1rem;
+      color: var(--gray-500);
+      margin-bottom: 32px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--gray-700);
+    }
+
+    .pricing-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--green-50);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* ======= FAQ ======= */
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item.open {
+      border-color: var(--green);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .faq-chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: transform 0.3s;
+      color: var(--gray-400);
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+      color: var(--green);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+    }
+
+    /* ======= CTA ======= */
+    .cta-section {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      padding: 96px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(0,168,104,0.12) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .cta-section h2 span {
+      color: var(--green);
+    }
+
+    .cta-section p {
+      font-size: 1.15rem;
+      color: var(--gray-400);
+      margin-bottom: 36px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .cta-note {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: var(--gray-500);
+    }
+
+    /* ======= Footer ======= */
+    .footer {
+      background: var(--dark);
+      border-top: 1px solid var(--dark-3);
+      padding: 48px 0 32px;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .footer-brand span {
+      font-weight: 700;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--gray-400);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--green);
+    }
+
+    /* ======= Responsive ======= */
+    @media (max-width: 1024px) {
+      .hero h1 { font-size: 2.75rem; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .steps::before { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-cta .btn-outline { display: none; }
+      .nav-mobile-toggle { display: block; }
+
+      .hero { padding: 100px 0 60px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+      .hero h1 { font-size: 2.25rem; }
+      .hero-description { margin: 0 auto 32px; font-size: 1.05rem; }
+      .hero-buttons { justify-content: center; flex-wrap: wrap; }
+      .hero-social-proof { justify-content: center; }
+      .hero-mockup { max-width: 400px; margin: 0 auto; }
+      .hero-float { display: none; }
+
+      .section { padding: 64px 0; }
+      .section-title { font-size: 1.75rem; }
+
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .comparison { grid-template-columns: 1fr; }
+      .channels-grid { grid-template-columns: 1fr; }
+
+      .cta-section h2 { font-size: 1.75rem; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+
+      .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+
+      .trust-inner { gap: 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.85rem; }
+      .mockup-cards { grid-template-columns: 1fr; }
+      .pricing-card { padding: 32px 24px; }
+      .pricing-price { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">P</div>
+        PagaFacil
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Funcionalidades</a></li>
+        <li><a href="#how-it-works">Como funciona</a></li>
+        <li><a href="#channels">Canais</a></li>
+        <li><a href="#pricing">Preco</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="/login" class="btn btn-outline">Entrar</a>
+        <a href="/login" class="btn btn-primary">Comecar gratis</a>
+      </div>
+      <button class="nav-mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <div class="hero-badge">
+          <div class="hero-badge-dot"></div>
+          100% gratuito, sem cartao de credito
+        </div>
+        <h1>Suas contas a pagar <span>organizadas</span> de verdade</h1>
+        <p class="hero-description">
+          Chega de planilha, caderno e esquecimento. Cadastre suas contas, receba lembretes e
+          nunca mais pague com atraso.
+        </p>
+        <div class="hero-buttons">
+          <a href="/login" class="btn btn-primary btn-lg">Comecar agora &#8594;</a>
+          <a href="#features" class="btn btn-outline btn-lg">Ver funcionalidades</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="hero-avatars">
+            <div class="hero-avatar">JM</div>
+            <div class="hero-avatar">AL</div>
+            <div class="hero-avatar">CS</div>
+            <div class="hero-avatar">+</div>
+          </div>
+          <span>Usado por MEIs e pessoas fisicas no Brasil</span>
+        </div>
+      </div>
+
+      <div class="hero-mockup">
+        <div class="hero-float hero-float-1">&#128276; Lembrete enviado!</div>
+        <div class="hero-float hero-float-2">&#9989; Conta paga!</div>
+        <div class="hero-mockup-frame">
+          <div class="hero-mockup-bar">
+            <div class="hero-mockup-dot" style="background:#ef4444"></div>
+            <div class="hero-mockup-dot" style="background:#f59e0b"></div>
+            <div class="hero-mockup-dot" style="background:#22c55e"></div>
+            <div class="hero-mockup-url">pagafacil.app/dashboard</div>
+          </div>
+          <div class="mockup-dashboard">
+            <div class="mockup-greeting">Bom dia, Joao &#9728;&#65039;</div>
+            <div class="mockup-cards">
+              <div class="mockup-card">
+                <div class="mockup-card-value" style="color:var(--red)">2</div>
+                <div class="mockup-card-label">Vencidas</div>
+              </div>
+              <div class="mockup-card">
+                <div class="mockup-card-value" style="color:var(--amber)">1</div>
+                <div class="mockup-card-label">Hoje</div>
+              </div>
+              <div class="mockup-card">
+                <div class="mockup-card-value" style="color:var(--blue)">5</div>
+                <div class="mockup-card-label">7 dias</div>
+              </div>
+            </div>
+            <div class="mockup-chart">
+              <div class="mockup-bar mockup-bar-green" style="height:30%"></div>
+              <div class="mockup-bar mockup-bar-gray" style="height:45%"></div>
+              <div class="mockup-bar mockup-bar-green" style="height:55%"></div>
+              <div class="mockup-bar mockup-bar-gray" style="height:30%"></div>
+              <div class="mockup-bar mockup-bar-green" style="height:70%"></div>
+              <div class="mockup-bar mockup-bar-gray" style="height:20%"></div>
+              <div class="mockup-bar mockup-bar-green" style="height:85%"></div>
+              <div class="mockup-bar mockup-bar-gray" style="height:40%"></div>
+              <div class="mockup-bar mockup-bar-green" style="height:60%"></div>
+              <div class="mockup-bar mockup-bar-gray" style="height:55%"></div>
+            </div>
+            <div class="mockup-list">
+              <div class="mockup-list-item">
+                <div class="mockup-list-left">
+                  <div class="mockup-list-dot" style="background:var(--red)"></div>
+                  <span class="mockup-list-name">Aluguel</span>
+                </div>
+                <span class="mockup-list-value">R$ 1.800,00</span>
+                <span class="mockup-list-btn">Pagar</span>
+              </div>
+              <div class="mockup-list-item">
+                <div class="mockup-list-left">
+                  <div class="mockup-list-dot" style="background:var(--amber)"></div>
+                  <span class="mockup-list-name">Internet</span>
+                </div>
+                <span class="mockup-list-value">R$ 119,90</span>
+                <span class="mockup-list-btn">Pagar</span>
+              </div>
+              <div class="mockup-list-item">
+                <div class="mockup-list-left">
+                  <div class="mockup-list-dot" style="background:var(--blue)"></div>
+                  <span class="mockup-list-name">Contador</span>
+                </div>
+                <span class="mockup-list-value">R$ 450,00</span>
+                <span class="mockup-list-btn">Pagar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust bar -->
+  <div class="trust-bar">
+    <div class="container trust-inner">
+      <div class="trust-item"><span class="trust-icon">&#128274;</span> Dados protegidos</div>
+      <div class="trust-item"><span class="trust-icon">&#9889;</span> 100% gratuito</div>
+      <div class="trust-item"><span class="trust-icon">&#128241;</span> Funciona no celular</div>
+      <div class="trust-item"><span class="trust-icon">&#128276;</span> Lembretes automaticos</div>
+      <div class="trust-item"><span class="trust-icon">&#129302;</span> Bot Telegram</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Funcionalidades</div>
+        <h2 class="section-title">Tudo que voce precisa para nunca mais atrasar um pagamento</h2>
+        <p class="section-subtitle">Simples de usar, poderoso nos bastidores. Sem complicacao, sem custo.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-green">&#128203;</div>
+          <h3>Cadastro de contas</h3>
+          <p>Fornecedor, valor, vencimento, categoria e observacoes. Crie uma por uma ou importe centenas de uma planilha.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-blue">&#128200;</div>
+          <h3>Dashboard inteligente</h3>
+          <p>Resumo financeiro, grafico de barras (pago vs pendente), calendario mensal, insights e streak de pontualidade.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-amber">&#128197;</div>
+          <h3>Calendario visual</h3>
+          <p>Veja todas as contas do mes com dots coloridos. Clique no dia para detalhes. Totalizadores por mes.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-red">&#128276;</div>
+          <h3>Lembretes D-1</h3>
+          <p>Receba uma notificacao 1 dia antes do vencimento por email e/ou Telegram. Nunca mais esqueca.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-purple">&#128257;</div>
+          <h3>Contas recorrentes</h3>
+          <p>Semanal, quinzenal, mensal ou anual. Parcelas geradas automaticamente por 90 dias. Data de fim opcional.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-blue">&#129302;</div>
+          <h3>Bot Telegram</h3>
+          <p>Crie contas, liste pendencias e marque como paga direto pelo chat. Sem abrir o navegador.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-green">&#128196;</div>
+          <h3>Importacao por planilha</h3>
+          <p>Suba um arquivo Excel ou CSV e cadastre centenas de contas de uma vez. Preview com validacao antes de salvar.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-amber">&#128106;</div>
+          <h3>Family Link</h3>
+          <p>Compartilhe suas contas com outra pessoa via link de convite. Ambos veem e gerenciam tudo junto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-bg-purple">&#127763;</div>
+          <h3>Dark mode</h3>
+          <p>Modo escuro, claro ou automatico. Sem flash ao carregar. Perfeito para usar a noite.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section section-dark" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Como funciona</div>
+        <h2 class="section-title">Comece a usar em menos de 1 minuto</h2>
+        <p class="section-subtitle">Sem instalacao, sem configuracao complicada. Abra, logue e pronto.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number" style="background: var(--green);">1</div>
+          <h3>Faca login</h3>
+          <p>Google, email ou Telegram. Sem senha para decorar, sem formulario de cadastro.</p>
+        </div>
+        <div class="step">
+          <div class="step-number" style="background: var(--blue);">2</div>
+          <h3>Cadastre contas</h3>
+          <p>Adicione uma por uma, importe da planilha ou crie em lote. Voce escolhe.</p>
+        </div>
+        <div class="step">
+          <div class="step-number" style="background: var(--amber);">3</div>
+          <h3>Receba lembretes</h3>
+          <p>Um dia antes do vencimento, voce recebe uma notificacao por email ou Telegram.</p>
+        </div>
+        <div class="step">
+          <div class="step-number" style="background: var(--purple);">4</div>
+          <h3>Marque como paga</h3>
+          <p>1 clique no app ou no Telegram. Contas recorrentes geram a proxima automaticamente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Por que trocar</div>
+        <h2 class="section-title">Planilha vs PagaFacil</h2>
+        <p class="section-subtitle">Voce ja sabe que a planilha nao funciona. Veja a diferenca.</p>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-card comparison-old">
+          <h3>&#128196; Planilha / Caderno</h3>
+          <ul class="comparison-list">
+            <li><span class="comparison-icon">&#10060;</span> Esquece de olhar e paga com atraso</li>
+            <li><span class="comparison-icon">&#10060;</span> Nao avisa quando vence</li>
+            <li><span class="comparison-icon">&#10060;</span> Dificil de manter atualizada</li>
+            <li><span class="comparison-icon">&#10060;</span> Sem visao geral do mes</li>
+            <li><span class="comparison-icon">&#10060;</span> So funciona no computador</li>
+            <li><span class="comparison-icon">&#10060;</span> Nao compartilha com ninguem</li>
+          </ul>
+        </div>
+        <div class="comparison-card comparison-new">
+          <h3>&#9889; PagaFacil</h3>
+          <ul class="comparison-list">
+            <li><span class="comparison-icon">&#9989;</span> Lembrete automatico 1 dia antes</li>
+            <li><span class="comparison-icon">&#9989;</span> Notificacao por email e Telegram</li>
+            <li><span class="comparison-icon">&#9989;</span> Contas recorrentes geram sozinhas</li>
+            <li><span class="comparison-icon">&#9989;</span> Dashboard com graficos e calendario</li>
+            <li><span class="comparison-icon">&#9989;</span> Funciona no celular como app (PWA)</li>
+            <li><span class="comparison-icon">&#9989;</span> Family Link para compartilhar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Channels -->
+  <section class="section section-dark" id="channels">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Acesse de qualquer lugar</div>
+        <h2 class="section-title">3 formas de gerenciar suas contas</h2>
+        <p class="section-subtitle">Web, celular ou Telegram. Use o que for mais comodo pra voce.</p>
+      </div>
+
+      <div class="channels-grid">
+        <div class="channel-card">
+          <div class="channel-emoji">&#128187;</div>
+          <h3>Web App</h3>
+          <p>Dashboard completo com graficos, calendario, filtros e gestao total. Funciona em qualquer navegador.</p>
+        </div>
+        <div class="channel-card">
+          <div class="channel-emoji">&#128241;</div>
+          <h3>PWA no celular</h3>
+          <p>Instale no celular como um app nativo. Mobile-first, rapido, funciona offline. Sem app store.</p>
+        </div>
+        <div class="channel-card">
+          <div class="channel-emoji">&#129302;</div>
+          <h3>Bot Telegram</h3>
+          <p>@pagafacil_bot: /contas para listar, /nova para criar, /pagar para quitar. Tudo pelo chat.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Preco</div>
+        <h2 class="section-title">Gratis. De verdade.</h2>
+        <p class="section-subtitle">Sem plano premium, sem trial, sem cartao de credito. Todas as funcionalidades, para sempre.</p>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-tag">Gratis</div>
+        <div class="pricing-price">R$ 0</div>
+        <div class="pricing-period">para sempre, sem limite</div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">&#10003;</span> Contas ilimitadas</li>
+          <li><span class="pricing-check">&#10003;</span> Dashboard com graficos e calendario</li>
+          <li><span class="pricing-check">&#10003;</span> Lembretes por email e Telegram</li>
+          <li><span class="pricing-check">&#10003;</span> Bot Telegram completo</li>
+          <li><span class="pricing-check">&#10003;</span> Importacao por planilha</li>
+          <li><span class="pricing-check">&#10003;</span> Contas recorrentes automaticas</li>
+          <li><span class="pricing-check">&#10003;</span> Family Link (compartilhar contas)</li>
+          <li><span class="pricing-check">&#10003;</span> Dark mode</li>
+          <li><span class="pricing-check">&#10003;</span> PWA (instalar no celular)</li>
+        </ul>
+        <a href="/login" class="btn btn-primary btn-lg" style="width:100%;">Comecar agora &#8594;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-dark" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">FAQ</div>
+        <h2 class="section-title">Perguntas frequentes</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Preciso pagar alguma coisa?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Nao. O PagaFacil e 100% gratuito. Nao tem plano pago, nao tem trial, nao pede cartao de credito. Todas as funcionalidades estao disponiveis para todos os usuarios.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Preciso instalar alguma coisa?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Nao. O PagaFacil funciona direto no navegador, como um site. Se quiser, pode instalar como app no celular (PWA) — basta acessar e clicar em "Adicionar a tela inicial". Nao precisa de app store.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Como funciona o login?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Voce pode entrar com Google (1 clique), receber um link magico por email, ou usar um codigo OTP enviado pelo Telegram. Nao precisa criar senha.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Meus dados estao seguros?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Sim. Usamos autenticacao JWT, validacao em todas as acoes, banco PostgreSQL com criptografia em transito e cada usuario so ve seus proprios dados. Nao compartilhamos informacoes com terceiros.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            O que e o Family Link?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            O Family Link permite compartilhar suas contas com outra pessoa (conjuge, socio, etc). Voce gera um link de convite, a pessoa aceita, e ambos passam a ver e gerenciar as mesmas contas.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Posso importar minhas contas de uma planilha?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Sim! Basta subir um arquivo Excel (.xlsx, .xls) ou CSV. O sistema identifica as colunas automaticamente, mostra um preview para voce validar, e importa todas as contas de uma vez. Ate 500 contas por arquivo.
+          </div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Funciona para empresa (MEI)?
+            <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">
+            Sim. O PagaFacil foi feito para MEIs e pessoas fisicas. As categorias incluem: Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario e Outro — cobrindo os gastos mais comuns de um pequeno negocio.
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Final -->
+  <section class="cta-section">
+    <div class="container cta-content">
+      <h2>Pare de pagar com <span>atraso</span></h2>
+      <p>Comece agora em menos de 1 minuto. Sem cadastro complicado, sem custo.</p>
+      <div class="cta-buttons">
+        <a href="/login" class="btn btn-primary btn-lg">Comecar gratis &#8594;</a>
+        <a href="#features" class="btn btn-white btn-lg">Ver funcionalidades</a>
+      </div>
+      <p class="cta-note">&#128274; Sem cartao de credito. Seus dados protegidos.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-brand-icon">P</div>
+        <span>PagaFacil</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="#features">Funcionalidades</a></li>
+        <li><a href="#pricing">Preco</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="/login">Entrar</a></li>
+      </ul>
+      <span class="footer-copy">&copy; 2026 PagaFacil. Todos os direitos reservados.</span>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll effect
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // FAQ toggle
+    function toggleFaq(btn) {
+      const item = btn.parentElement;
+      const answer = item.querySelector('.faq-answer');
+      const isOpen = item.classList.contains('open');
+
+      // Close all
+      document.querySelectorAll('.faq-item.open').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-answer').style.maxHeight = '0';
+      });
+
+      // Open clicked (if was closed)
+      if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+      }
+    }
+
+    // Animate bars on load
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.mockup-bar').forEach((bar, i) => {
+        const h = bar.style.height;
+        bar.style.height = '0';
+        setTimeout(() => { bar.style.height = h; }, 200 + i * 80);
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -209,6 +209,19 @@ Este projeto roda em múltiplas sessões do Claude Code ao longo de 10 dias. Par
 10. **Após cada modificação no software, atualize `docs/arquitetura.html`** — esse arquivo documenta a arquitetura e funcionalidades da solução. Mantenha-o sempre sincronizado com o estado atual do projeto (funcionalidades, estrutura de arquivos, tech stack, modelo de dados, fluxo do usuário).
 11. **Após adicionar ou modificar funcionalidades, atualize a landing page (`app/(auth)/login/page.tsx`)** — a página de login serve como landing page e deve refletir a proposta de valor atual do produto. Ao adicionar features, atualize os textos e destaques para que novos visitantes vejam o que o PagaFácil oferece.
 
+### Checklist Obrigatório Antes de Commit/Push
+
+Existe um **git hook de pre-push** (`scripts/hooks/pre-push`) que bloqueia o push se código foi alterado sem atualizar os docs. Antes de cada commit que altera código, verifique:
+
+- [ ] `docs/CHANGELOG.md` — registrar o que mudou (novo bloco ou atualizar o do dia)
+- [ ] `README.md` — features, estrutura de pastas, tech stack, env vars
+- [ ] `docs/arquitetura.html` — funcionalidades, modelo de dados, rotas, stats, fluxo do usuário
+- [ ] `app/(auth)/login/page.tsx` — landing page (se feature nova voltada ao usuário)
+
+**Instalar hooks após clone:** `npm run setup-hooks`
+
+O hook pode ser pulado com `git push --no-verify` em emergências, mas **nunca** deve ser rotina.
+
 ### Prompt de Início de Sessão
 
 No começo de cada sessão, o João vai dizer algo como:

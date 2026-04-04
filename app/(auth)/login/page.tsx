@@ -30,9 +30,9 @@ export default async function LoginPage() {
               <p className="text-xs text-muted-foreground">Valor, vencimento e categoria</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128197;</div>
-              <p className="text-sm font-medium text-foreground">Calendário visual</p>
-              <p className="text-xs text-muted-foreground">Veja tudo que vence no mês</p>
+              <div className="mb-1 text-2xl">&#128200;</div>
+              <p className="text-sm font-medium text-foreground">Dashboard inteligente</p>
+              <p className="text-xs text-muted-foreground">Gráficos, calendário e insights</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#128276;</div>
@@ -44,10 +44,15 @@ export default async function LoginPage() {
               <p className="text-sm font-medium text-foreground">Bot Telegram</p>
               <p className="text-xs text-muted-foreground">Crie e pague contas pelo chat</p>
             </div>
-            <div className="col-span-2 rounded-xl border border-border bg-card p-4 text-center">
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <div className="mb-1 text-2xl">&#128106;</div>
+              <p className="text-sm font-medium text-foreground">Family Link</p>
+              <p className="text-xs text-muted-foreground">Compartilhe contas com alguém</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="mb-1 text-2xl">&#128196;</div>
-              <p className="text-sm font-medium text-foreground">Importe da planilha</p>
-              <p className="text-xs text-muted-foreground">Suba um Excel ou CSV e cadastre contas em lote</p>
+              <p className="text-sm font-medium text-foreground">Importe planilha</p>
+              <p className="text-xs text-muted-foreground">Excel ou CSV em lote</p>
             </div>
           </div>
 
