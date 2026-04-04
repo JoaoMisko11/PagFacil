@@ -24,6 +24,7 @@
 - [x] Todas as referências `redirect("/")` e `callbackUrl: "/"` atualizadas para `/dashboard`
 - [x] Domínio **pagafacil.work** configurado — metadataBase atualizado
 - [x] Componente `LandingPage` em React (components/landing-page.tsx)
+- [x] Fix: URL do mockup do dashboard atualizada para pagafacil.work
 
 ### Pendente
 - [ ] Deploy na Vercel com novo domínio
@@ -35,6 +36,7 @@
 
 ## D18 - 2026-04-02 - Separação Dashboard / Pagamentos / Contas
 ### Feito
+- [x] Fix: corrige pins do calendário aparecendo um dia antes (bug de timezone)
 - [x] Nova rota `/pagamentos` — lista por urgência (vencidas, hoje, semana, futuras) + marcar como paga
 - [x] Dashboard limpo — mantém resumo, gráfico, calendário, insights, streak. Sem lista de contas.
 - [x] Navegação com 3 abas: **Dashboard**, **Pagamentos**, **Contas**
