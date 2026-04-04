@@ -26,7 +26,7 @@ export default async function AcceptFamilyInvitePage({ searchParams }: InvitePag
 
   // Se não está logado, redireciona para login com callback
   if (!session?.user?.id) {
-    redirect(`/login?callbackUrl=/invite/family?token=${token}`)
+    redirect(`/login?callbackUrl=${encodeURIComponent(`/invite/family?token=${token}`)}`)
   }
 
   // Busca o convite

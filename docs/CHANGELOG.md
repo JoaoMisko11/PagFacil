@@ -1,5 +1,32 @@
 # Changelog — PagaFácil
 
+## D20 - 2026-04-04 - Security Hardening (Bloco 1)
+### Feito
+- [x] **S1** — Webhook Telegram autenticado via `X-Telegram-Bot-Api-Secret-Token`
+- [x] **S2** — Rate limit no OTP: max 5 tentativas por código + max 3 OTPs ativos por chatId
+- [x] **S4** — Tokens de convite família gerados com `crypto.randomBytes(32)` (imprevisíveis)
+- [x] **S9** — `escapeHtml()` em todas as mensagens Telegram com dados de usuário
+- [x] **S6** — Cron endpoints exigem header `x-vercel-cron` em produção
+- [x] **S7** — `importBills` re-valida todas as rows server-side (não confia no client)
+- [x] **S8** — `allowedOrigins` configurado no next.config para CSRF protection
+- [x] **S3** — Removido `allowDangerousEmailAccountLinking` + tratamento do erro OAuthAccountNotLinked
+- [x] **S5** — callbackUrl no invite encodado com `encodeURIComponent`
+- [x] Migration: campo `attempts` no model `TelegramOtp`
+- [x] Code review completo documentado em `CODE_REVIEW_AND_EVOLUTION_GUIDE.md`
+
+### Pendente
+- [ ] Configurar `TELEGRAM_WEBHOOK_SECRET` na Vercel e registrar webhook com secret_token
+- [ ] Bloco 2: Caching & Static (P6, P7, P8, P1)
+- [ ] Bloco 3: Reliability + Architecture
+- [ ] Bloco 4: Performance
+- [ ] Bloco 5: Observability
+- [ ] Bloco 6: DX + Cleanup
+
+### Bugs Conhecidos
+- Nenhum novo
+
+---
+
 ## D19 - 2026-04-03 - Landing Page, Rotas e Documentação
 ### Feito
 - [x] **Family Link** — compartilhamento de contas entre usuários via convite (`/family`, `/invite/family`)

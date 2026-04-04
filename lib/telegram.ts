@@ -1,5 +1,14 @@
 const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
 
+/** Escapa caracteres especiais do HTML para uso seguro em mensagens Telegram (parse_mode HTML) */
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
 export async function sendTelegramMessage(
   chatId: string,
   text: string

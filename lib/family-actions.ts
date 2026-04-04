@@ -1,5 +1,6 @@
 "use server"
 
+import crypto from "crypto"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
@@ -30,9 +31,11 @@ export async function createFamilyInvite(): Promise<{ token: string } | { error:
     revalidatePath("/family")
   }
 
-  // Cria convite (expira em 7 dias)
+  // Cria convite (expira em 7 dias) com token criptograficamente seguro
+  const secureToken = crypto.randomBytes(32).toString("hex")
   const invite = await db.familyInvite.create({
     data: {
+      token: secureToken,
       familyId,
       invitedBy: userId,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),

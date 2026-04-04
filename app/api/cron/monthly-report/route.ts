@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import nodemailer from "nodemailer"
-import { sendTelegramMessage } from "@/lib/telegram"
+import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -19,7 +19,8 @@ function formatCurrency(cents: number): string {
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get("authorization")
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const isVercelCron = request.headers.get("x-vercel-cron") === "1"
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}` || (process.env.VERCEL && !isVercelCron)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -81,10 +82,8 @@ export async function GET(request: Request) {
 
       const totalPaid = paidBills.reduce((sum, b) => sum + b.amount, 0)
       const totalPending = pendingBills.reduce((sum, b) => sum + b.amount, 0)
-      const greeting = `Ola${user.name ? `, ${user.name}` : ""}!`
 
-      const report = [
-        `${greeting}`,
+      const reportBody = [
         ``,
         `Seu resumo de ${monthName}:`,
         ``,
@@ -100,8 +99,9 @@ export async function GET(request: Request) {
       const channels = (user.notifyVia ?? "email").split(",")
 
       if (channels.includes("telegram") && user.telegramChatId) {
+        const tgGreeting = `Ola${user.name ? `, ${escapeHtml(user.name)}` : ""}!`
         try {
-          await sendTelegramMessage(user.telegramChatId, report)
+          await sendTelegramMessage(user.telegramChatId, tgGreeting + reportBody)
           sent++
         } catch (err) {
           console.error(`Erro Telegram monthly report para ${user.telegramChatId}:`, err)
@@ -114,7 +114,7 @@ export async function GET(request: Request) {
             from: process.env.EMAIL_FROM ?? process.env.SMTP_USER,
             to: user.email,
             subject: `Resumo ${monthName} — PagaFacil`,
-            text: `${report}\n\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFacil`,
+            text: `Ola${user.name ? `, ${user.name}` : ""}!${reportBody}\n\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFacil`,
           })
           sent++
         } catch (err) {

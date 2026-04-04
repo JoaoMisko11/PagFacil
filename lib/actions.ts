@@ -603,19 +603,51 @@ export async function parseSpreadsheet(
 export async function importBills(rows: ImportBillRow[]): Promise<ImportResult> {
   const userId = await getUserId()
 
-  const validRows = rows.filter((r) => r.valid)
-  if (validRows.length === 0) {
+  if (rows.length === 0) {
+    return { message: "Nenhuma conta para importar." }
+  }
+  if (rows.length > 500) {
+    return { message: "Máximo de 500 contas por importação." }
+  }
+
+  // Re-valida todas as rows server-side (não confia no flag `valid` do client)
+  type ValidBill = { supplier: string; amount: number; dueDate: string; category: string; notes: string | null }
+  const validBills: ValidBill[] = []
+
+  for (const r of rows) {
+    const supplier = r.supplier?.trim()
+    if (!supplier) continue
+
+    const amount = parseBrazilianAmount(r.amount)
+    if (amount <= 0) continue
+
+    const parsedDate = parseBrazilianDate(r.dueDate)
+    if (!parsedDate) continue
+
+    const category = normalizeCategory(r.category || "OUTRO")
+    if (!category) continue
+
+    validBills.push({
+      supplier,
+      amount,
+      dueDate: parsedDate,
+      category,
+      notes: r.notes?.trim() || null,
+    })
+  }
+
+  if (validBills.length === 0) {
     return { message: "Nenhuma conta válida para importar." }
   }
 
   try {
     await db.bill.createMany({
-      data: validRows.map((r) => ({
-        supplier: r.supplier,
-        amount: parseBrazilianAmount(r.amount),
-        dueDate: new Date(parseBrazilianDate(r.dueDate)! + "T12:00:00Z"),
-        category: normalizeCategory(r.category) as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO",
-        notes: r.notes || null,
+      data: validBills.map((b) => ({
+        supplier: b.supplier,
+        amount: b.amount,
+        dueDate: new Date(b.dueDate + "T12:00:00Z"),
+        category: b.category as "FIXO" | "VARIAVEL" | "IMPOSTO" | "FORNECEDOR" | "ASSINATURA" | "FUNCIONARIO" | "OUTRO",
+        notes: b.notes,
         isRecurring: false,
         userId,
       })),
@@ -627,7 +659,7 @@ export async function importBills(rows: ImportBillRow[]): Promise<ImportResult> 
 
   revalidatePath("/bills")
   revalidatePath("/")
-  return { imported: validRows.length }
+  return { imported: validBills.length }
 }
 
 // --- Cadastro em lote ---
@@ -758,6 +790,19 @@ export async function sendTelegramOtp(
       ],
     },
   })
+
+  // Rate limit: max 3 OTPs ativos por chatId (anti-spam)
+  const activeOtps = await db.telegramOtp.count({
+    where: { chatId, used: false, expires: { gt: new Date() } },
+  })
+
+  if (activeOtps >= 3) {
+    return {
+      errors: {
+        chatId: ["Muitas tentativas. Aguarde o código anterior expirar (10 min) e tente novamente."],
+      },
+    }
+  }
 
   const code = crypto.randomInt(100000, 999999).toString()
   const expires = new Date(Date.now() + 10 * 60 * 1000) // 10 min

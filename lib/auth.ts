@@ -11,7 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
     }),
     Nodemailer({
       server: {
@@ -37,11 +36,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!chatId || !code) return null
 
-        // Busca OTP válido
+        const MAX_ATTEMPTS = 5
+
+        // Busca OTP mais recente (válido ou não) para esse chatId
         const otp = await db.telegramOtp.findFirst({
           where: {
             chatId,
-            code,
             used: false,
             expires: { gt: new Date() },
           },
@@ -50,7 +50,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!otp) return null
 
-        // Marca como usado
+        // Bloqueia se excedeu tentativas
+        if (otp.attempts >= MAX_ATTEMPTS) {
+          // Invalida o OTP por excesso de tentativas
+          await db.telegramOtp.update({
+            where: { id: otp.id },
+            data: { used: true },
+          })
+          return null
+        }
+
+        // Código errado: incrementa tentativas e rejeita
+        if (otp.code !== code) {
+          await db.telegramOtp.update({
+            where: { id: otp.id },
+            data: { attempts: { increment: 1 } },
+          })
+          return null
+        }
+
+        // Código correto — marca como usado
         await db.telegramOtp.update({
           where: { id: otp.id },
           data: { used: true },

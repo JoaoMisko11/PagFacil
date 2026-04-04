@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { sendTelegramMessage } from "@/lib/telegram"
+import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
 import { db } from "@/lib/db"
 import { getFamilyUserIds } from "@/lib/family"
 import type { Category } from "@prisma/client"
@@ -59,7 +59,7 @@ async function handleContas(chatId: string, userId: string) {
   const lines = bills.map((b, i) => {
     const emoji = b.status === "OVERDUE" ? "🔴" : "🟡"
     const dateStr = formatDate(b.dueDate)
-    return `${emoji} <b>${i + 1}.</b> ${b.supplier} — ${formatCurrency(b.amount)} — ${dateStr}`
+    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrency(b.amount)} — ${dateStr}`
   })
 
   const overdue = bills.filter((b) => b.status === "OVERDUE").length
@@ -161,7 +161,7 @@ async function handleNova(chatId: string, userId: string, args: string) {
     await sendTelegramMessage(
       chatId,
       `✅ Conta criada!\n\n` +
-        `<b>${supplier}</b>\n` +
+        `<b>${escapeHtml(supplier)}</b>\n` +
         `Valor: ${formatCurrency(amount)}\n` +
         `Vencimento: ${formatDate(dueDate)}\n` +
         `Categoria: ${category}`
@@ -192,7 +192,7 @@ async function handlePagar(chatId: string, userId: string) {
 
   const lines = bills.map((b, i) => {
     const emoji = b.status === "OVERDUE" ? "🔴" : "🟡"
-    return `${emoji} <b>${i + 1}.</b> ${b.supplier} — ${formatCurrency(b.amount)} — ${formatDate(b.dueDate)}`
+    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrency(b.amount)} — ${formatDate(b.dueDate)}`
   })
 
   // Salva sessão (expira em 5 min)
@@ -298,7 +298,7 @@ async function handlePaySelection(chatId: string, userId: string, num: number) {
 
     await sendTelegramMessage(
       chatId,
-      `✅ <b>${bill.supplier}</b> — ${formatCurrency(bill.amount)} marcada como paga!`
+      `✅ <b>${escapeHtml(bill.supplier)}</b> — ${formatCurrency(bill.amount)} marcada como paga!`
     )
   } catch (error) {
     console.error("Erro ao marcar como paga via Telegram:", error)
@@ -323,6 +323,15 @@ async function handleAjuda(chatId: string) {
 
 // ─── Webhook Handler ───────────────────────────────────────
 export async function POST(request: Request) {
+  // Verifica secret_token enviado pelo Telegram ao chamar o webhook
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET
+  if (webhookSecret) {
+    const headerSecret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    if (headerSecret !== webhookSecret) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+  }
+
   const body = await request.json()
   const message = body?.message
 

@@ -2,9 +2,16 @@ import { LoginForm } from "@/components/login-form"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
-export default async function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{ error?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth()
   if (session) redirect("/dashboard")
+
+  const params = await searchParams
+  const authError = params.error
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -55,6 +62,16 @@ export default async function LoginPage() {
               <p className="text-xs text-muted-foreground">Excel ou CSV em lote</p>
             </div>
           </div>
+
+          {/* Erro de auth (ex: OAuthAccountNotLinked) */}
+          {authError === "OAuthAccountNotLinked" && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+              <p className="font-medium">Essa conta ja existe com outro metodo de login.</p>
+              <p className="mt-1 text-xs">
+                Entre primeiro com o metodo original (email ou Telegram) e depois vincule sua conta Google nas configuracoes.
+              </p>
+            </div>
+          )}
 
           {/* Login */}
           <LoginForm />

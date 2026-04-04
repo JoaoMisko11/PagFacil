@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import nodemailer from "nodemailer"
-import { sendTelegramMessage } from "@/lib/telegram"
+import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -13,10 +13,11 @@ const transporter = nodemailer.createTransport({
 })
 
 export async function GET(request: Request) {
-  // Verifica o secret para proteger o endpoint
+  // Verifica o secret + header Vercel para proteger o endpoint
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get("authorization")
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const isVercelCron = request.headers.get("x-vercel-cron") === "1"
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}` || (process.env.VERCEL && !isVercelCron)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -71,23 +72,24 @@ export async function GET(request: Request) {
   let sent = 0
 
   for (const [, userData] of billsByUser) {
-    const billLines = userData.bills
-      .map(
-        (b) =>
-          `• ${b.supplier} — R$ ${(b.amount / 100).toFixed(2).replace(".", ",")}`
-      )
-      .join("\n")
-
     const count = userData.bills.length
-    const greeting = `Olá${userData.name ? `, ${userData.name}` : ""}!`
+    const safeName = userData.name ? escapeHtml(userData.name) : null
 
     const channels = userData.notifyVia.split(",")
 
     if (channels.includes("telegram") && userData.telegramChatId) {
+      const tgBillLines = userData.bills
+        .map(
+          (b) =>
+            `• ${escapeHtml(b.supplier)} — R$ ${(b.amount / 100).toFixed(2).replace(".", ",")}`
+        )
+        .join("\n")
+      const tgGreeting = `Olá${safeName ? `, ${safeName}` : ""}!`
+
       try {
         await sendTelegramMessage(
           userData.telegramChatId,
-          `${greeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga.`
+          `${tgGreeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${tgBillLines}\n\nAcesse o PagaFácil para marcar como paga.`
         )
         sent++
       } catch (err) {
@@ -96,6 +98,13 @@ export async function GET(request: Request) {
     }
 
     if (channels.includes("email")) {
+      const emailBillLines = userData.bills
+        .map(
+          (b) =>
+            `• ${b.supplier} — R$ ${(b.amount / 100).toFixed(2).replace(".", ",")}`
+        )
+        .join("\n")
+      const emailGreeting = `Olá${userData.name ? `, ${userData.name}` : ""}!`
       const subject =
         count === 1
           ? `Amanhã vence: ${userData.bills[0].supplier}`
@@ -106,7 +115,7 @@ export async function GET(request: Request) {
           from: process.env.EMAIL_FROM ?? process.env.SMTP_USER,
           to: userData.email,
           subject,
-          text: `${greeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${billLines}\n\nAcesse o PagaFácil para marcar como paga:\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`,
+          text: `${emailGreeting}\n\nVocê tem ${count} conta${count > 1 ? "s" : ""} vencendo amanhã:\n\n${emailBillLines}\n\nAcesse o PagaFácil para marcar como paga:\n${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`,
         })
         sent++
       } catch (err) {

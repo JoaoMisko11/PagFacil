@@ -94,6 +94,7 @@ model TelegramOtp {
   chatId    String
   expires   DateTime
   used      Boolean  @default(false)
+  attempts  Int      @default(0) // tentativas de verificacao (max 5)
   createdAt DateTime @default(now())
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -1,5 +1,13 @@
 # Decisões Técnicas — PagaFácil
 
+## D20 - 2026-04-04
+- **Webhook secret_token (não IP whitelist):** Telegram envia o header `X-Telegram-Bot-Api-Secret-Token` em cada request quando configurado no `setWebhook`. Mais confiável que IP whitelist (IPs do Telegram mudam). Verificação condicional — funciona sem secret em dev.
+- **OTP max attempts no model (não rate limit por IP):** Rate limit por IP é frágil em serverless (sem estado entre invocações). O campo `attempts` no DB é durável e funciona independente da instância. Limite de 5 tentativas × 3 OTPs = 15 tentativas a cada 10min, tornando brute-force de 6 dígitos impraticável.
+- **Remoção do `allowDangerousEmailAccountLinking`:** O flag era um atalho conveniente mas inseguro. Com 2 usuários o risco era baixo, mas como o repo é público, melhor fechar antes de escalar. Tratamento do erro na UI é simples e não bloqueia o fluxo.
+- **`crypto.randomBytes(32)` para invite tokens (não UUID):** UUIDs v4 são aleatórios mas têm 122 bits de entropia. `randomBytes(32)` tem 256 bits — overkill para o caso mas sem custo extra.
+- **Cron: `x-vercel-cron` check condicional (`process.env.VERCEL`):** Permite testar crons localmente com `curl -H "Authorization: Bearer ..."` sem precisar do header Vercel, mas bloqueia chamadas externas em produção.
+- **Re-validação server-side no `importBills`:** O client envia rows pré-validadas para mostrar preview, mas o server não pode confiar no flag `valid`. Re-validar é redundante mas fecha um vetor de data injection.
+
 ## D16 - 2026-04-01
 - **Confetti CSS puro (sem canvas-confetti):** 30 `<span>` com `@keyframes` em vez de lib Canvas. Zero dependências, ~60 linhas. Suficiente para efeito celebratório — não é um jogo, é um momento de delight.
 - **Saudação via Intl.DateTimeFormat (sem date-fns):** `toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })` resolve timezone no server sem dependência extra. Roda a cada request (página é dinâmica de qualquer forma).
