@@ -103,7 +103,7 @@ export function LandingPage() {
                 <div className="landing-hero-mockup-dot" style={{ background: "#ef4444" }} />
                 <div className="landing-hero-mockup-dot" style={{ background: "#f59e0b" }} />
                 <div className="landing-hero-mockup-dot" style={{ background: "#22c55e" }} />
-                <div className="landing-hero-mockup-url">pagafacil.work/dashboard</div>
+                <div className="landing-hero-mockup-url">pagafacil.work</div>
               </div>
               <div className="mockup-dashboard">
                 <div className="mockup-greeting">Bom dia, Joao &#9728;&#65039;</div>
