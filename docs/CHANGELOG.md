@@ -1,5 +1,26 @@
 # Changelog — PagaFácil
 
+## D21 - 2026-04-04 - Web Push Notifications na PWA
+### Feito
+- [x] Instalação do `web-push` + `@types/web-push`
+- [x] Geração de VAPID keys
+- [x] Modelo `PushSubscription` no Prisma (endpoint, p256dh, auth, userId)
+- [x] Service worker atualizado com listeners `push` e `notificationclick`
+- [x] Componente `PushToggle` para ativar/desativar push no navegador
+- [x] Server Actions: `savePushSubscription` e `removePushSubscription`
+- [x] `notifyVia` agora suporta "push" como canal (adicionado/removido automaticamente)
+- [x] Cron de lembretes envia Web Push junto com email/Telegram
+- [x] Auto-cleanup de subscriptions expiradas (410/404)
+- [x] Integração no settings-form.tsx
+
+### Pendente
+- [ ] Adicionar PushToggle no onboarding (step reminders)
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D20 - 2026-04-04 - Security Hardening (Bloco 1)
 ### Feito
 - [x] **S1** — Webhook Telegram autenticado via `X-Telegram-Bot-Api-Secret-Token`

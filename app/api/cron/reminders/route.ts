@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import nodemailer from "nodemailer"
+import webpush from "web-push"
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
+
+webpush.setVapidDetails(
+  "mailto:" + (process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? "noreply@pagafacil.app"),
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+)
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -39,7 +46,13 @@ export async function GET(request: Request) {
     },
     include: {
       user: {
-        select: { email: true, name: true, telegramChatId: true, notifyVia: true },
+        select: {
+          email: true,
+          name: true,
+          telegramChatId: true,
+          notifyVia: true,
+          pushSubscriptions: { select: { endpoint: true, p256dh: true, auth: true } },
+        },
       },
     },
   })
@@ -51,7 +64,14 @@ export async function GET(request: Request) {
   // Agrupa por usuário
   const billsByUser = new Map<
     string,
-    { email: string; name: string | null; telegramChatId: string | null; notifyVia: string; bills: typeof bills }
+    {
+      email: string
+      name: string | null
+      telegramChatId: string | null
+      notifyVia: string
+      pushSubscriptions: { endpoint: string; p256dh: string; auth: string }[]
+      bills: typeof bills
+    }
   >()
 
   for (const bill of bills) {
@@ -64,6 +84,7 @@ export async function GET(request: Request) {
         name: bill.user.name,
         telegramChatId: bill.user.telegramChatId,
         notifyVia: bill.user.notifyVia,
+        pushSubscriptions: bill.user.pushSubscriptions,
         bills: [bill],
       })
     }
@@ -120,6 +141,45 @@ export async function GET(request: Request) {
         sent++
       } catch (err) {
         console.error(`Erro ao enviar email para ${userData.email}:`, err)
+      }
+    }
+
+    if (channels.includes("push") && userData.pushSubscriptions.length > 0) {
+      const pushBillLines = userData.bills
+        .map(
+          (b) =>
+            `${b.supplier} — R$ ${(b.amount / 100).toFixed(2).replace(".", ",")}`
+        )
+        .join(", ")
+      const pushBody =
+        count === 1
+          ? `Amanhã vence: ${pushBillLines}`
+          : `${count} contas vencem amanhã: ${pushBillLines}`
+      const payload = JSON.stringify({
+        title: "PagaFácil - Lembrete",
+        body: pushBody,
+        tag: "pagafacil-reminder",
+        url: "/dashboard",
+      })
+
+      for (const sub of userData.pushSubscriptions) {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            },
+            payload
+          )
+          sent++
+        } catch (err: unknown) {
+          const statusCode = (err as { statusCode?: number }).statusCode
+          if (statusCode === 410 || statusCode === 404) {
+            // Subscription expirou, remove do banco
+            await db.pushSubscription.delete({ where: { endpoint: sub.endpoint } }).catch(() => {})
+          }
+          console.error(`Erro ao enviar push para ${sub.endpoint.slice(0, 50)}...:`, err)
+        }
       }
     }
   }

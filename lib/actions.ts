@@ -848,7 +848,7 @@ export async function updateNotificationPreferences(
   const userId = await getUserId()
   const telegramChatId = (formData.get("telegramChatId") as string)?.trim() || null
   const notifyViaValues = formData.getAll("notifyVia") as string[]
-  const notifyVia = notifyViaValues.filter((v) => ["email", "telegram"].includes(v)).join(",")
+  const notifyVia = notifyViaValues.filter((v) => ["email", "telegram", "push"].includes(v)).join(",")
 
   if (!notifyVia) {
     return { errors: { notifyVia: ["Selecione pelo menos um canal de notificação"] } }
@@ -902,4 +902,70 @@ export async function updateNotificationPreferences(
 
   revalidatePath("/settings")
   return { message: "Preferências salvas!" }
+}
+
+// --- Push Subscription ---
+
+export async function savePushSubscription(subscription: {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+}) {
+  const userId = await getUserId()
+
+  await db.pushSubscription.upsert({
+    where: { endpoint: subscription.endpoint },
+    create: {
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+      userId,
+    },
+    update: {
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+      userId,
+    },
+  })
+
+  // Garante que "push" está no notifyVia
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { notifyVia: true },
+  })
+  const channels = user.notifyVia.split(",").filter(Boolean)
+  if (!channels.includes("push")) {
+    channels.push("push")
+    await db.user.update({
+      where: { id: userId },
+      data: { notifyVia: channels.join(",") },
+    })
+  }
+
+  revalidatePath("/settings")
+  return { ok: true }
+}
+
+export async function removePushSubscription(endpoint: string) {
+  const userId = await getUserId()
+
+  await db.pushSubscription.deleteMany({
+    where: { endpoint, userId },
+  })
+
+  // Se não tem mais subscriptions, remove "push" do notifyVia
+  const remaining = await db.pushSubscription.count({ where: { userId } })
+  if (remaining === 0) {
+    const user = await db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { notifyVia: true },
+    })
+    const channels = user.notifyVia.split(",").filter((c) => c !== "push")
+    await db.user.update({
+      where: { id: userId },
+      data: { notifyVia: channels.join(",") || "email" },
+    })
+  }
+
+  revalidatePath("/settings")
+  return { ok: true }
 }

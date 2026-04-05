@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { updateNotificationPreferences } from "@/lib/actions"
 import type { ActionState } from "@/lib/actions"
+import { PushToggle } from "@/components/push-toggle"
 
 interface SettingsFormProps {
   telegramChatId: string
@@ -100,6 +101,19 @@ export function SettingsForm({
                   </p>
                 </div>
               </label>
+            </div>
+
+            {/* Push Notifications */}
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Push no navegador</p>
+                  <p className="text-xs text-muted-foreground">
+                    Receba notificações diretamente no celular/desktop
+                  </p>
+                </div>
+                <PushToggle />
+              </div>
             </div>
           </div>
 

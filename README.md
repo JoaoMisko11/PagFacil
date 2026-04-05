@@ -19,11 +19,11 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
 - **Cadastro em lote** — tabela editavel para criar varias contas de uma vez
 - **Family Link** — compartilhe contas com outra pessoa via link de convite
-- **Lembretes D-1** — notificacao automatica 1 dia antes por email e/ou Telegram
+- **Lembretes D-1** — notificacao automatica 1 dia antes por email, Telegram e/ou push notification (PWA)
 - **Bot Telegram** — @pagafacil_bot com /contas, /nova, /pagar, /ajuda
 - **Dark mode** — toggle light/dark/system sem flash
 - **Lixeira** — contas deletadas ficam recuperaveis por 30 dias
-- **PWA** — instalavel no celular, mobile-first (360px+)
+- **PWA com push** — instalavel no celular, push notifications nativas, mobile-first (360px+)
 - **UX avancada** — optimistic UI, skeleton loading, confetti, transicoes, modo compacto, atalhos de teclado
 
 ## Tech Stack
@@ -54,6 +54,7 @@ cp .env.example .env.local
 # Preencha: DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,
 # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SMTP_USER, SMTP_PASSWORD,
 # TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, CRON_SECRET
+# NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
 
 # Rode as migrations
 npx prisma migrate dev

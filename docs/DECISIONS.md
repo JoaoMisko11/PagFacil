@@ -1,5 +1,12 @@
 # Decisões Técnicas — PagaFácil
 
+## D21 - 2026-04-04
+- **Web Push via `web-push` (não Firebase/OneSignal):** Lib padrão W3C Push API, zero vendor lock-in, ~50KB. Firebase exige SDK pesado e conta Google Cloud. OneSignal é SaaS com limites no free tier. `web-push` é a implementação direta do protocolo.
+- **PushSubscription como modelo separado (não campo no User):** Um usuário pode ter múltiplas subscriptions (celular + desktop + tablets). Modelo separado com `endpoint` unique permite gerenciar cada device independentemente.
+- **`notifyVia` gerenciado automaticamente pelo toggle (não pelo form):** Ao ativar push, o `savePushSubscription` adiciona "push" ao `notifyVia`. Ao desativar, `removePushSubscription` remove. Evita inconsistência entre ter subscriptions no DB mas "push" não estar no `notifyVia`.
+- **Auto-cleanup de subscriptions expiradas (410/404):** Quando o browser revoga a subscription, o push endpoint retorna 410 Gone. O cron deleta essas subscriptions automaticamente para não acumular lixo.
+- **VAPID keys (não GCM):** VAPID é o padrão moderno, funciona em todos os browsers que suportam Push API. GCM é legado Google-only.
+
 ## D20 - 2026-04-04
 - **Webhook secret_token (não IP whitelist):** Telegram envia o header `X-Telegram-Bot-Api-Secret-Token` em cada request quando configurado no `setWebhook`. Mais confiável que IP whitelist (IPs do Telegram mudam). Verificação condicional — funciona sem secret em dev.
 - **OTP max attempts no model (não rate limit por IP):** Rate limit por IP é frágil em serverless (sem estado entre invocações). O campo `attempts` no DB é durável e funciona independente da instância. Limite de 5 tentativas × 3 OTPs = 15 tentativas a cada 10min, tornando brute-force de 6 dígitos impraticável.
