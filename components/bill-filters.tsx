@@ -36,7 +36,7 @@ export function BillFilters({
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(currentQuery ?? "")
   const timeoutRef = useRef<NodeJS.Timeout>(null)
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   const activeCategories = new Set(
     currentCategory ? currentCategory.split(",") : []
@@ -73,14 +73,21 @@ export function BillFilters({
   }, [search])
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 transition-opacity ${isPending ? "opacity-60" : ""}`}>
       <div className="flex gap-2">
-        <Input
-          placeholder="Buscar fornecedor..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-9 flex-1"
-        />
+        <div className="relative h-9 flex-1">
+          <Input
+            placeholder="Buscar fornecedor..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 w-full"
+          />
+          {isPending && (
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+            </div>
+          )}
+        </div>
         <select
           value={currentSort || "dueDate"}
           onChange={(e) => updateParams("sort", e.target.value === "dueDate" ? "" : e.target.value)}

@@ -137,7 +137,14 @@ export function BillCard({ bill }: BillCardProps) {
             onClick={handleTogglePaid}
             disabled={isPending}
           >
-            {isPaid ? "↩ Desfazer" : "✓ Paga"}
+            {isPending ? (
+              <span className="flex items-center gap-1.5">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {isPaid ? "Desfazendo..." : "Pagando..."}
+              </span>
+            ) : (
+              isPaid ? "↩ Desfazer" : "✓ Paga"
+            )}
           </Button>
 
           <Link href={`/bills/${bill.id}/edit`} className="flex-1 sm:flex-none">

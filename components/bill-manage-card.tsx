@@ -115,8 +115,16 @@ export function BillManageCard({
             size="sm"
             className={`min-w-[44px] flex-1 text-xs text-destructive hover:text-destructive ${compact ? "h-8 sm:h-8" : "h-11 sm:h-9"} sm:flex-none sm:text-sm`}
             onClick={() => setDialogOpen(true)}
+            disabled={deleting}
           >
-            🗑 Deletar
+            {deleting ? (
+              <span className="flex items-center gap-1.5">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Deletando...
+              </span>
+            ) : (
+              "🗑 Deletar"
+            )}
           </Button>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

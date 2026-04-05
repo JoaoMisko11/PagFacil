@@ -6,6 +6,7 @@
 - [x] Removido `app/(dashboard)/page.tsx` duplicado (resquício do move D19, rota correta é `dashboard/page.tsx`)
 - [x] **Fix: cron reminders e monthly-report retornavam 401** — check de header `x-vercel-cron` inexistente bloqueava toda execução na Vercel
 - [x] Removido grid de benefícios/funcionalidades da página de login — agora que existe landing page separada, login fica limpo e focado
+- [x] **UX: loading states em toda a app** — adicionado `loading.tsx` (skeletons) para pagamentos, settings, family, trash; spinner no botão "Paga"/"Desfazer" do BillCard; spinner no "Deletar" do BillManageCard; opacity + disabled nas PagamentosTabs durante transição; spinner no input de busca do BillFilters durante filtragem
 
 ### Bugs Conhecidos
 - Nenhum

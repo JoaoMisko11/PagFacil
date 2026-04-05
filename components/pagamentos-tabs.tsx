@@ -18,7 +18,7 @@ interface PagamentosTabsProps {
 export function PagamentosTabs({ current, counts }: PagamentosTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   function setTab(tab: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -33,7 +33,7 @@ export function PagamentosTabs({ current, counts }: PagamentosTabsProps) {
   }
 
   return (
-    <div className="flex gap-1 rounded-lg border border-border bg-muted/50 p-1">
+    <div className={`flex gap-1 rounded-lg border border-border bg-muted/50 p-1 transition-opacity ${isPending ? "opacity-60 pointer-events-none" : ""}`}>
       {TABS.map((tab) => {
         const isActive = current === tab.value
         const count = counts[tab.value]
@@ -41,6 +41,7 @@ export function PagamentosTabs({ current, counts }: PagamentosTabsProps) {
           <button
             key={tab.value}
             onClick={() => setTab(tab.value)}
+            disabled={isPending}
             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
               isActive
                 ? "bg-background text-foreground shadow-sm"
