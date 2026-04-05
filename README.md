@@ -70,7 +70,7 @@ O app roda em `http://localhost:3005`.
 ```
 app/
   page.tsx                   # Landing page (raiz do dominio)
-  (auth)/login/              # Login form
+  (auth)/login/              # Login form (limpo, sem descritivo de features)
   (auth)/login/verify/       # Verificacao magic link
   (dashboard)/
     dashboard/page.tsx       # Dashboard (resumo, graficos, calendario)
