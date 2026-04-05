@@ -34,7 +34,9 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/login)",
       "Bash(chmod +x /Users/joaomisko/Desktop/DEV/PagFacil/.git/hooks/pre-push)",
       "Bash(chmod +x /Users/joaomisko/Desktop/DEV/PagFacil/scripts/hooks/pre-push)",
-      "Read(//Users/joaomisko/Desktop/DEV/PagFacil/**)"
+      "Read(//Users/joaomisko/Desktop/DEV/PagFacil/**)",
+      "Bash(ls -la /Users/joaomisko/Desktop/DEV/PagFacil/next.config.* /Users/joaomisko/Desktop/DEV/PagFacil/tsconfig.json)",
+      "Bash(npx web-push:*)"
     ]
   }
 }
