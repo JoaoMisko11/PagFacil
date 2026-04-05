@@ -1,12 +1,9 @@
 # Changelog — PagaFácil
 
-## D22 - 2026-04-05 - Dashboard route + permissões Claude Code
+## D22 - 2026-04-05 - Cleanup + permissões Claude Code
 ### Feito
-- [x] Adicionado `app/(dashboard)/page.tsx` — rota raiz do dashboard group (cópia do dashboard/page.tsx)
 - [x] Atualizado `.claude/settings.json` — novas permissões auto-aprovadas (ls config, npx web-push)
-
-### Pendente
-- [ ] Avaliar se a duplicação dashboard/page.tsx vs page.tsx é intencional ou deve ser consolidada
+- [x] Removido `app/(dashboard)/page.tsx` duplicado (resquício do move D19, rota correta é `dashboard/page.tsx`)
 
 ### Bugs Conhecidos
 - Nenhum

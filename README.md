@@ -73,8 +73,7 @@ app/
   (auth)/login/              # Login form
   (auth)/login/verify/       # Verificacao magic link
   (dashboard)/
-    page.tsx                 # Dashboard raiz (resumo, graficos, calendario)
-    dashboard/page.tsx       # Dashboard (alias, mesmo conteudo)
+    dashboard/page.tsx       # Dashboard (resumo, graficos, calendario)
     pagamentos/page.tsx      # Pagamentos (por urgencia, marcar paga)
     bills/page.tsx           # Contas (gestao, CRUD)
     bills/new/               # Nova conta
