@@ -37,7 +37,8 @@
       "Read(//Users/joaomisko/Desktop/DEV/PagFacil/**)",
       "Bash(ls -la /Users/joaomisko/Desktop/DEV/PagFacil/next.config.* /Users/joaomisko/Desktop/DEV/PagFacil/tsconfig.json)",
       "Bash(npx web-push:*)",
-      "Bash(grep -r \"Cache\\\\|caching\\\\|CACHE\" /Users/joaomisko/Desktop/DEV/PagFacil --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.json\" ! -path \"*/node_modules/*\")"
+      "Bash(grep -r \"Cache\\\\|caching\\\\|CACHE\" /Users/joaomisko/Desktop/DEV/PagFacil --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.json\" ! -path \"*/node_modules/*\")",
+      "Bash(xargs cat:*)"
     ]
   }
 }
