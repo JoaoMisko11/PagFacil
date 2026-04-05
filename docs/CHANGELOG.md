@@ -1,5 +1,18 @@
 # Changelog — PagaFácil
 
+## D22 - 2026-04-05 - Dashboard route + permissões Claude Code
+### Feito
+- [x] Adicionado `app/(dashboard)/page.tsx` — rota raiz do dashboard group (cópia do dashboard/page.tsx)
+- [x] Atualizado `.claude/settings.json` — novas permissões auto-aprovadas (ls config, npx web-push)
+
+### Pendente
+- [ ] Avaliar se a duplicação dashboard/page.tsx vs page.tsx é intencional ou deve ser consolidada
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D21 - 2026-04-04 - Web Push Notifications na PWA
 ### Feito
 - [x] Instalação do `web-push` + `@types/web-push`
