@@ -86,8 +86,8 @@ app/
     settings/                # Configuracoes (Telegram, lembretes)
   api/
     auth/[...nextauth]/      # NextAuth route handlers
-    cron/reminders/          # Cron job D-1 lembretes
-    cron/monthly-report/     # Relatorio mensal
+    cron/reminders/          # Cron job D-1 lembretes (auth via CRON_SECRET)
+    cron/monthly-report/     # Relatorio mensal (auth via CRON_SECRET)
     telegram/webhook/        # Bot Telegram webhook
   invite/family/             # Aceitar convite Family Link
 components/                  # Componentes React
@@ -116,7 +116,7 @@ npx vercel deploy --prod # Deploy para Vercel
 - Cron endpoints protegidos por Bearer token + header Vercel
 - Importacao de planilha re-validada server-side
 - CSRF protection via `allowedOrigins`
-- Veja `CODE_REVIEW_AND_EVOLUTION_GUIDE.md` para o review completo
+- Veja `docs/specs/CODE_REVIEW_AND_EVOLUTION_GUIDE.md` para o review completo
 
 ## Status
 
