@@ -1,9 +1,10 @@
 # Changelog — PagaFácil
 
-## D22 - 2026-04-05 - Cleanup + permissões Claude Code
+## D22 - 2026-04-05 - Cleanup + permissões Claude Code + fix cron auth
 ### Feito
 - [x] Atualizado `.claude/settings.json` — novas permissões auto-aprovadas (ls config, npx web-push)
 - [x] Removido `app/(dashboard)/page.tsx` duplicado (resquício do move D19, rota correta é `dashboard/page.tsx`)
+- [x] **Fix: cron reminders e monthly-report retornavam 401** — check de header `x-vercel-cron` inexistente bloqueava toda execução na Vercel
 
 ### Bugs Conhecidos
 - Nenhum
