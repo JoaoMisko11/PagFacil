@@ -29,40 +29,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           </div>
 
-          {/* Benefícios */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128203;</div>
-              <p className="text-sm font-medium text-foreground">Cadastre contas</p>
-              <p className="text-xs text-muted-foreground">Valor, vencimento e categoria</p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128200;</div>
-              <p className="text-sm font-medium text-foreground">Dashboard inteligente</p>
-              <p className="text-xs text-muted-foreground">Gráficos, calendário e insights</p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128276;</div>
-              <p className="text-sm font-medium text-foreground">Lembretes</p>
-              <p className="text-xs text-muted-foreground">Email e Telegram no D-1</p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#129302;</div>
-              <p className="text-sm font-medium text-foreground">Bot Telegram</p>
-              <p className="text-xs text-muted-foreground">Crie e pague contas pelo chat</p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128106;</div>
-              <p className="text-sm font-medium text-foreground">Family Link</p>
-              <p className="text-xs text-muted-foreground">Compartilhe contas com alguém</p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 text-center">
-              <div className="mb-1 text-2xl">&#128196;</div>
-              <p className="text-sm font-medium text-foreground">Importe planilha</p>
-              <p className="text-xs text-muted-foreground">Excel ou CSV em lote</p>
-            </div>
-          </div>
-
           {/* Erro de auth (ex: OAuthAccountNotLinked) */}
           {authError === "OAuthAccountNotLinked" && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
