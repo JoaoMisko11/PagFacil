@@ -4,11 +4,14 @@ import nodemailer from "nodemailer"
 import webpush from "web-push"
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
 
-webpush.setVapidDetails(
-  "mailto:" + (process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? "noreply@pagafacil.app"),
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+function getWebPush() {
+  webpush.setVapidDetails(
+    "mailto:" + (process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? "noreply@pagafacil.app"),
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  )
+  return webpush
+}
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -164,7 +167,7 @@ export async function GET(request: Request) {
 
       for (const sub of userData.pushSubscriptions) {
         try {
-          await webpush.sendNotification(
+          await getWebPush().sendNotification(
             {
               endpoint: sub.endpoint,
               keys: { p256dh: sub.p256dh, auth: sub.auth },
