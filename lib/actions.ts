@@ -969,3 +969,168 @@ export async function removePushSubscription(endpoint: string) {
   revalidatePath("/settings")
   return { ok: true }
 }
+
+// --- Enviar lembretes agora ---
+
+export async function sendMyRemindersNow(): Promise<ActionState> {
+  const userId = await getUserId()
+
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: {
+      email: true,
+      name: true,
+      telegramChatId: true,
+      notifyVia: true,
+      pushSubscriptions: { select: { endpoint: true, p256dh: true, auth: true } },
+    },
+  })
+
+  const channels = user.notifyVia.split(",")
+
+  // Busca contas pendentes: vencidas + vencendo nos próximos 7 dias
+  const now = new Date()
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400000)
+
+  const bills = await db.bill.findMany({
+    where: {
+      userId,
+      status: "PENDING",
+      deletedAt: null,
+      dueDate: { lte: sevenDaysFromNow },
+    },
+    orderBy: { dueDate: "asc" },
+  })
+
+  if (bills.length === 0) {
+    return { message: "Nenhuma conta pendente para notificar!" }
+  }
+
+  const count = bills.length
+  const today = new Date(now.toISOString().split("T")[0] + "T00:00:00Z")
+  const overdue = bills.filter((b) => b.dueDate < today)
+  const upcoming = bills.filter((b) => b.dueDate >= today)
+
+  function formatBillLine(b: { supplier: string; amount: number; dueDate: Date }) {
+    const date = b.dueDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+    return `${b.supplier} — R$ ${(b.amount / 100).toFixed(2).replace(".", ",")} (${date})`
+  }
+
+  let sent = 0
+  const errors: string[] = []
+
+  // Telegram
+  if (channels.includes("telegram") && user.telegramChatId) {
+    const { escapeHtml } = await import("@/lib/telegram")
+    const safeName = user.name ? escapeHtml(user.name) : null
+    let msg = `Olá${safeName ? `, ${safeName}` : ""}!\n\n`
+
+    if (overdue.length > 0) {
+      msg += `<b>Vencidas (${overdue.length}):</b>\n`
+      msg += overdue.map((b) => `• ${escapeHtml(formatBillLine(b))}`).join("\n")
+      msg += "\n\n"
+    }
+    if (upcoming.length > 0) {
+      msg += `<b>Próximos 7 dias (${upcoming.length}):</b>\n`
+      msg += upcoming.map((b) => `• ${escapeHtml(formatBillLine(b))}`).join("\n")
+    }
+
+    try {
+      await sendTelegramMessage(user.telegramChatId, msg)
+      sent++
+    } catch {
+      errors.push("Telegram")
+    }
+  }
+
+  // Email
+  if (channels.includes("email")) {
+    try {
+      const nodemailer = (await import("nodemailer")).default
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
+      })
+
+      let text = `Olá${user.name ? `, ${user.name}` : ""}!\n\n`
+      if (overdue.length > 0) {
+        text += `VENCIDAS (${overdue.length}):\n`
+        text += overdue.map((b) => `• ${formatBillLine(b)}`).join("\n")
+        text += "\n\n"
+      }
+      if (upcoming.length > 0) {
+        text += `PRÓXIMOS 7 DIAS (${upcoming.length}):\n`
+        text += upcoming.map((b) => `• ${formatBillLine(b)}`).join("\n")
+      }
+      text += `\n\nAcesse: ${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`
+
+      const subject = overdue.length > 0
+        ? `${overdue.length} conta${overdue.length > 1 ? "s" : ""} vencida${overdue.length > 1 ? "s" : ""} + ${upcoming.length} próxima${upcoming.length > 1 ? "s" : ""}`
+        : `${count} conta${count > 1 ? "s" : ""} pendente${count > 1 ? "s" : ""}`
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM ?? process.env.SMTP_USER,
+        to: user.email,
+        subject,
+        text,
+      })
+      sent++
+    } catch {
+      errors.push("Email")
+    }
+  }
+
+  // Push
+  if (channels.includes("push") && user.pushSubscriptions.length > 0) {
+    try {
+      const webpush = (await import("web-push")).default
+      webpush.setVapidDetails(
+        "mailto:" + (process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? "noreply@pagafacil.app"),
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+        process.env.VAPID_PRIVATE_KEY!
+      )
+
+      const pushBody = overdue.length > 0
+        ? `${overdue.length} vencida${overdue.length > 1 ? "s" : ""}, ${upcoming.length} próxima${upcoming.length > 1 ? "s" : ""}`
+        : `${count} conta${count > 1 ? "s" : ""} pendente${count > 1 ? "s" : ""} nos próximos 7 dias`
+
+      const payload = JSON.stringify({
+        title: "PagaFácil - Resumo",
+        body: pushBody,
+        tag: "pagafacil-manual-reminder",
+        url: "/pagamentos",
+      })
+
+      for (const sub of user.pushSubscriptions) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
+          sent++
+        } catch (err: unknown) {
+          const statusCode = (err as { statusCode?: number }).statusCode
+          if (statusCode === 410 || statusCode === 404) {
+            await db.pushSubscription.delete({ where: { endpoint: sub.endpoint } }).catch(() => {})
+          }
+        }
+      }
+    } catch {
+      errors.push("Push")
+    }
+  }
+
+  if (sent === 0 && errors.length > 0) {
+    return { errors: { _form: [`Falha ao enviar via: ${errors.join(", ")}`] } }
+  }
+
+  const channelNames = []
+  if (channels.includes("telegram") && user.telegramChatId) channelNames.push("Telegram")
+  if (channels.includes("email")) channelNames.push("Email")
+  if (channels.includes("push") && user.pushSubscriptions.length > 0) channelNames.push("Push")
+
+  return {
+    message: `Lembrete enviado! ${count} conta${count > 1 ? "s" : ""} via ${channelNames.join(", ")}${errors.length > 0 ? ` (falha em: ${errors.join(", ")})` : ""}`
+  }
+}

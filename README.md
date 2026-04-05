@@ -19,7 +19,8 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
 - **Cadastro em lote** — tabela editavel para criar varias contas de uma vez
 - **Family Link** — compartilhe contas com outra pessoa via link de convite
-- **Lembretes D-1** — notificacao automatica 1 dia antes por email, Telegram e/ou push notification (PWA)
+- **Lembretes D-1** — notificacao automatica 1 dia antes (8h BRT) por email, Telegram e/ou push notification (PWA)
+- **Enviar lembrete agora** — botao nas configuracoes para disparar resumo de contas pendentes na hora
 - **Bot Telegram** — @pagafacil_bot com /contas, /nova, /pagar, /ajuda
 - **Dark mode** — toggle light/dark/system sem flash
 - **Lixeira** — contas deletadas ficam recuperaveis por 30 dias

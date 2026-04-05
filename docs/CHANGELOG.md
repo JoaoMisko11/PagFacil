@@ -7,6 +7,7 @@
 - [x] **Fix: cron reminders e monthly-report retornavam 401** — check de header `x-vercel-cron` inexistente bloqueava toda execução na Vercel
 - [x] Removido grid de benefícios/funcionalidades da página de login — agora que existe landing page separada, login fica limpo e focado
 - [x] **UX: loading states em toda a app** — adicionado `loading.tsx` (skeletons) para pagamentos, settings, family, trash; spinner no botão "Paga"/"Desfazer" do BillCard; spinner no "Deletar" do BillManageCard; opacity + disabled nas PagamentosTabs durante transição; spinner no input de busca do BillFilters durante filtragem
+- [x] **Feature: botão "Enviar lembrete agora"** na página de settings — dispara notificações manuais (vencidas + próximos 7 dias) via todos os canais configurados (email, telegram, push), com feedback via toast
 
 ### Bugs Conhecidos
 - Nenhum

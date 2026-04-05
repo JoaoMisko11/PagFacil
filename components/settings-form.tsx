@@ -1,13 +1,14 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { updateNotificationPreferences } from "@/lib/actions"
+import { updateNotificationPreferences, sendMyRemindersNow } from "@/lib/actions"
 import type { ActionState } from "@/lib/actions"
 import { PushToggle } from "@/components/push-toggle"
+import { toast } from "sonner"
 
 interface SettingsFormProps {
   telegramChatId: string
@@ -24,10 +25,12 @@ export function SettingsForm({
     updateNotificationPreferences,
     {} as ActionState
   )
+  const [sending, startSending] = useTransition()
 
   const channels = notifyVia.split(",")
 
   return (
+    <div className="space-y-4">
     <Card>
       <CardHeader>
         <CardTitle>Notificações</CardTitle>
@@ -129,5 +132,42 @@ export function SettingsForm({
         </form>
       </CardContent>
     </Card>
+
+    {/* Enviar lembrete agora */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Enviar lembrete agora</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Dispare um resumo das suas contas pendentes (vencidas + próximos 7 dias) pelos canais configurados acima.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Lembrete automático: todo dia às 8h (horário de Brasília) para contas que vencem no dia seguinte.
+        </p>
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={sending}
+          onClick={() => {
+            startSending(async () => {
+              const result = await sendMyRemindersNow()
+              if (result.message) toast.success(result.message)
+              if (result.errors) toast.error(result.errors._form?.[0] ?? "Erro ao enviar")
+            })
+          }}
+        >
+          {sending ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Enviando...
+            </span>
+          ) : (
+            "Enviar lembrete agora"
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+    </div>
   )
 }
