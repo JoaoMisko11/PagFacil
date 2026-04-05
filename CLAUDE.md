@@ -6,7 +6,7 @@ PagaFácil é um MVP de contas a pagar para MEIs e pessoas físicas no Brasil. W
 
 ## PRD
 
-O PRD completo está em `docs/PRD_Fase1.md`. Leia esse arquivo antes de qualquer implementação — ele contém user stories, requirements, acceptance criteria e tech stack.
+O PRD completo está em `docs/specs/PagaFacil_PRD_Fase1.md`. Leia esse arquivo antes de qualquer implementação — ele contém user stories, requirements, acceptance criteria e tech stack.
 
 ## Tech Stack (não mude sem perguntar)
 
@@ -41,7 +41,8 @@ pagafacil/
 ├── prisma/
 │   └── schema.prisma
 ├── docs/
-│   └── PRD_Fase1.md
+│   ├── specs/                    # PRD, UX audit, code review, plans
+│   └── BACKLOG.md
 └── package.json
 ```
 
@@ -191,7 +192,7 @@ Este projeto roda em múltiplas sessões do Claude Code ao longo de 10 dias. Par
 ### Arquivos de Memória (leia SEMPRE no início de cada sessão)
 
 1. **`CLAUDE.md`** (este arquivo) — instruções permanentes, tech stack, schema, convenções
-2. **`docs/PRD_Fase1.md`** — source of truth do escopo, user stories, acceptance criteria
+2. **`docs/specs/PagaFacil_PRD_Fase1.md`** — source of truth do escopo, user stories, acceptance criteria
 3. **`docs/DECISIONS.md`** — log de todas as decisões técnicas tomadas durante o projeto
 4. **`docs/CHANGELOG.md`** — o que foi feito em cada dia/sessão, com status
 
