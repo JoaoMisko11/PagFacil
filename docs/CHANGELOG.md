@@ -12,6 +12,12 @@
   - `__tests__/telegram.test.ts` — 7 testes (escapeHtml)
   - `__tests__/recurrence.test.ts` — 11 testes (computeNextDueDate WEEKLY/BIWEEKLY/MONTHLY/YEARLY, edge cases Feb 29, generateFutureDates com horizonte e endDate)
   - `__tests__/bill-schema.test.ts` — 16 testes (validação Zod, conversão centavos, categorias, recorrência)
+  - `__tests__/telegram-utils.test.ts` — 28 testes (parseDateBR, parseAmount, parseNovaArgs, formatCurrencySimple)
+  - `__tests__/telegram-send.test.ts` — 3 testes (sendTelegramMessage com mock de fetch)
+  - `__tests__/constants.test.ts` — 9 testes (CATEGORIES, CATEGORY_MAP, RECURRENCE_FREQUENCIES)
+  - `__tests__/utils.test.ts` — 6 testes (cn tailwind-merge)
+- [x] **Refactor: extração de parsing Telegram** — funções puras `parseDateBR`, `parseAmount`, `parseNovaArgs`, `formatCurrencySimple` extraídas para `lib/telegram-utils.ts`; webhook simplificado usando `parseNovaArgs`
+- [x] Cobertura de testes: 97.87% statements, 100% functions, 100% lines (8 suites, 91 testes)
 
 ### Bugs Conhecidos
 - Nenhum

@@ -38,7 +38,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 | Email | Nodemailer + Gmail SMTP |
 | Bot | Telegram Bot API (fetch nativo, zero deps) |
 | Deploy | Vercel (free tier) |
-| Testes | Vitest (45 testes unitários) |
+| Testes | Vitest (91 testes, ~98% cobertura) |
 | Linguagem | TypeScript (strict mode) |
 
 ## Rodando localmente

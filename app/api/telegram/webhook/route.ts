@@ -2,23 +2,10 @@ import { NextResponse } from "next/server"
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram"
 import { db } from "@/lib/db"
 import { getFamilyUserIds } from "@/lib/family"
-import type { Category } from "@prisma/client"
+import { parseNovaArgs, formatCurrencySimple } from "@/lib/telegram-utils"
 
 // Estado temporário para fluxo /pagar (chatId → lista de bills)
 const paySessionMap = new Map<string, { billIds: string[]; expires: number }>()
-
-const CATEGORIES: Category[] = [
-  "FIXO",
-  "VARIAVEL",
-  "IMPOSTO",
-  "FORNECEDOR",
-  "ASSINATURA",
-  "OUTRO",
-]
-
-function formatCurrency(cents: number): string {
-  return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`
-}
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
@@ -59,7 +46,7 @@ async function handleContas(chatId: string, userId: string) {
   const lines = bills.map((b, i) => {
     const emoji = b.status === "OVERDUE" ? "🔴" : "🟡"
     const dateStr = formatDate(b.dueDate)
-    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrency(b.amount)} — ${dateStr}`
+    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrencySimple(b.amount)} — ${dateStr}`
   })
 
   const overdue = bills.filter((b) => b.status === "OVERDUE").length
@@ -83,11 +70,8 @@ async function handleNova(chatId: string, userId: string, args: string) {
     return
   }
 
-  // Parse: Fornecedor Valor DD/MM/AAAA [Categoria]
-  // O fornecedor pode ter espaços, então pegamos valor e data de trás pra frente
-  const parts = args.split(/\s+/)
-
-  if (parts.length < 3) {
+  const parsed = parseNovaArgs(args)
+  if (!parsed) {
     await sendTelegramMessage(
       chatId,
       "❌ Formato inválido.\n\nUse: <code>/nova Fornecedor 150,00 15/04/2026 FIXO</code>"
@@ -95,57 +79,7 @@ async function handleNova(chatId: string, userId: string, args: string) {
     return
   }
 
-  // Tenta detectar categoria (último item, se for válida)
-  let category: Category = "OUTRO"
-  const lastUpper = parts[parts.length - 1].toUpperCase()
-  if (CATEGORIES.includes(lastUpper as Category)) {
-    category = lastUpper as Category
-    parts.pop()
-  }
-
-  if (parts.length < 3) {
-    await sendTelegramMessage(
-      chatId,
-      "❌ Formato inválido.\n\nUse: <code>/nova Fornecedor 150,00 15/04/2026</code>"
-    )
-    return
-  }
-
-  // Data é o último item agora
-  const dateStr = parts.pop()!
-  const dateMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
-  if (!dateMatch) {
-    await sendTelegramMessage(
-      chatId,
-      "❌ Data inválida. Use o formato <b>DD/MM/AAAA</b> (ex: 15/04/2026)"
-    )
-    return
-  }
-  const [, dd, mm, yyyy] = dateMatch
-  const dueDate = new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`)
-  if (isNaN(dueDate.getTime())) {
-    await sendTelegramMessage(chatId, "❌ Data inválida.")
-    return
-  }
-
-  // Valor é o último item agora
-  const valorStr = parts.pop()!
-  const cleaned = valorStr.replace(/[^\d,\.]/g, "").replace(",", ".")
-  const amount = Math.round(parseFloat(cleaned) * 100)
-  if (isNaN(amount) || amount <= 0) {
-    await sendTelegramMessage(
-      chatId,
-      "❌ Valor inválido. Use formato como <b>150,00</b> ou <b>1500</b>"
-    )
-    return
-  }
-
-  // O que sobrou é o nome do fornecedor
-  const supplier = parts.join(" ").trim()
-  if (!supplier) {
-    await sendTelegramMessage(chatId, "❌ Nome do fornecedor é obrigatório.")
-    return
-  }
+  const { supplier, amount, dueDate, category } = parsed
 
   try {
     await db.bill.create({
@@ -162,7 +96,7 @@ async function handleNova(chatId: string, userId: string, args: string) {
       chatId,
       `✅ Conta criada!\n\n` +
         `<b>${escapeHtml(supplier)}</b>\n` +
-        `Valor: ${formatCurrency(amount)}\n` +
+        `Valor: ${formatCurrencySimple(amount)}\n` +
         `Vencimento: ${formatDate(dueDate)}\n` +
         `Categoria: ${category}`
     )
@@ -192,7 +126,7 @@ async function handlePagar(chatId: string, userId: string) {
 
   const lines = bills.map((b, i) => {
     const emoji = b.status === "OVERDUE" ? "🔴" : "🟡"
-    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrency(b.amount)} — ${formatDate(b.dueDate)}`
+    return `${emoji} <b>${i + 1}.</b> ${escapeHtml(b.supplier)} — ${formatCurrencySimple(b.amount)} — ${formatDate(b.dueDate)}`
   })
 
   // Salva sessão (expira em 5 min)
@@ -298,7 +232,7 @@ async function handlePaySelection(chatId: string, userId: string, num: number) {
 
     await sendTelegramMessage(
       chatId,
-      `✅ <b>${escapeHtml(bill.supplier)}</b> — ${formatCurrency(bill.amount)} marcada como paga!`
+      `✅ <b>${escapeHtml(bill.supplier)}</b> — ${formatCurrencySimple(bill.amount)} marcada como paga!`
     )
   } catch (error) {
     console.error("Erro ao marcar como paga via Telegram:", error)

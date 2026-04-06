@@ -743,7 +743,7 @@
           <div class="tech-logo" style="background: #729b1b; color: #fff;">Vi</div>
           <div class="tech-info">
             <h4>Vitest</h4>
-            <p>45 testes unitarios, path aliases</p>
+            <p>91 testes, ~98% cobertura, pre-commit hook</p>
           </div>
         </div>
       </div>
@@ -986,6 +986,7 @@ pagafacil/
 +-- lib/
 |   +-- actions.ts              <span style="color:var(--text-light);"># Server Actions (CRUD, mark paid, import)</span>
 |   +-- bill-utils.ts           <span style="color:var(--text-light);"># Funcoes puras: billSchema, recorrencia</span>
+|   +-- telegram-utils.ts      <span style="color:var(--text-light);"># Parsing comandos Telegram (datas BR, valores)</span>
 |   +-- auth.ts                 <span style="color:var(--text-light);"># NextAuth config (3 providers)</span>
 |   +-- constants.ts            <span style="color:var(--text-light);"># Categorias, enums</span>
 |   +-- db.ts                   <span style="color:var(--text-light);"># Prisma client singleton</span>
@@ -996,6 +997,10 @@ pagafacil/
 |   +-- telegram.test.ts        <span style="color:var(--text-light);"># Testes escapeHtml</span>
 |   +-- recurrence.test.ts      <span style="color:var(--text-light);"># Testes computeNextDueDate, generateFutureDates</span>
 |   +-- bill-schema.test.ts     <span style="color:var(--text-light);"># Testes validacao Zod billSchema</span>
+|   +-- telegram-utils.test.ts <span style="color:var(--text-light);"># Testes parsing comandos Telegram</span>
+|   +-- telegram-send.test.ts  <span style="color:var(--text-light);"># Testes sendTelegramMessage (mock)</span>
+|   +-- constants.test.ts      <span style="color:var(--text-light);"># Testes CATEGORIES, CATEGORY_MAP</span>
+|   +-- utils.test.ts          <span style="color:var(--text-light);"># Testes cn (tailwind-merge)</span>
 +-- prisma/
 |   +-- schema.prisma           <span style="color:var(--text-light);"># Schema do banco de dados</span>
 +-- docs/
