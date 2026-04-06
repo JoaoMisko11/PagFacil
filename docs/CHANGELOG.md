@@ -1,5 +1,14 @@
 # Changelog — PagaFácil
 
+## D23 - 2026-04-06 - UX mobile menu hambúrguer
+### Feito
+- [x] **UX: menu hambúrguer no mobile** — navegação superior colapsa em menu dropdown em telas < md (768px). Links de navegação, controles (tema, modo display) e botão sair ficam dentro do menu sanduíche. Desktop mantém layout horizontal original.
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D22 - 2026-04-05 - Cleanup + permissões Claude Code + fix cron auth
 ### Feito
 - [x] Atualizado `.claude/settings.json` — novas permissões auto-aprovadas (ls config, npx web-push)

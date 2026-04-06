@@ -86,15 +86,16 @@
 | F-02 | Modelo de planilha para download (template Excel/CSV) | CHANGELOG D12 | 1-2h |
 | F-03 | Workspaces multi-usuario (design completo em `docs/specs/PLAN_workspaces.md`) | PLAN_workspaces | 38-50h |
 | F-04 | Scan de boleto via camera (OCR — Google Vision API) | PRD Fase1 (P2) | 20-40h |
-| F-05 | Pagamento Pix direto do app (deep link → BaaS real) | PRD Fase1 (P3) | 40-80h |
-| F-06 | Conexao bancaria via Open Finance (Pluggy/Belvo) | PRD Fase1 (P3) | 40-80h |
-| F-07 | Notificacoes via WhatsApp (API oficial) | PRD Fase1 (P2) | 20-30h |
-| F-08 | Categorizacao automatica por IA (precisa dados historicos) | PRD Fase1 (P4) | 20-40h |
-| F-09 | Exportar dados para Excel/CSV | - | 4-6h |
-| F-10 | Escolher horario dos lembretes | - | 2-4h |
-| F-11 | Resumo semanal por email | - | 4-6h |
-| F-12 | App nativo (React Native ou Capacitor) | PRD Fase1 (P2+) | 80-120h |
-| F-13 | Monetizacao (tier pago) | PRD Fase1 (P3) | - |
+| F-05 | Informacoes de pagamento na conta (metodo, chave PIX, codigo de barras) + botao copiar | Conversa D23 | 6-8h |
+| F-06 | Pagamento Pix direto do app (deep link → BaaS real) | PRD Fase1 (P3) | 40-80h |
+| F-07 | Conexao bancaria via Open Finance (Pluggy/Belvo) | PRD Fase1 (P3) | 40-80h |
+| F-08 | Notificacoes via WhatsApp (API oficial) | PRD Fase1 (P2) | 20-30h |
+| F-09 | Categorizacao automatica por IA (precisa dados historicos) | PRD Fase1 (P4) | 20-40h |
+| F-10 | Exportar dados para Excel/CSV | - | 4-6h |
+| F-11 | Escolher horario dos lembretes | - | 2-4h |
+| F-12 | Resumo semanal por email | - | 4-6h |
+| F-13 | App nativo (React Native ou Capacitor) | PRD Fase1 (P2+) | 80-120h |
+| F-14 | Monetizacao (tier pago) | PRD Fase1 (P3) | - |
 
 ---
 
