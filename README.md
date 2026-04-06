@@ -38,6 +38,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 | Email | Nodemailer + Gmail SMTP |
 | Bot | Telegram Bot API (fetch nativo, zero deps) |
 | Deploy | Vercel (free tier) |
+| Testes | Vitest (45 testes unitários) |
 | Linguagem | TypeScript (strict mode) |
 
 ## Rodando localmente
@@ -103,6 +104,8 @@ docs/                        # PRD, changelog, decisoes, arquitetura
 ```bash
 npm run dev              # Dev server
 npm run build            # Build de producao
+npm test                 # Rodar testes (vitest run)
+npm run test:watch       # Testes em modo watch
 npx prisma studio        # Editor visual do banco
 npx prisma migrate dev   # Nova migration
 npx vercel deploy --prod # Deploy para Vercel

@@ -739,6 +739,13 @@
             <p>SMTP, magic links, lembretes</p>
           </div>
         </div>
+        <div class="tech-item">
+          <div class="tech-logo" style="background: #729b1b; color: #fff;">Vi</div>
+          <div class="tech-info">
+            <h4>Vitest</h4>
+            <p>45 testes unitarios, path aliases</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -978,11 +985,17 @@ pagafacil/
 |   +-- ui/                     <span style="color:var(--text-light);"># shadcn/ui components</span>
 +-- lib/
 |   +-- actions.ts              <span style="color:var(--text-light);"># Server Actions (CRUD, mark paid, import)</span>
+|   +-- bill-utils.ts           <span style="color:var(--text-light);"># Funcoes puras: billSchema, recorrencia</span>
 |   +-- auth.ts                 <span style="color:var(--text-light);"># NextAuth config (3 providers)</span>
 |   +-- constants.ts            <span style="color:var(--text-light);"># Categorias, enums</span>
 |   +-- db.ts                   <span style="color:var(--text-light);"># Prisma client singleton</span>
 |   +-- format.ts               <span style="color:var(--text-light);"># Formatacao moeda, data, categoria</span>
 |   +-- telegram.ts             <span style="color:var(--text-light);"># Wrapper Telegram Bot API</span>
++-- __tests__/
+|   +-- format.test.ts          <span style="color:var(--text-light);"># Testes formatacao (moeda, data, categoria)</span>
+|   +-- telegram.test.ts        <span style="color:var(--text-light);"># Testes escapeHtml</span>
+|   +-- recurrence.test.ts      <span style="color:var(--text-light);"># Testes computeNextDueDate, generateFutureDates</span>
+|   +-- bill-schema.test.ts     <span style="color:var(--text-light);"># Testes validacao Zod billSchema</span>
 +-- prisma/
 |   +-- schema.prisma           <span style="color:var(--text-light);"># Schema do banco de dados</span>
 +-- docs/

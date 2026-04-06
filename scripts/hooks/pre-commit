@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Pre-commit hook: roda os testes antes de permitir o commit.
+# Se algum teste falhar, o commit é bloqueado.
+#
+# Instalar: npm run setup-hooks  (ou  cp scripts/hooks/* .git/hooks/ && chmod +x .git/hooks/*)
+#
+
+echo "🧪 Rodando testes..."
+npm test 2>&1
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Testes falhando — commit bloqueado."
+  echo "   Corrija os testes e tente novamente."
+  echo ""
+  echo "   Para pular (emergência): git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ Testes passaram."
+exit 0

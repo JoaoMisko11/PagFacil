@@ -1,8 +1,17 @@
 # Changelog — PagaFácil
 
-## D23 - 2026-04-06 - UX mobile menu hambúrguer
+## D23 - 2026-04-06 - Testes automatizados + UX mobile
 ### Feito
 - [x] **UX: menu hambúrguer no mobile** — navegação superior colapsa em menu dropdown em telas < md (768px). Links de navegação, controles (tema, modo display) e botão sair ficam dentro do menu sanduíche. Desktop mantém layout horizontal original.
+- [x] **Testes automatizados com Vitest** — setup completo de testes unitários (45 testes, 4 suites)
+  - Instalação do Vitest + @vitejs/plugin-react como devDependencies
+  - `vitest.config.mts` com path aliases (@/)
+  - Scripts `npm test` (run) e `npm run test:watch`
+  - Extração de funções puras para `lib/bill-utils.ts` (billSchema, computeNextDueDate, generateFutureDates) para testabilidade sem deps do Next.js
+  - `__tests__/format.test.ts` — 11 testes (formatCurrency, formatDate, formatDateInput, formatCategory)
+  - `__tests__/telegram.test.ts` — 7 testes (escapeHtml)
+  - `__tests__/recurrence.test.ts` — 11 testes (computeNextDueDate WEEKLY/BIWEEKLY/MONTHLY/YEARLY, edge cases Feb 29, generateFutureDates com horizonte e endDate)
+  - `__tests__/bill-schema.test.ts` — 16 testes (validação Zod, conversão centavos, categorias, recorrência)
 
 ### Bugs Conhecidos
 - Nenhum

@@ -62,10 +62,21 @@ pagafacil/
 
 ```bash
 npm run dev          # dev server
+npm test             # rodar testes (vitest run) — OBRIGATÓRIO antes de commit
+npm run test:watch   # testes em modo watch (durante dev)
 npx prisma studio    # visual DB editor
 npx prisma migrate dev --name <nome>  # nova migration
 npx prisma generate  # regenerar client após schema change
 ```
+
+## Testes (Vitest)
+
+- **Framework:** Vitest com path aliases (`@/`)
+- **Testes em:** `__tests__/*.test.ts`
+- **Funções testáveis:** Extrair lógica pura para `lib/*-utils.ts` (sem imports de `next/`, `next-auth`, Prisma). O arquivo `lib/bill-utils.ts` é o modelo — contém `billSchema`, `computeNextDueDate`, `generateFutureDates`.
+- **Regra:** Toda nova função pura em `lib/` deve ter teste correspondente em `__tests__/`. Ao modificar uma função existente, atualize o teste.
+- **Hook pre-commit:** Roda `npm test` automaticamente — commit é bloqueado se testes falham.
+- **Não mocke o banco** — teste funções puras isoladamente. Lógica que depende do Prisma/auth será testada em fase posterior.
 
 ## Variáveis de Ambiente (.env.local)
 
@@ -84,9 +95,10 @@ EMAIL_FROM=noreply@pagafacil.app
 2. **Não crie abstrações prematuras** — código direto e simples, refatora depois
 3. **Não use microserviços** — tudo é um monolith Next.js
 4. **Não use Redux, Zustand ou state management externo** — React state + Server Components bastam
-5. **Não crie testes unitários ainda** — nesta fase, testes manuais são suficientes
-6. **Comite frequentemente** com mensagens descritivas em português
-7. **Pergunte antes de decisões arquiteturais** que não estejam no PRD
+5. **Toda evolução de código deve ter testes** — ao criar ou modificar lógica em `lib/`, adicione/atualize testes em `__tests__/`. Funções puras vão em `lib/bill-utils.ts` (ou novos `lib/*-utils.ts`) para serem testáveis sem deps do Next.js.
+6. **Rode `npm test` antes de todo commit e push** — nunca commite com testes falhando. O hook de pre-commit roda os testes automaticamente.
+7. **Comite frequentemente** com mensagens descritivas em português
+8. **Pergunte antes de decisões arquiteturais** que não estejam no PRD
 
 ## Schema Prisma (referência)
 
@@ -212,8 +224,13 @@ Este projeto roda em múltiplas sessões do Claude Code ao longo de 10 dias. Par
 
 ### Checklist Obrigatório Antes de Commit/Push
 
-Existe um **git hook de pre-push** (`scripts/hooks/pre-push`) que bloqueia o push se código foi alterado sem atualizar os docs. Antes de cada commit que altera código, verifique:
+Existem **git hooks** que bloqueiam commit/push se algo estiver errado:
+- **pre-commit** (`scripts/hooks/pre-commit`): roda `npm test` — bloqueia commit se testes falham
+- **pre-push** (`scripts/hooks/pre-push`): verifica se docs foram atualizados junto com código
 
+Antes de cada commit que altera código, verifique:
+
+- [ ] `npm test` — todos os testes passando (o hook faz isso automaticamente)
 - [ ] `docs/CHANGELOG.md` — registrar o que mudou (novo bloco ou atualizar o do dia)
 - [ ] `README.md` — features, estrutura de pastas, tech stack, env vars
 - [ ] `docs/arquitetura.html` — funcionalidades, modelo de dados, rotas, stats, fluxo do usuário
