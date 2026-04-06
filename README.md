@@ -25,7 +25,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Dark mode** — toggle light/dark/system sem flash
 - **Lixeira** — contas deletadas ficam recuperaveis por 30 dias
 - **PWA com push** — instalavel no celular, push notifications nativas, mobile-first (360px+)
-- **UX avancada** — optimistic UI, skeleton loading em todas as paginas, spinners nos botoes de acao, confetti, transicoes, modo compacto, atalhos de teclado
+- **UX avancada** — optimistic UI, skeleton loading em todas as paginas, spinners nos botoes de acao, confetti, transicoes, modo compacto, atalhos de teclado, menu hamburguer responsivo no mobile
 
 ## Tech Stack
 
