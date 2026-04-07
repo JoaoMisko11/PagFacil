@@ -1,5 +1,20 @@
 # Changelog — PagaFácil
 
+## D24 - 2026-04-07 - Melhoria UX: navegação e Nova Conta
+### Feito
+- [x] **Unificação Nova Conta** — Lote e Importar agora são tabs dentro de `/bills/new` (Manual/Em lote/Importar), removidos do header de Contas
+- [x] **Renomeação nav** — "Pagamentos" → "A Pagar", "Contas" → "Minhas Contas" para diferenciar intenção (ação vs gestão)
+- [x] **Nav simplificada** — Família e Lembretes movidos para dropdown menu; nome do usuário ao lado do logo
+- [x] **Dropdown menu com animação** — scale+fade, fecha ao clicar fora ou ao navegar
+- [x] **Botão Voltar reposicionado** — título à esquerda, voltar à direita nas páginas de nova conta e edição
+- [x] **Lixeira discreta** — de botão para link de texto no header de Minhas Contas
+- [x] **Fix "use server" exports** — types extraídos de `actions.ts` para `lib/action-types.ts`
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D23 - 2026-04-06 - Testes automatizados + UX mobile
 ### Feito
 - [x] **UX: menu hambúrguer no mobile** — navegação superior colapsa em menu dropdown em telas < md (768px). Links de navegação, controles (tema, modo display) e botão sair ficam dentro do menu sanduíche. Desktop mantém layout horizontal original.

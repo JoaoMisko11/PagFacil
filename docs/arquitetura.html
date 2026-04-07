@@ -574,7 +574,7 @@
         <div class="card">
           <div class="card-icon icon-green">&#9889;</div>
           <h3>UX World-Class (Fase 2)</h3>
-          <p>Optimistic UI ao marcar como paga (feedback instantaneo), Suspense streaming no dashboard (3 boundaries com skeletons), loading indicators na busca, drag-and-drop real na importacao, tabela responsiva (cards no mobile), onboarding em 3 passos com lembretes, pagina de lixeira com restauracao, hierarchy visual nos summary cards com icones e cores de urgencia, e menu hamburguer responsivo no mobile (navegacao colapsa em dropdown para telas pequenas).</p>
+          <p>Optimistic UI ao marcar como paga (feedback instantaneo), Suspense streaming no dashboard (3 boundaries com skeletons), loading indicators na busca, drag-and-drop real na importacao, tabela responsiva (cards no mobile), onboarding em 3 passos com lembretes, pagina de lixeira com restauracao, hierarchy visual nos summary cards com icones e cores de urgencia, dropdown menu com animacao (Familia/Lembretes/Sair), nome do usuario na nav, cadastro unificado (manual/lote/importar em tabs).</p>
         </div>
 
         <div class="card">
@@ -616,8 +616,8 @@
             <div class="arch-layer-title">Frontend — React Server Components + Client Components</div>
             <div class="arch-items">
               <div class="arch-item highlight">Dashboard — Resumo (RSC)</div>
-              <div class="arch-item highlight">Pagamentos — Acao (RSC)</div>
-              <div class="arch-item highlight">Contas — Gestao (RSC)</div>
+              <div class="arch-item highlight">A Pagar — Acao (RSC)</div>
+              <div class="arch-item highlight">Minhas Contas — Gestao (RSC)</div>
               <div class="arch-item">Formularios (Client)</div>
               <div class="arch-item">Calendario (Client)</div>
               <div class="arch-item">Filtros (Client)</div>
@@ -784,7 +784,7 @@
         <div class="flow-step">
           <div class="flow-dot" style="background: var(--purple);">4</div>
           <div class="flow-content">
-            <h4>Pagamentos</h4>
+            <h4>A Pagar</h4>
             <p>Contas organizadas por urgencia: vencidas, hoje, proximos 7 dias, futuras. Marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente.</p>
           </div>
         </div>
@@ -792,8 +792,8 @@
         <div class="flow-step">
           <div class="flow-dot" style="background: var(--blue);">5</div>
           <div class="flow-content">
-            <h4>Contas (Gestao)</h4>
-            <p>Cadastro e gestao de contas agrupadas por categoria. Contas recorrentes aparecem como entrada unica. Criar, editar, deletar, importar, cadastro em lote.</p>
+            <h4>Minhas Contas (Gestao)</h4>
+            <p>Cadastro e gestao de contas agrupadas por fornecedor. Contas recorrentes aparecem como entrada unica. Criar, editar, deletar. Cadastro unificado com tabs: manual, em lote e importar planilha.</p>
           </div>
         </div>
 
@@ -948,8 +948,8 @@ pagafacil/
 |   +-- (dashboard)/
 |   |   +-- dashboard/page.tsx  <span style="color:var(--text-light);"># Dashboard — resumo, graficos, calendario (RSC)</span>
 |   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
-|   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># Pagamentos — lista por urgencia + marcar paga</span>
-|   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Contas — gestao agrupada por categoria</span>
+|   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># A Pagar — lista por urgencia + marcar paga</span>
+|   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Minhas Contas — gestao agrupada por fornecedor</span>
 |   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
 |   |   +-- bills/import/       <span style="color:var(--text-light);"># Importar contas via planilha</span>
 |   |   +-- bills/batch/        <span style="color:var(--text-light);"># Cadastro em lote (tabela editavel)</span>

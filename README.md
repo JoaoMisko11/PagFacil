@@ -13,8 +13,8 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Login multi-canal** — Google OAuth (1 clique), magic link por email ou OTP via Telegram
 - **CRUD de contas** — fornecedor, valor, vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario, Outro), observacoes
 - **Dashboard inteligente** — resumo financeiro, grafico de barras (pago vs pendente, 6 meses), calendario mensal interativo, insights e streak de pontualidade
-- **3 telas, 3 intencoes** — Dashboard (visao geral), Pagamentos (acao), Contas (gestao)
-- **Pagamentos** — contas por urgencia (vencidas, hoje, semana, futuras) com tabs, marcar como paga com 1 clique
+- **3 telas, 3 intencoes** — Dashboard (visao geral), A Pagar (acao), Minhas Contas (gestao)
+- **A Pagar** — contas por urgencia (vencidas, hoje, semana, futuras) com tabs, marcar como paga com 1 clique
 - **Contas recorrentes** — frequencia semanal/quinzenal/mensal/anual, data de fim opcional, pre-geracao de parcelas (90 dias)
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
 - **Cadastro em lote** — tabela editavel para criar varias contas de uma vez
@@ -25,7 +25,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Dark mode** — toggle light/dark/system sem flash
 - **Lixeira** — contas deletadas ficam recuperaveis por 30 dias
 - **PWA com push** — instalavel no celular, push notifications nativas, mobile-first (360px+)
-- **UX avancada** — optimistic UI, skeleton loading em todas as paginas, spinners nos botoes de acao, confetti, transicoes, modo compacto, atalhos de teclado, menu hamburguer responsivo no mobile
+- **UX avancada** — optimistic UI, skeleton loading em todas as paginas, spinners nos botoes de acao, confetti, transicoes, modo compacto, atalhos de teclado, dropdown menu com animacao, cadastro unificado (manual/lote/importar)
 
 ## Tech Stack
 
@@ -76,7 +76,7 @@ app/
   (auth)/login/verify/       # Verificacao magic link
   (dashboard)/
     dashboard/page.tsx       # Dashboard (resumo, graficos, calendario)
-    pagamentos/page.tsx      # Pagamentos (por urgencia, marcar paga)
+    pagamentos/page.tsx      # A Pagar (por urgencia, marcar paga)
     bills/page.tsx           # Contas (gestao, CRUD)
     bills/new/               # Nova conta
     bills/[id]/edit/         # Editar conta
