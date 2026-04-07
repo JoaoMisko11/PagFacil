@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { type ActionState } from "@/lib/actions"
+import type { ActionState } from "@/lib/action-types"
 import { CATEGORIES, RECURRENCE_FREQUENCIES } from "@/lib/constants"
 
 interface BillFormProps {

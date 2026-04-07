@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { updateNotificationPreferences, sendMyRemindersNow } from "@/lib/actions"
-import type { ActionState } from "@/lib/actions"
+import type { ActionState } from "@/lib/action-types"
 import { PushToggle } from "@/components/push-toggle"
 import { toast } from "sonner"
 

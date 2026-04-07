@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { updateUserName, createBillOnboarding, updateNotificationPreferences, type ActionState } from "@/lib/actions"
+import { updateUserName, createBillOnboarding, updateNotificationPreferences } from "@/lib/actions"
+import type { ActionState } from "@/lib/action-types"
 import { CATEGORIES } from "@/lib/constants"
 
 interface OnboardingStepsProps {

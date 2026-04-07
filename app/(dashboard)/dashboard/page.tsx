@@ -429,7 +429,7 @@ export default async function DashboardPage() {
 
       <div className="text-center">
         <Link href="/pagamentos">
-          <Button variant="outline" className="h-11">Ver pagamentos pendentes</Button>
+          <Button variant="outline" className="h-11">Ver contas a pagar</Button>
         </Link>
       </div>
     </div>

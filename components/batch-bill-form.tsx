@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CATEGORIES, RECURRENCE_FREQUENCIES } from "@/lib/constants"
 import { createBillsBatch } from "@/lib/actions"
-import type { BatchBillInput } from "@/lib/actions"
+import type { BatchBillInput } from "@/lib/action-types"
 import { useRouter } from "next/navigation"
 
 function emptyRow(): BatchBillInput {

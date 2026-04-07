@@ -8,13 +8,7 @@ import { redirect } from "next/navigation"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { getFamilyUserIds } from "@/lib/family"
 import { billSchema, computeNextDueDate, generateFutureDates } from "@/lib/bill-utils"
-
-export { billSchema, computeNextDueDate, generateFutureDates }
-
-export type ActionState = {
-  errors?: Record<string, string[]>
-  message?: string
-}
+import type { ActionState, ImportBillRow, ImportResult, BatchBillInput, BatchResult } from "@/lib/action-types"
 
 async function getUserId(): Promise<string> {
   const session = await auth()
@@ -374,22 +368,6 @@ export async function createBillOnboarding(
 
 // --- Importação de planilha ---
 
-export type ImportBillRow = {
-  row: number
-  supplier: string
-  amount: string
-  dueDate: string
-  category: string
-  notes: string
-  valid: boolean
-  error?: string
-}
-
-export type ImportResult = {
-  rows?: ImportBillRow[]
-  imported?: number
-  message?: string
-}
 
 const VALID_CATEGORIES = ["FIXO", "VARIAVEL", "IMPOSTO", "FORNECEDOR", "ASSINATURA", "FUNCIONARIO", "OUTRO"]
 
@@ -583,22 +561,6 @@ export async function importBills(rows: ImportBillRow[]): Promise<ImportResult> 
 
 // --- Cadastro em lote ---
 
-export type BatchBillInput = {
-  supplier: string
-  amount: string
-  dueDate: string
-  category: string
-  notes: string
-  isRecurring: boolean
-  recurrenceFrequency: string
-  recurrenceEndDate: string
-}
-
-export type BatchResult = {
-  created?: number
-  errors?: { row: number; fields: Record<string, string> }[]
-  message?: string
-}
 
 export async function createBillsBatch(bills: BatchBillInput[]): Promise<BatchResult> {
   const userId = await getUserId()

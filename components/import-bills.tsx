@@ -3,7 +3,7 @@
 import { useActionState, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { parseSpreadsheet, importBills } from "@/lib/actions"
-import type { ImportResult, ImportBillRow } from "@/lib/actions"
+import type { ImportResult, ImportBillRow } from "@/lib/action-types"
 import { useRouter } from "next/navigation"
 
 export function ImportBills() {

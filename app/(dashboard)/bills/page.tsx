@@ -116,18 +116,12 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
         <div>
           <h2 className="text-xl font-bold text-foreground">Minhas Contas</h2>
           <p className="text-sm text-muted-foreground">
-            Gerencie suas contas cadastradas. Para pagar, use a aba Pagamentos.
+            Gerencie suas contas cadastradas. Para pagar, use a aba A Pagar.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/bills/trash">
-            <Button variant="ghost" size="sm" className="text-muted-foreground">Lixeira</Button>
-          </Link>
-          <Link href="/bills/batch">
-            <Button variant="outline" size="sm">+ Lote</Button>
-          </Link>
-          <Link href="/bills/import">
-            <Button variant="outline" size="sm">Importar</Button>
+        <div className="flex items-center gap-2">
+          <Link href="/bills/trash" className="text-xs text-muted-foreground underline-offset-4 hover:underline">
+            Lixeira
           </Link>
           <Link href="/bills/new">
             <Button size="sm">+ Nova Conta</Button>

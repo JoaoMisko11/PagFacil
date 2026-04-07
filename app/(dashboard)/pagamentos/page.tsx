@@ -165,10 +165,10 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
-            Pagamentos
+            A Pagar
           </h2>
           <p className="text-sm text-muted-foreground">
-            Marque como paga ao quitar.
+            Contas pendentes — marque como paga ao quitar.
           </p>
         </div>
         <Link href="/bills/new" className="shrink-0">

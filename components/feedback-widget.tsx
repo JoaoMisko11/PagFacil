@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { submitFeedback, type ActionState } from "@/lib/actions"
+import { submitFeedback } from "@/lib/actions"
+import type { ActionState } from "@/lib/action-types"
 
 export function FeedbackWidget() {
   const [open, setOpen] = useState(false)

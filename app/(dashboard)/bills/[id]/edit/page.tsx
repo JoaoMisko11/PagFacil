@@ -28,11 +28,11 @@ export default async function EditBillPage({ params }: EditBillPageProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-foreground">Editar Conta</h2>
         <Link href="/bills">
           <Button variant="ghost" size="sm" className="h-10 min-w-[44px]">← Voltar</Button>
         </Link>
-        <h2 className="text-xl font-bold text-foreground">Editar Conta</h2>
       </div>
       <BillForm
         action={action}

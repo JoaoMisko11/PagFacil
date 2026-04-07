@@ -4,7 +4,7 @@ import crypto from "crypto"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import type { ActionState } from "@/lib/actions"
+import type { ActionState } from "@/lib/action-types"
 
 async function getUserId(): Promise<string> {
   const session = await auth()
