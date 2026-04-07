@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/format"
-import { BillCalendar } from "@/components/bill-calendar"
 import { TrendChart } from "@/components/trend-chart"
 import { OnboardingChecklist } from "@/components/onboarding-checklist"
 import { SmartInsights } from "@/components/smart-insights"
@@ -22,21 +21,6 @@ const getPendingBills = cache(async (userIds: string[]) => {
   })
 })
 
-const getAllBills = cache(async (userIds: string[]) => {
-  return db.bill.findMany({
-    where: { userId: { in: userIds }, deletedAt: null },
-    orderBy: { dueDate: "asc" },
-    select: {
-      id: true,
-      supplier: true,
-      amount: true,
-      dueDate: true,
-      category: true,
-      status: true,
-      isRecurring: true,
-    },
-  })
-})
 
 // --- Skeleton fallbacks ---
 
@@ -57,18 +41,6 @@ function SummaryCardsSkeleton() {
   )
 }
 
-function CalendarSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
-        <Skeleton className="h-4 w-20" />
-      </CardHeader>
-      <CardContent className="p-2 sm:p-4 sm:pt-0">
-        <Skeleton className="mx-auto h-64 w-full max-w-xs" />
-      </CardContent>
-    </Card>
-  )
-}
 
 
 // --- Async streamed components ---
@@ -334,14 +306,6 @@ async function TrendSection({ userIds }: { userIds: string[] }) {
   return <TrendChart data={months} />
 }
 
-async function CalendarSection({ userIds }: { userIds: string[] }) {
-  const allBills = await getAllBills(userIds)
-  const calendarBills = allBills.map((b) => ({
-    ...b,
-    dueDate: b.dueDate.toISOString(),
-  }))
-  return <BillCalendar bills={calendarBills} />
-}
 
 
 // --- Greeting helpers ---
@@ -358,22 +322,6 @@ function getGreeting(): string {
   return "Boa noite"
 }
 
-function getDayContext(): string {
-  const dayOfWeek = new Date().toLocaleString("en-US", {
-    timeZone: "America/Sao_Paulo",
-    weekday: "long",
-  })
-  const dayMessages: Record<string, string> = {
-    Monday: "Começo de semana — bora organizar as contas!",
-    Tuesday: "Aqui está o resumo das suas contas a pagar.",
-    Wednesday: "Metade da semana! Confira suas contas.",
-    Thursday: "Quase sexta! Veja o que ainda precisa pagar.",
-    Friday: "Sextou! Deixe as contas em dia pro fim de semana.",
-    Saturday: "Bom descanso! Aqui está o resumo das suas contas.",
-    Sunday: "Domingo tranquilo. Confira suas contas para a semana.",
-  }
-  return dayMessages[dayOfWeek] ?? "Aqui está o resumo das suas contas a pagar."
-}
 
 // --- Main page ---
 
@@ -392,11 +340,8 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
-            {getGreeting()}, {session.user.name}!
+            {getGreeting()}, {session.user.name}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {getDayContext()}
-          </p>
         </div>
         <Link href="/bills/new" className="shrink-0">
           <Button size="sm" className="sm:size-default">+ Nova Conta</Button>
@@ -421,10 +366,6 @@ export default async function DashboardPage() {
 
       <Suspense fallback={<TrendChartSkeleton />}>
         <TrendSection userIds={userIds} />
-      </Suspense>
-
-      <Suspense fallback={<CalendarSkeleton />}>
-        <CalendarSection userIds={userIds} />
       </Suspense>
 
       <div className="text-center">

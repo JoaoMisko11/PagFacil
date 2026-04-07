@@ -13,6 +13,9 @@
 - [x] **Total visível na tab** — totalizador "N contas · R$ X" abaixo das tabs na tela A Pagar
 - [x] **Tabs responsivas** — labels curtas no mobile (Mês, Venc., Fut., Todas) e completas no desktop
 - [x] **Skeleton atualizado** — skeleton da tela A Pagar reflete o novo layout inline dos cards
+- [x] **Saudação encurtada** — removida frase do dia da semana, mantém só "Boa tarde, João"
+- [x] **Calendário movido para A Pagar** — removido do dashboard (visão geral) e adicionado na tela A Pagar (ação), abaixo da lista de contas
+- [x] **CTA mais visível** — "Ver contas a pagar" agora fica logo após o gráfico no dashboard
 
 ### Bugs Conhecidos
 - Nenhum

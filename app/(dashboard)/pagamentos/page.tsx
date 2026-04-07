@@ -6,6 +6,8 @@ import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BillCard } from "@/components/bill-card"
+import { BillCalendar } from "@/components/bill-calendar"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/format"
 import { PagamentosTabs } from "@/components/pagamentos-tabs"
 import { getFamilyUserIds } from "@/lib/family"
@@ -142,6 +144,42 @@ async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: str
   )
 }
 
+// --- Calendar section ---
+
+function CalendarSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
+        <Skeleton className="h-4 w-20" />
+      </CardHeader>
+      <CardContent className="p-2 sm:p-4 sm:pt-0">
+        <Skeleton className="mx-auto h-64 w-full max-w-xs" />
+      </CardContent>
+    </Card>
+  )
+}
+
+async function CalendarSection({ userIds }: { userIds: string[] }) {
+  const allBills = await db.bill.findMany({
+    where: { userId: { in: userIds }, deletedAt: null },
+    orderBy: { dueDate: "asc" },
+    select: {
+      id: true,
+      supplier: true,
+      amount: true,
+      dueDate: true,
+      category: true,
+      status: true,
+      isRecurring: true,
+    },
+  })
+  const calendarBills = allBills.map((b) => ({
+    ...b,
+    dueDate: b.dueDate.toISOString(),
+  }))
+  return <BillCalendar bills={calendarBills} />
+}
+
 // --- Main page ---
 
 interface PagamentosPageProps {
@@ -178,6 +216,10 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
 
       <Suspense fallback={<BillsSkeleton />}>
         <PagamentosSection userIds={userIds} tab={tab} />
+      </Suspense>
+
+      <Suspense fallback={<CalendarSkeleton />}>
+        <CalendarSection userIds={userIds} />
       </Suspense>
     </div>
   )
