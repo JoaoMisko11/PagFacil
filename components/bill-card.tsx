@@ -1,30 +1,12 @@
 "use client"
 
-import { useState, useOptimistic, useTransition } from "react"
-import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
+import { useOptimistic, useTransition } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/lib/format"
 import { CATEGORY_MAP } from "@/lib/constants"
-import { markBillAsPaid, markBillAsPending, deleteBill } from "@/lib/actions"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { markBillAsPaid, markBillAsPending } from "@/lib/actions"
 import { toast } from "sonner"
-import { useDisplayMode } from "@/components/display-mode-provider"
-
-const frequencyLabels: Record<string, string> = {
-  WEEKLY: "Semanal",
-  BIWEEKLY: "Quinzenal",
-  MONTHLY: "Mensal",
-  YEARLY: "Anual",
-}
 
 interface BillCardProps {
   bill: {
@@ -40,29 +22,22 @@ interface BillCardProps {
   }
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  PENDING: { label: "Pendente", variant: "outline" },
-  PAID: { label: "Paga", variant: "default" },
-  OVERDUE: { label: "Vencida", variant: "destructive" },
-}
-
 export function BillCard({ bill }: BillCardProps) {
-  const [deleting, setDeleting] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(bill.status)
   const [isPending, startTransition] = useTransition()
-  const { mode } = useDisplayMode()
-  const compact = mode === "compact"
 
   const isPaid = optimisticStatus === "PAID"
   const isOverdue =
     optimisticStatus === "PENDING" && new Date(bill.dueDate) < new Date(new Date().toDateString())
-  const status = isOverdue ? "OVERDUE" : optimisticStatus
-  const { label, variant } = statusConfig[status] ?? statusConfig.PENDING
+
+  const borderColor = isPaid
+    ? "border-l-green-500"
+    : isOverdue
+      ? "border-l-red-500"
+      : "border-l-blue-500"
 
   function handleTogglePaid() {
     const wasPaid = isPaid
-    // Haptic feedback ao marcar como paga (PWA)
     if (!wasPaid && typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(50)
     }
@@ -85,103 +60,48 @@ export function BillCard({ bill }: BillCardProps) {
     })
   }
 
-  async function handleDelete() {
-    setDeleting(true)
-    try {
-      await deleteBill(bill.id)
-      toast.success("Conta deletada")
-      setDialogOpen(false)
-    } catch {
-      toast.error("Erro ao deletar conta. Tente novamente.")
-      setDeleting(false)
-    }
-  }
-
   return (
-    <Card className={isPaid ? "opacity-60" : ""}>
-      <CardContent className={compact ? "p-2 sm:p-3" : "p-3 sm:p-4"}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className={`font-medium truncate ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"} ${isPaid ? "line-through" : ""}`}>
-                {bill.supplier}
-              </p>
-              {bill.isRecurring && (
-                <Badge variant="secondary" className="text-[10px] sm:text-xs shrink-0">
-                  {frequencyLabels[bill.recurrenceFrequency ?? "MONTHLY"] ?? "Mensal"}
-                </Badge>
-              )}
-            </div>
-            <div className={`mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground ${compact ? "" : "sm:gap-2 sm:text-sm"}`}>
-              <span>{formatDate(new Date(bill.dueDate))}</span>
-              <span>·</span>
-              <span className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium ${compact ? "" : "sm:text-xs"} ${CATEGORY_MAP[bill.category]?.color ?? ""}`}>
-                {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
-              </span>
-              <Badge variant={variant} className="text-[10px] sm:text-xs">
-                {label}
-              </Badge>
-            </div>
-          </div>
-
-          <p className={`font-semibold whitespace-nowrap shrink-0 ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"} ${isPaid ? "line-through text-muted-foreground" : ""}`}>
-            {formatCurrency(bill.amount)}
-          </p>
-        </div>
-
-        <div className={`flex gap-1 border-t ${compact ? "mt-1.5 pt-1.5" : "mt-2 pt-2 sm:mt-3 sm:pt-3"}`}>
+    <div className={`flex items-center justify-between gap-2 rounded-lg border border-l-[3px] ${borderColor} bg-background p-2.5 text-sm shadow-sm transition-shadow hover:shadow-md ${isPaid ? "opacity-60" : ""}`}>
+      <div className="min-w-0">
+        <p className={`truncate font-medium ${isPaid ? "text-muted-foreground line-through" : ""}`}>
+          {bill.supplier}
+        </p>
+        <p className="text-[11px] text-muted-foreground">
+          {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
+          <span className="ml-1">· {formatDate(new Date(bill.dueDate))}</span>
+          {bill.isRecurring && (
+            <span className="ml-1 inline-flex items-center gap-0.5">
+              · <svg className="h-3 w-3 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </span>
+          )}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className={`font-semibold tabular-nums ${isPaid ? "text-muted-foreground" : ""}`}>
+          {formatCurrency(bill.amount)}
+        </span>
+        {isPaid ? (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} flex-1 text-xs sm:h-9 sm:flex-none sm:text-sm`}
+            className="h-8 text-xs px-2.5 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 dark:hover:bg-amber-950 dark:hover:text-amber-400 dark:hover:border-amber-700 transition-colors"
             onClick={handleTogglePaid}
             disabled={isPending}
           >
-            {isPending ? (
-              <span className="flex items-center gap-1.5">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                {isPaid ? "Desfazendo..." : "Pagando..."}
-              </span>
-            ) : (
-              isPaid ? "↩ Desfazer" : "✓ Paga"
-            )}
+            {isPending ? "..." : "↩ Desfazer"}
           </Button>
-
-          <Link href={`/bills/${bill.id}/edit`} className="flex-1 sm:flex-none">
-            <Button variant="ghost" size="sm" className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} w-full text-xs sm:h-9 sm:text-sm`}>
-              ✏️ Editar
-            </Button>
-          </Link>
-
+        ) : (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className={`${compact ? "h-8 min-w-[36px]" : "h-11 min-w-[44px]"} flex-1 text-xs text-destructive hover:text-destructive sm:h-9 sm:flex-none sm:text-sm`}
-            onClick={() => setDialogOpen(true)}
+            className="h-8 text-xs px-2.5 hover:bg-green-50 hover:text-green-700 hover:border-green-300 dark:hover:bg-green-950 dark:hover:text-green-400 dark:hover:border-green-700 transition-colors"
+            onClick={handleTogglePaid}
+            disabled={isPending}
           >
-            🗑 Deletar
+            {isPending ? "..." : "✓ Paga"}
           </Button>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Deletar conta</DialogTitle>
-                <DialogDescription>
-                  Tem certeza que quer deletar &quot;{bill.supplier}&quot; — {formatCurrency(bill.amount)}?
-                  Essa ação pode ser desfeita em até 30 dias.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                  {deleting ? "Deletando..." : "Deletar"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   )
 }

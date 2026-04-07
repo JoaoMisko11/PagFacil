@@ -1,5 +1,8 @@
 # Decisões Técnicas — PagaFácil
 
+## D24 - 2026-04-07
+- **PostHog para analytics (não Vercel Analytics):** Vercel Analytics é mais simples (zero config) mas limitado — 2.500 custom events/mês no free tier, sem funis, sem retenção, sem tracking por usuário. PostHog tem 1M eventos/mês grátis, funis, cohorts, session replay, feature flags. Mais complexo, mas o João quer aprender a ferramenta. Para 10 usuários na validação o free tier é mais que suficiente. Se a complexidade virar problema, simplificar para Vercel Analytics é trivial (trocar provider).
+
 ## D21 - 2026-04-04
 - **Web Push via `web-push` (não Firebase/OneSignal):** Lib padrão W3C Push API, zero vendor lock-in, ~50KB. Firebase exige SDK pesado e conta Google Cloud. OneSignal é SaaS com limites no free tier. `web-push` é a implementação direta do protocolo.
 - **PushSubscription como modelo separado (não campo no User):** Um usuário pode ter múltiplas subscriptions (celular + desktop + tablets). Modelo separado com `endpoint` unique permite gerenciar cada device independentemente.

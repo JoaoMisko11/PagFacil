@@ -132,6 +132,33 @@
 
 ---
 
+## Analytics & Metricas de Produto (PostHog)
+
+| # | Item | Prioridade | Esforco |
+|---|------|------------|---------|
+| AN-01 | Setup PostHog (SDK + provider no layout) | Alta | 1-2h |
+| AN-02 | Tracking de acoes principais (criar conta, marcar paga, importar, deletar) | Alta | 2-3h |
+| AN-03 | Funil de onboarding — eventos por step, % conclusao | Alta | 2-3h |
+| AN-04 | Feature adoption — uso de Telegram, push, import, batch, calendario, recorrentes | Media | 2-4h |
+| AN-05 | Metricas de retencao — login frequency, dias sem login | Media | 3-4h |
+| AN-06 | Evento "conta paga no prazo" vs "paga atrasada" — medir proposta de valor | Alta | 1-2h |
+| AN-07 | Dashboard de metricas no PostHog (dashboards + insights configurados) | Media | 2-3h |
+
+---
+
+## Painel Admin
+
+| # | Item | Prioridade | Esforco |
+|---|------|------------|---------|
+| AD-01 | Rota `/admin` protegida (so emails allowlist) | Alta | 1-2h |
+| AD-02 | Lista de usuarios (email, data cadastro, ultimo login, n contas, canal notificacao) | Alta | 2-3h |
+| AD-03 | Metricas agregadas — total usuarios, contas criadas, pagas, vencidas, churn | Alta | 2-3h |
+| AD-04 | Feedbacks recebidos (modelo Feedback ja existe, falta tela) | Alta | 1-2h |
+| AD-05 | Status dos crons (ultimo envio de lembretes, erros) | Media | 2-3h |
+| AD-06 | Acoes admin: enviar lembrete manual, desativar usuario | Baixa | 3-4h |
+
+---
+
 ## Observabilidade
 
 | # | Item | Origem | Esforco |

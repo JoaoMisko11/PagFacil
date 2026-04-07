@@ -4,10 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
 
 const TABS = [
-  { value: "month", label: "Este mês" },
-  { value: "overdue", label: "Vencidas" },
-  { value: "future", label: "Futuras" },
-  { value: "all", label: "Todas" },
+  { value: "month", label: "Este mês", shortLabel: "Mês" },
+  { value: "overdue", label: "Vencidas", shortLabel: "Venc." },
+  { value: "future", label: "Futuras", shortLabel: "Fut." },
+  { value: "all", label: "Todas", shortLabel: "Todas" },
 ] as const
 
 interface PagamentosTabsProps {
@@ -48,7 +48,8 @@ export function PagamentosTabs({ current, counts }: PagamentosTabsProps) {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab.label}
+            <span className="sm:hidden">{tab.shortLabel}</span>
+            <span className="hidden sm:inline">{tab.label}</span>
             {count > 0 && (
               <span className={`ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold ${
                 isActive

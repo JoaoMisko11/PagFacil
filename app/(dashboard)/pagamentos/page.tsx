@@ -4,9 +4,9 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BillCard } from "@/components/bill-card"
+import { formatCurrency } from "@/lib/format"
 import { PagamentosTabs } from "@/components/pagamentos-tabs"
 import { getFamilyUserIds } from "@/lib/family"
 
@@ -17,22 +17,16 @@ function BillsSkeleton() {
     <div className="space-y-2">
       <Skeleton className="h-5 w-32" />
       {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-4 w-56" />
-              </div>
-              <Skeleton className="h-6 w-24" />
-            </div>
-            <div className="mt-3 flex gap-2 border-t pt-3">
-              <Skeleton className="h-9 w-20" />
-              <Skeleton className="h-9 w-20" />
-              <Skeleton className="h-9 w-20" />
-            </div>
-          </CardContent>
-        </Card>
+        <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-l-[3px] border-l-muted bg-background p-2.5">
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-44" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-8 w-16 rounded-md" />
+          </div>
+        </div>
       ))}
     </div>
   )
@@ -92,6 +86,12 @@ async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: str
   return (
     <>
       <PagamentosTabs current={tab} counts={counts} />
+
+      {visibleBills.length > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {visibleBills.length} {visibleBills.length === 1 ? "conta" : "contas"} · <span className="font-semibold text-foreground">{formatCurrency(visibleBills.reduce((s, b) => s + b.amount, 0))}</span>
+        </p>
+      )}
 
       {visibleBills.length > 0 ? (
         <div className="space-y-2">

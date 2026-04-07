@@ -1,6 +1,6 @@
 # Changelog — PagaFácil
 
-## D24 - 2026-04-07 - Melhoria UX: navegação e Nova Conta
+## D24 - 2026-04-07 - Melhoria UX: navegação, Nova Conta e tela A Pagar
 ### Feito
 - [x] **Unificação Nova Conta** — Lote e Importar agora são tabs dentro de `/bills/new` (Manual/Em lote/Importar), removidos do header de Contas
 - [x] **Renomeação nav** — "Pagamentos" → "A Pagar", "Contas" → "Minhas Contas" para diferenciar intenção (ação vs gestão)
@@ -9,6 +9,10 @@
 - [x] **Botão Voltar reposicionado** — título à esquerda, voltar à direita nas páginas de nova conta e edição
 - [x] **Lixeira discreta** — de botão para link de texto no header de Minhas Contas
 - [x] **Fix "use server" exports** — types extraídos de `actions.ts` para `lib/action-types.ts`
+- [x] **BillCard simplificado** — removidos botões Editar/Deletar da tela A Pagar; card inline com borda colorida de status (verde/vermelho/azul), só botão "Paga"/"Desfazer"
+- [x] **Total visível na tab** — totalizador "N contas · R$ X" abaixo das tabs na tela A Pagar
+- [x] **Tabs responsivas** — labels curtas no mobile (Mês, Venc., Fut., Todas) e completas no desktop
+- [x] **Skeleton atualizado** — skeleton da tela A Pagar reflete o novo layout inline dos cards
 
 ### Bugs Conhecidos
 - Nenhum
