@@ -10,6 +10,7 @@ import { BillCalendar } from "@/components/bill-calendar"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/format"
 import { PagamentosTabs } from "@/components/pagamentos-tabs"
+import { MobileCalendarTrigger, DateFilterBadge } from "@/components/calendar-position-toggle"
 import { getFamilyUserIds } from "@/lib/family"
 
 // --- Skeleton ---
@@ -34,9 +35,67 @@ function BillsSkeleton() {
   )
 }
 
-// --- Async section ---
+// --- Bills section (tab or date filter) ---
 
-async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: string }) {
+async function PagamentosSection({
+  userIds,
+  tab,
+  dateFilter,
+  children,
+}: {
+  userIds: string[]
+  tab: string
+  dateFilter?: string
+  children?: React.ReactNode
+}) {
+  // When filtering by date, show ALL bills for that date (pending + paid)
+  if (dateFilter) {
+    const dayStart = new Date(dateFilter + "T00:00:00.000Z")
+    const dayEnd = new Date(dateFilter + "T23:59:59.999Z")
+
+    const dayBills = await db.bill.findMany({
+      where: {
+        userId: { in: userIds },
+        deletedAt: null,
+        dueDate: { gte: dayStart, lte: dayEnd },
+      },
+      orderBy: { dueDate: "asc" },
+    })
+
+    return (
+      <>
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <DateFilterBadge date={dateFilter} />
+          </div>
+          {children}
+        </div>
+
+        {dayBills.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {dayBills.length} {dayBills.length === 1 ? "conta" : "contas"} · <span className="font-semibold text-foreground">{formatCurrency(dayBills.reduce((s, b) => s + b.amount, 0))}</span>
+          </p>
+        )}
+
+        {dayBills.length > 0 ? (
+          <div className="space-y-2">
+            {dayBills.map((bill) => (
+              <BillCard key={bill.id} bill={bill} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border bg-card p-6 text-center text-muted-foreground">
+            <p className="text-sm">Nenhuma conta neste dia.</p>
+            <Link href={`/bills/new?date=${dateFilter}`} className="mt-3 inline-block">
+              <Button size="sm" variant="outline">+ Cadastrar conta</Button>
+            </Link>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // Normal tab-based view
   const pendingBills = await db.bill.findMany({
     where: { userId: { in: userIds }, deletedAt: null, status: "PENDING" },
     orderBy: { dueDate: "asc" },
@@ -75,7 +134,7 @@ async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: str
       visibleBills = thisMonth
   }
 
-  // Celebração quando tudo pago
+  // Celebracao quando tudo pago
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
   const paidThisMonthCount = pendingBills.length === 0
@@ -87,7 +146,12 @@ async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: str
 
   return (
     <>
-      <PagamentosTabs current={tab} counts={counts} />
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <PagamentosTabs current={tab} counts={counts} />
+        </div>
+        {children}
+      </div>
 
       {visibleBills.length > 0 && (
         <p className="text-xs text-muted-foreground">
@@ -109,10 +173,10 @@ async function PagamentosSection({ userIds, tab }: { userIds: string[]; tab: str
                 <span className="text-4xl">🎉</span>
               </div>
               <p className="text-lg font-semibold text-foreground">
-                Todas as contas do mês pagas!
+                Todas as contas do mes pagas!
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Você arrasou! {paidThisMonthCount} conta{paidThisMonthCount > 1 ? "s" : ""} paga{paidThisMonthCount > 1 ? "s" : ""} esse mês. Aproveite a tranquilidade.
+                Voce arrasou! {paidThisMonthCount} conta{paidThisMonthCount > 1 ? "s" : ""} paga{paidThisMonthCount > 1 ? "s" : ""} esse mes. Aproveite a tranquilidade.
               </p>
               <div className="celebrate-sparkles mx-auto mt-3 flex justify-center gap-1">
                 {["✨", "⭐", "✨"].map((s, i) => (
@@ -159,7 +223,7 @@ function CalendarSkeleton() {
   )
 }
 
-async function CalendarSection({ userIds }: { userIds: string[] }) {
+async function CalendarSection({ userIds, selectedDate }: { userIds: string[]; selectedDate?: string }) {
   const allBills = await db.bill.findMany({
     where: { userId: { in: userIds }, deletedAt: null },
     orderBy: { dueDate: "asc" },
@@ -177,13 +241,13 @@ async function CalendarSection({ userIds }: { userIds: string[] }) {
     ...b,
     dueDate: b.dueDate.toISOString(),
   }))
-  return <BillCalendar bills={calendarBills} />
+  return <BillCalendar bills={calendarBills} selectedDate={selectedDate} />
 }
 
 // --- Main page ---
 
 interface PagamentosPageProps {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; date?: string }>
 }
 
 export default async function PagamentosPage({ searchParams }: PagamentosPageProps) {
@@ -197,6 +261,7 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
   const userIds = await getFamilyUserIds(userId)
   const params = await searchParams
   const tab = params.tab || "month"
+  const dateFilter = params.date // YYYY-MM-DD or undefined
 
   return (
     <div className="space-y-4">
@@ -214,13 +279,29 @@ export default async function PagamentosPage({ searchParams }: PagamentosPagePro
         </Link>
       </div>
 
-      <Suspense fallback={<BillsSkeleton />}>
-        <PagamentosSection userIds={userIds} tab={tab} />
-      </Suspense>
+      {/* Layout: sidebar no desktop */}
+      <div className="flex flex-col gap-4 lg:flex-row">
+        {/* Lista de contas — area principal */}
+        <div className="min-w-0 flex-1 space-y-4">
+          <Suspense fallback={<BillsSkeleton />}>
+            <PagamentosSection userIds={userIds} tab={tab} dateFilter={dateFilter}>
+              {/* Botão calendário mobile — aparece ao lado das tabs */}
+              <MobileCalendarTrigger>
+                <Suspense fallback={<CalendarSkeleton />}>
+                  <CalendarSection userIds={userIds} selectedDate={dateFilter} />
+                </Suspense>
+              </MobileCalendarTrigger>
+            </PagamentosSection>
+          </Suspense>
+        </div>
 
-      <Suspense fallback={<CalendarSkeleton />}>
-        <CalendarSection userIds={userIds} />
-      </Suspense>
+        {/* Calendario — sidebar direita, só desktop */}
+        <div className="hidden w-[320px] shrink-0 lg:block">
+          <Suspense fallback={<CalendarSkeleton />}>
+            <CalendarSection userIds={userIds} selectedDate={dateFilter} />
+          </Suspense>
+        </div>
+      </div>
     </div>
   )
 }

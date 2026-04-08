@@ -1,15 +1,10 @@
 "use client"
 
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useTransition } from "react"
-import Link from "next/link"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/lib/format"
-import { CATEGORY_MAP } from "@/lib/constants"
-import { markBillAsPaid } from "@/lib/actions"
-import { toast } from "sonner"
 import { ptBR } from "date-fns/locale"
 import type { DayMouseEventHandler } from "react-day-picker"
 
@@ -25,11 +20,16 @@ interface CalendarBill {
 
 interface BillCalendarProps {
   bills: CalendarBill[]
+  selectedDate?: string // YYYY-MM-DD from URL
 }
 
-export function BillCalendar({ bills }: BillCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [viewMonth, setViewMonth] = useState<Date>(new Date())
+export function BillCalendar({ bills, selectedDate }: BillCalendarProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+  const [viewMonth, setViewMonth] = useState<Date>(
+    selectedDate ? new Date(selectedDate + "T00:00:00") : new Date()
+  )
 
   // Agrupa contas por dia (YYYY-MM-DD)
   const billsByDay = new Map<string, CalendarBill[]>()
@@ -71,23 +71,30 @@ export function BillCalendar({ bills }: BillCalendarProps) {
     .filter((b) => b.status === "PAID")
     .reduce((sum, b) => sum + b.amount, 0)
 
-  const selectedKey = selectedDate
-    ? selectedDate.toLocaleDateString("en-CA")
+  const selectedDateObj = selectedDate
+    ? new Date(selectedDate + "T00:00:00")
     : undefined
-  const selectedBills = selectedKey ? billsByDay.get(selectedKey) ?? [] : []
 
   const handleDayClick: DayMouseEventHandler = (day) => {
-    setSelectedDate(day)
-  }
+    const dateStr = day.toLocaleDateString("en-CA")
+    const params = new URLSearchParams(searchParams.toString())
 
-  // Contagem de contas por dia para o badge
-  const billCountByDay = new Map<string, number>()
-  for (const [dateStr, dateBills] of billsByDay) {
-    billCountByDay.set(dateStr, dateBills.length)
+    // Toggle: clicar na mesma data limpa o filtro
+    if (selectedDate === dateStr) {
+      params.delete("date")
+    } else {
+      params.set("date", dateStr)
+      // Limpa tab ao filtrar por data
+      params.delete("tab")
+    }
+
+    startTransition(() => {
+      router.push(`/pagamentos?${params.toString()}`)
+    })
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={`overflow-hidden transition-opacity ${isPending ? "opacity-60" : ""}`}>
       <CardHeader className="p-3 pb-1 sm:p-4 sm:pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -96,7 +103,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
             <line x1="8" y1="2" x2="8" y2="6"/>
             <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
-          Calendário
+          Calendario
         </CardTitle>
       </CardHeader>
       <CardContent className="p-2 sm:p-4 sm:pt-0">
@@ -104,7 +111,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
           <Calendar
             locale={ptBR}
             mode="single"
-            selected={selectedDate}
+            selected={selectedDateObj}
             onDayClick={handleDayClick}
             onMonthChange={setViewMonth}
             modifiers={{
@@ -122,7 +129,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
           />
         </div>
 
-        {/* Totais do mês — visual melhorado */}
+        {/* Totais do mês */}
         <div className="mt-3 flex items-center justify-center gap-3 text-xs">
           {totalPending > 0 && (
             <div className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 font-medium text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/30">
@@ -143,11 +150,11 @@ export function BillCalendar({ bills }: BillCalendarProps) {
             </div>
           )}
           {totalPending === 0 && totalPaid === 0 && (
-            <span className="text-muted-foreground italic">Nenhuma conta neste mês</span>
+            <span className="text-muted-foreground italic">Nenhuma conta neste mes</span>
           )}
         </div>
 
-        {/* Legenda — melhorada com glow */}
+        {/* Legenda */}
         <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
@@ -166,113 +173,7 @@ export function BillCalendar({ bills }: BillCalendarProps) {
             A vencer
           </span>
         </div>
-
-        {/* Contas do dia selecionado — visual card */}
-        {selectedDate && (
-          <div className="calendar-detail-enter mt-4 rounded-lg border bg-muted/30 p-3">
-            <div className="mb-2.5 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold capitalize">
-                  {selectedDate.toLocaleDateString("pt-BR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    timeZone: "UTC",
-                  })}
-                </p>
-                {selectedBills.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {selectedBills.length} {selectedBills.length === 1 ? "conta" : "contas"} · {formatCurrency(selectedBills.reduce((s, b) => s + b.amount, 0))}
-                  </p>
-                )}
-              </div>
-              <Link href={`/bills/new?date=${selectedKey}`}>
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1 border-dashed">
-                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  Criar
-                </Button>
-              </Link>
-            </div>
-            {selectedBills.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-3">
-                Nenhuma conta neste dia
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {selectedBills.map((bill) => (
-                  <CalendarBillItem key={bill.id} bill={bill} today={today} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
-  )
-}
-
-function CalendarBillItem({ bill, today }: { bill: CalendarBill; today: Date }) {
-  const [isPending, startTransition] = useTransition()
-  const isOverdue = bill.status === "PENDING" && new Date(bill.dueDate) < today
-  const isPaid = bill.status === "PAID"
-  const canMarkPaid = !isPaid
-
-  const borderColor = isPaid
-    ? "border-l-green-500"
-    : isOverdue
-      ? "border-l-red-500"
-      : "border-l-blue-500"
-
-  function handleMarkPaid() {
-    startTransition(async () => {
-      try {
-        const result = await markBillAsPaid(bill.id)
-        toast.success(`"${bill.supplier}" marcada como paga!`)
-        if (result.remainingPending === 0) {
-          window.dispatchEvent(new Event("pagafacil:all-paid"))
-        }
-      } catch {
-        toast.error("Erro ao marcar como paga.")
-      }
-    })
-  }
-
-  return (
-    <div className={`flex items-center justify-between gap-2 rounded-lg border border-l-[3px] ${borderColor} bg-background p-2.5 text-sm shadow-sm transition-shadow hover:shadow-md`}>
-      <div className="min-w-0">
-        <p className={`truncate font-medium ${isPaid ? "text-muted-foreground line-through" : ""}`}>
-          {bill.supplier}
-        </p>
-        <p className="text-[11px] text-muted-foreground">
-          {CATEGORY_MAP[bill.category]?.icon} {CATEGORY_MAP[bill.category]?.label ?? bill.category}
-          {bill.isRecurring && (
-            <span className="ml-1 inline-flex items-center gap-0.5">
-              · <svg className="h-3 w-3 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            </span>
-          )}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className={`font-semibold tabular-nums ${isPaid ? "text-muted-foreground" : ""}`}>
-          {formatCurrency(bill.amount)}
-        </span>
-        {canMarkPaid ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-[10px] px-2.5 hover:bg-green-50 hover:text-green-700 hover:border-green-300 dark:hover:bg-green-950 dark:hover:text-green-400 dark:hover:border-green-700 transition-colors"
-            onClick={handleMarkPaid}
-            disabled={isPending}
-          >
-            {isPending ? "..." : "✓ Paga"}
-          </Button>
-        ) : (
-          <Badge variant="default" className="text-[10px] bg-green-600">✓ Paga</Badge>
-        )}
-      </div>
-    </div>
   )
 }

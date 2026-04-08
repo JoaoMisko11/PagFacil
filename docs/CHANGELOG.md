@@ -1,5 +1,19 @@
 # Changelog — PagaFácil
 
+## D25 - 2026-04-08 - Calendário sidebar + filtro por data na tela A Pagar
+### Feito
+- [x] **Calendário sidebar no desktop** — calendário aparece como sidebar fixa (320px) à direita da lista de contas em telas lg+
+- [x] **Calendário overlay no mobile** — botão de calendário ao lado das tabs abre overlay com backdrop, fecha ao clicar fora
+- [x] **Filtro por data via URL** — clicar em um dia no calendário adiciona `?date=YYYY-MM-DD` à URL, filtrando contas daquele dia (server-side); clicar de novo limpa o filtro
+- [x] **DateFilterBadge** — badge visual mostrando data filtrada com botão de limpar (X)
+- [x] **Simplificação bill-calendar.tsx** — removida listagem inline de contas do dia (~110 linhas), navegação agora é via URL (server-side rendering)
+- [x] **Novos componentes** — `calendar-position-toggle.tsx` (MobileCalendarTrigger + DateFilterBadge), `pagamentos-layout.tsx` (não utilizado ainda)
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D24 - 2026-04-07 - Melhoria UX: navegação, Nova Conta e tela A Pagar
 ### Feito
 - [x] **Unificação Nova Conta** — Lote e Importar agora são tabs dentro de `/bills/new` (Manual/Em lote/Importar), removidos do header de Contas

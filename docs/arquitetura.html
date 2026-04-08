@@ -580,7 +580,7 @@
         <div class="card">
           <div class="card-icon icon-blue">&#128200;</div>
           <h3>Diferenciacao (Fase 3)</h3>
-          <p>Grafico de barras interativo (6 meses pago vs pendente, tooltips, eixo Y), smart insights baseados em padroes de contas recorrentes, quick actions no calendario (criar conta, marcar como paga inline), checklist de onboarding persistente (4 marcos), relatorio mensal por email/Telegram, categorias com icones e cores, atalhos de teclado (n=nova, /=buscar).</p>
+          <p>Grafico de barras interativo (6 meses pago vs pendente, tooltips, eixo Y), smart insights baseados em padroes de contas recorrentes, calendario sidebar (desktop) com filtro por dia via URL, overlay mobile com backdrop, checklist de onboarding persistente (4 marcos), relatorio mensal por email/Telegram, categorias com icones e cores, atalhos de teclado (n=nova, /=buscar).</p>
         </div>
 
         <div class="card">
@@ -785,7 +785,7 @@
           <div class="flow-dot" style="background: var(--purple);">4</div>
           <div class="flow-content">
             <h4>A Pagar</h4>
-            <p>Contas organizadas por urgencia: vencidas, hoje, proximos 7 dias, futuras. Marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente.</p>
+            <p>Contas organizadas por urgencia: vencidas, hoje, proximos 7 dias, futuras. Marcar como paga com 1 clique. Contas recorrentes geram proxima parcela automaticamente. Calendario como sidebar no desktop e overlay no mobile — clicar em um dia filtra as contas daquela data via URL (?date=YYYY-MM-DD).</p>
           </div>
         </div>
 
@@ -948,7 +948,7 @@ pagafacil/
 |   +-- (dashboard)/
 |   |   +-- dashboard/page.tsx  <span style="color:var(--text-light);"># Dashboard — resumo, graficos, insights, streak (RSC)</span>
 |   |   +-- layout.tsx          <span style="color:var(--text-light);"># Layout com nav</span>
-|   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># A Pagar — tabs, total, cards inline, calendario (RSC)</span>
+|   |   +-- pagamentos/page.tsx <span style="color:var(--text-light);"># A Pagar — tabs, total, cards inline, calendario sidebar/overlay, filtro por data</span>
 |   |   +-- bills/page.tsx      <span style="color:var(--text-light);"># Minhas Contas — gestao agrupada por fornecedor</span>
 |   |   +-- bills/new/          <span style="color:var(--text-light);"># Formulario nova conta</span>
 |   |   +-- bills/import/       <span style="color:var(--text-light);"># Importar contas via planilha</span>
@@ -967,7 +967,8 @@ pagafacil/
 |   +-- layout.tsx              <span style="color:var(--text-light);"># Root layout</span>
 |   +-- globals.css             <span style="color:var(--text-light);"># Tailwind + calendar dots</span>
 +-- components/
-|   +-- bill-calendar.tsx       <span style="color:var(--text-light);"># Calendario interativo</span>
+|   +-- bill-calendar.tsx       <span style="color:var(--text-light);"># Calendario interativo (sidebar desktop, overlay mobile)</span>
+|   +-- calendar-position-toggle.tsx <span style="color:var(--text-light);"># MobileCalendarTrigger + DateFilterBadge</span>
 |   +-- bill-card.tsx           <span style="color:var(--text-light);"># Card inline A Pagar (borda status + botao Paga)</span>
 |   +-- bill-filters.tsx        <span style="color:var(--text-light);"># Filtros status/categoria/busca</span>
 |   +-- bill-form.tsx           <span style="color:var(--text-light);"># Formulario criar/editar</span>

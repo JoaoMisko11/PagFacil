@@ -14,7 +14,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **CRUD de contas** — fornecedor, valor, vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario, Outro), observacoes
 - **Dashboard inteligente** — resumo financeiro, grafico de barras (pago vs pendente, 6 meses), insights e streak de pontualidade
 - **3 telas, 3 intencoes** — Dashboard (visao geral), A Pagar (acao), Minhas Contas (gestao)
-- **A Pagar** — contas por urgencia (vencidas, mes, futuras, todas) com tabs responsivas, card inline com borda de status, botao "Paga", total por tab, calendario mensal interativo
+- **A Pagar** — contas por urgencia (vencidas, mes, futuras, todas) com tabs responsivas, card inline com borda de status, botao "Paga", total por tab, calendario sidebar (desktop) / overlay (mobile) com filtro por data via URL
 - **Contas recorrentes** — frequencia semanal/quinzenal/mensal/anual, data de fim opcional, pre-geracao de parcelas (90 dias)
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
 - **Cadastro em lote** — tabela editavel para criar varias contas de uma vez

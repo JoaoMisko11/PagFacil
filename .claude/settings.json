@@ -38,7 +38,18 @@
       "Bash(ls -la /Users/joaomisko/Desktop/DEV/PagFacil/next.config.* /Users/joaomisko/Desktop/DEV/PagFacil/tsconfig.json)",
       "Bash(npx web-push:*)",
       "Bash(grep -r \"Cache\\\\|caching\\\\|CACHE\" /Users/joaomisko/Desktop/DEV/PagFacil --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.json\" ! -path \"*/node_modules/*\")",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(wc -l /Users/joaomisko/Desktop/DEV/PagFacil/lib/*.ts)",
+      "Bash(chmod +x /Users/joaomisko/Desktop/DEV/PagFacil/scripts/hooks/pre-commit)",
+      "Bash(.git/hooks/pre-commit)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(curl -s http://localhost:3005/bills/new)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/bills/new)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/bills/batch)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/pagamentos)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/pagamentos --max-time 10)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3005/pagamentos --max-time 5)"
     ]
   }
 }
