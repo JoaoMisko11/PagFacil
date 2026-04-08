@@ -7,7 +7,8 @@
 - [x] **Filtro por data via URL** — clicar em um dia no calendário adiciona `?date=YYYY-MM-DD` à URL, filtrando contas daquele dia (server-side); clicar de novo limpa o filtro
 - [x] **DateFilterBadge** — badge visual mostrando data filtrada com botão de limpar (X)
 - [x] **Simplificação bill-calendar.tsx** — removida listagem inline de contas do dia (~110 linhas), navegação agora é via URL (server-side rendering)
-- [x] **Novos componentes** — `calendar-position-toggle.tsx` (MobileCalendarTrigger + DateFilterBadge), `pagamentos-layout.tsx` (não utilizado ainda)
+- [x] **Novos componentes** — `calendar-position-toggle.tsx` (MobileCalendarTrigger + DateFilterBadge)
+- [x] **Cleanup** — removido `pagamentos-layout.tsx` (não utilizado, quebrava build por importar export inexistente)
 
 ### Bugs Conhecidos
 - Nenhum
