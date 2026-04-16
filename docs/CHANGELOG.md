@@ -1,8 +1,20 @@
 # Changelog — PagaFácil
 
-## D26 - 2026-04-16 - Aviso Google OAuth em modo teste
+## D26 - 2026-04-16 - Página de Insights + Aviso Google OAuth
 ### Feito
 - [x] **Nota no login** — texto abaixo do botão Google avisando que está em fase de teste e sugerindo Email/Telegram como alternativa
+- [x] **Página de Insights (`/insights`)** — nova rota dedicada com análise completa de gastos:
+  - Gastos por categoria (barras horizontais com %)
+  - Top 5 fornecedores por valor total
+  - Pontualidade (ring chart com % em dia vs atrasadas)
+  - Previsão próximo mês (recorrentes + estimativa variáveis)
+  - Comparativo mensal (tabela 6 meses: total, em dia, pendente)
+  - Smart messages (concentração de gastos, tendência, economia, pontualidade)
+  - Cards resumo: total pago 6m, quantidade contas, variação mensal %
+- [x] **lib/insights-utils.ts** — funções puras de cálculo (categoria, fornecedores, pontualidade, forecast, mensagens)
+- [x] **26 testes novos** — `__tests__/insights.test.ts` (117 testes total)
+- [x] **5 componentes** — `insights-category-chart`, `insights-top-suppliers`, `insights-punctuality`, `insights-forecast`, `insights-messages`
+- [x] **Nav atualizada** — link "Insights" no menu principal + CTA "Ver insights" no dashboard
 
 ### Bugs Conhecidos
 - Nenhum

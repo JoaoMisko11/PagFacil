@@ -19,6 +19,7 @@ interface DashboardNavProps {
 const mainLinks = [
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/pagamentos", label: "A Pagar", exact: true },
+  { href: "/insights", label: "Insights", exact: true },
   { href: "/bills", label: "Minhas Contas", exact: false },
 ]
 

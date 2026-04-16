@@ -25,7 +25,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
             <h1 className="text-3xl font-bold text-foreground sm:text-4xl">PagaFácil</h1>
             <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-              Suas contas a pagar organizadas.<br />Sem planilha. Sem complicação. Grátis.
+              Suas contas a pagar organizadas com insights.<br />Sem planilha. Sem complicação. Grátis.
             </p>
           </div>
 

@@ -368,9 +368,12 @@ export default async function DashboardPage() {
         <TrendSection userIds={userIds} />
       </Suspense>
 
-      <div className="text-center">
+      <div className="flex items-center justify-center gap-3">
         <Link href="/pagamentos">
           <Button variant="outline" className="h-11">Ver contas a pagar</Button>
+        </Link>
+        <Link href="/insights">
+          <Button variant="outline" className="h-11">Ver insights</Button>
         </Link>
       </div>
     </div>

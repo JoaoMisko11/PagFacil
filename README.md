@@ -13,7 +13,8 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Login multi-canal** — Google OAuth (1 clique, em modo teste), magic link por email ou OTP via Telegram
 - **CRUD de contas** — fornecedor, valor, vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario, Outro), observacoes
 - **Dashboard inteligente** — resumo financeiro, grafico de barras (pago vs pendente, 6 meses), insights e streak de pontualidade
-- **3 telas, 3 intencoes** — Dashboard (visao geral), A Pagar (acao), Minhas Contas (gestao)
+- **Insights** — analise de gastos por categoria, top fornecedores, taxa de pontualidade (ring chart), previsao proximo mes, comparativo mensal (6 meses), smart messages (tendencias, alertas, economia)
+- **4 telas, 4 intencoes** — Dashboard (visao geral), A Pagar (acao), Insights (analise), Minhas Contas (gestao)
 - **A Pagar** — contas por urgencia (vencidas, mes, futuras, todas) com tabs responsivas, card inline com borda de status, botao "Paga", total por tab, calendario sidebar (desktop) / overlay (mobile) com filtro por data via URL
 - **Contas recorrentes** — frequencia semanal/quinzenal/mensal/anual, data de fim opcional, pre-geracao de parcelas (90 dias)
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
@@ -38,7 +39,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 | Email | Nodemailer + Gmail SMTP |
 | Bot | Telegram Bot API (fetch nativo, zero deps) |
 | Deploy | Vercel (free tier) |
-| Testes | Vitest (91 testes) |
+| Testes | Vitest (117 testes) |
 | Linguagem | TypeScript (strict mode) |
 
 ## Rodando localmente
@@ -77,6 +78,7 @@ app/
   (dashboard)/
     dashboard/page.tsx       # Dashboard (resumo, graficos, calendario)
     pagamentos/page.tsx      # A Pagar (por urgencia, marcar paga)
+    insights/page.tsx        # Insights (analise de gastos)
     bills/page.tsx           # Contas (gestao, CRUD)
     bills/new/               # Nova conta
     bills/[id]/edit/         # Editar conta
