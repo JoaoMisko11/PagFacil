@@ -94,6 +94,9 @@ export function LoginForm() {
           </svg>
           {googleLoading ? "Entrando..." : "Entrar com Google"}
         </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          Login Google em fase de teste — se der erro, use Email ou Telegram abaixo.
+        </p>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

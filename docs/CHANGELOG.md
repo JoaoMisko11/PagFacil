@@ -1,5 +1,14 @@
 # Changelog — PagaFácil
 
+## D26 - 2026-04-16 - Aviso Google OAuth em modo teste
+### Feito
+- [x] **Nota no login** — texto abaixo do botão Google avisando que está em fase de teste e sugerindo Email/Telegram como alternativa
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D25 - 2026-04-08 - Calendário sidebar + filtro por data na tela A Pagar
 ### Feito
 - [x] **Calendário sidebar no desktop** — calendário aparece como sidebar fixa (320px) à direita da lista de contas em telas lg+
