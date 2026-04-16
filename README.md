@@ -10,7 +10,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 
 ## Funcionalidades
 
-- **Login multi-canal** — Google OAuth (1 clique), magic link por email ou OTP via Telegram
+- **Login multi-canal** — Google OAuth (1 clique, em modo teste), magic link por email ou OTP via Telegram
 - **CRUD de contas** — fornecedor, valor, vencimento, categoria (Fixo, Variavel, Imposto, Fornecedor, Assinatura, Funcionario, Outro), observacoes
 - **Dashboard inteligente** — resumo financeiro, grafico de barras (pago vs pendente, 6 meses), insights e streak de pontualidade
 - **3 telas, 3 intencoes** — Dashboard (visao geral), A Pagar (acao), Minhas Contas (gestao)
