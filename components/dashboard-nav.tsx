@@ -24,6 +24,7 @@ const mainLinks = [
 ]
 
 const menuLinks = [
+  { href: "/bancos", label: "Bancos", exact: true },
   { href: "/family", label: "Família", exact: true },
   { href: "/settings", label: "Lembretes", exact: true },
 ]

@@ -195,6 +195,7 @@ export function LandingPage() {
               { icon: "🤖", title: "Bot Telegram", desc: "Crie contas, liste pendencias e marque como paga direto pelo chat. Sem abrir o navegador.", bg: "icon-bg-blue" },
               { icon: "📄", title: "Importacao por planilha", desc: "Suba um arquivo Excel ou CSV e cadastre centenas de contas de uma vez. Preview com validacao antes de salvar.", bg: "icon-bg-green" },
               { icon: "👪", title: "Family Link", desc: "Compartilhe suas contas com outra pessoa via link de convite. Ambos veem e gerenciam tudo junto.", bg: "icon-bg-amber" },
+              { icon: "🏦", title: "Open Finance", desc: "Conecte sua conta bancaria via Pluggy. O app detecta seus pagamentos automaticamente e marca contas como pagas. Sem trabalho manual.", bg: "icon-bg-green" },
               { icon: "🌓", title: "Dark mode", desc: "Modo escuro, claro ou automatico. Sem flash ao carregar. Perfeito para usar a noite.", bg: "icon-bg-purple" },
             ].map(f => (
               <div className="landing-feature-card" key={f.title}>

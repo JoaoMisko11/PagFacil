@@ -9,23 +9,24 @@ datasource db {
 }
 
 model User {
-  id             String     @id @default(cuid())
-  name           String?
-  email          String     @unique
-  emailVerified  DateTime?
-  image          String?
-  telegramChatId String?    @unique
-  notifyVia      String     @default("email") // "email" | "telegram" | "push"
-  familyId       String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  bills          Bill[]
-  accounts       Account[]
-  sessions       Session[]
-  feedbacks          Feedback[]
-  telegramOtps       TelegramOtp[]
-  familyInvites      FamilyInvite[]
-  pushSubscriptions  PushSubscription[]
+  id                String             @id @default(cuid())
+  name              String?
+  email             String             @unique
+  emailVerified     DateTime?
+  image             String?
+  telegramChatId    String?            @unique
+  notifyVia         String             @default("email") // "email" | "telegram" | "push"
+  familyId          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  bills             Bill[]
+  accounts          Account[]
+  sessions          Session[]
+  feedbacks         Feedback[]
+  telegramOtps      TelegramOtp[]
+  familyInvites     FamilyInvite[]
+  pushSubscriptions PushSubscription[]
+  bankConnections   BankConnection[]
 
   @@index([familyId])
 }
@@ -44,22 +45,23 @@ model FamilyInvite {
 }
 
 model Bill {
-  id          String     @id @default(cuid())
-  supplier    String
-  amount      Int        // centavos
-  dueDate     DateTime
-  category    Category
-  status      BillStatus @default(PENDING)
-  notes       String?
+  id                  String               @id @default(cuid())
+  supplier            String
+  amount              Int // centavos
+  dueDate             DateTime
+  category            Category
+  status              BillStatus           @default(PENDING)
+  notes               String?
   isRecurring         Boolean              @default(false)
   recurrenceFrequency RecurrenceFrequency? // null quando não é recorrente
-  recurrenceEndDate   DateTime?            // null = sem fim
+  recurrenceEndDate   DateTime? // null = sem fim
   paidAt              DateTime?
-  deletedAt   DateTime?  // soft delete
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt           DateTime? // soft delete
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  userId              String
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankTransaction     BankTransaction?
 
   @@index([userId, status])
   @@index([userId, dueDate])
@@ -105,7 +107,7 @@ model TelegramOtp {
 
 model Feedback {
   id        String   @id @default(cuid())
-  type      String   // "feature", "bug", "other"
+  type      String // "feature", "bug", "other"
   message   String
   createdAt DateTime @default(now())
   userId    String
@@ -157,4 +159,75 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Open Finance via Pluggy
+model BankConnection {
+  id           String        @id @default(cuid())
+  pluggyItemId String        @unique
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankName     String
+  bankImageUrl String?
+  status       String // UPDATED | OUTDATED | LOGIN_ERROR | WAITING_USER_INPUT | UPDATING | etc
+  statusDetail String?
+  lastSyncAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  accounts     BankAccount[]
+
+  @@index([userId])
+}
+
+model BankAccount {
+  id              String            @id @default(cuid())
+  pluggyAccountId String            @unique
+  connectionId    String
+  connection      BankConnection    @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  type            BankAccountType
+  subtype         String?
+  name            String
+  number          String? // últimos 4 dígitos ou mascarado
+  balance         Int // centavos
+  currencyCode    String            @default("BRL")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  transactions    BankTransaction[]
+
+  @@index([connectionId])
+}
+
+model BankTransaction {
+  id                  String                     @id @default(cuid())
+  pluggyTransactionId String                     @unique
+  accountId           String
+  account             BankAccount                @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  amount              Int // centavos (negativo = débito, positivo = crédito)
+  date                DateTime
+  description         String
+  pluggyCategory      String?
+  type                String // DEBIT | CREDIT
+  matchedBillId       String?                    @unique
+  matchedBill         Bill?                      @relation(fields: [matchedBillId], references: [id], onDelete: SetNull)
+  matchStatus         BankTransactionMatchStatus @default(UNMATCHED)
+  matchScore          Int? // 0-100
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+
+  @@index([accountId, date])
+  @@index([matchStatus])
+}
+
+enum BankAccountType {
+  CHECKING
+  SAVINGS
+  CREDIT
+}
+
+enum BankTransactionMatchStatus {
+  UNMATCHED // não há candidato
+  SUGGESTED // candidato com score 50-79, aguardando confirmação
+  AUTO_MATCHED // score >= 80, marcado automaticamente
+  USER_CONFIRMED // usuário confirmou manualmente
+  IGNORED // usuário descartou ou não é despesa
 }

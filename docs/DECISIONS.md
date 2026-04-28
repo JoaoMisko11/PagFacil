@@ -1,5 +1,19 @@
 # Decisões Técnicas — PagaFácil
 
+## D27 - 2026-04-28 — Open Finance via Pluggy
+- **Pluggy (não Belvo, não certificação direta):** Pluggy é aggregator brasileiro com sandbox gratuito, REST API simples e cobertura ampla de bancos PT-BR. Belvo tem foco LATAM mais distribuído. Certificação OPF direta com BCB exige meses e equipe de compliance — fora de escopo para MVP.
+- **Pluggy Connect via CDN, não npm:** Usamos `<script src="cdn.pluggy.ai/web-connect/v2/...">` para evitar adicionar dependência. Carregado lazy via `next/script`.
+- **Cache do apiKey em memória (não Redis):** Pluggy apiKey tem TTL de 2h. Cache module-level com expiry de 110min. Em serverless, cada cold start re-autentica — barato (~50ms) e simples. Se o volume crescer, migrar para storage compartilhado.
+- **`pluggyAccountId/pluggyTransactionId @unique` para idempotência:** Sync chama `upsert` — pode ser executado múltiplas vezes pelo webhook + cron sem duplicar.
+- **Apenas CHECKING/SAVINGS/CREDIT:** Investimentos, empréstimos e outros tipos retornados pela Pluggy são ignorados. Para o caso de uso (detecção de pagamentos), saldo de investimento não é relevante.
+- **Histórico inicial: 30 dias na conexão, 7 dias no cron:** Suficiente para cruzar com bills pendentes/recém-pagas. Mais que isso aumenta DB sem benefício direto.
+- **`matchedBillId @unique` no schema:** Uma bill pode ter no máximo uma transação match. Simplifica modelagem (1:1) — caso real de pagamentos parciais é raro neste contexto.
+- **Score threshold 80 (auto) / 50 (sugere):** Calibrado para ser conservador no auto-match. Valor exato + data próxima + supplier no description = ~85+ tipicamente. Difícil dar falso positivo ≥80 porque exige overlap nas três dimensões.
+- **Sync + match na mesma operação:** Após inserir transações novas, rodamos `matchTransactionsForUser` no mesmo fluxo. Reduz latência percebida — usuário conecta, dá refresh, já vê os matches.
+- **Webhook + cron como redundância:** Pluggy webhook é primário (real-time). Cron diário às 9h UTC é fallback caso o webhook falhe. Idempotência do upsert garante que rodar 2x não duplica nada.
+- **URL do webhook como secret de fato:** Pluggy gera webhook URL única se configurado. Validamos `PLUGGY_WEBHOOK_SECRET` opcionalmente — se ausente, aceita (modo dev). Em produção, configurar.
+- **Lógica de marcar pago duplicada em bank-sync e bank-actions:** A geração de parcelas recorrentes ao auto-marcar/confirmar match repete o que `markBillAsPaid` faz. Aceitável duplicar — extrair pra `lib/bill-helpers.ts` é refactor sem benefício imediato.
+
 ## D24 - 2026-04-07
 - **PostHog para analytics (não Vercel Analytics):** Vercel Analytics é mais simples (zero config) mas limitado — 2.500 custom events/mês no free tier, sem funis, sem retenção, sem tracking por usuário. PostHog tem 1M eventos/mês grátis, funis, cohorts, session replay, feature flags. Mais complexo, mas o João quer aprender a ferramenta. Para 10 usuários na validação o free tier é mais que suficiente. Se a complexidade virar problema, simplificar para Vercel Analytics é trivial (trocar provider).
 

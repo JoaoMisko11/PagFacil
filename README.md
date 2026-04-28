@@ -20,6 +20,7 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 - **Importacao por planilha** — upload de Excel (.xlsx, .xls) ou CSV com preview e validacao visual
 - **Cadastro em lote** — tabela editavel para criar varias contas de uma vez
 - **Family Link** — compartilhe contas com outra pessoa via link de convite
+- **Open Finance (Pluggy)** — conecte sua conta bancaria; o app detecta pagamentos automaticamente e marca contas como pagas (matching por valor + data + descricao com score 0-100, threshold ≥80 = auto-marca, 50-79 = sugere)
 - **Lembretes D-1** — notificacao automatica 1 dia antes (8h BRT) por email, Telegram e/ou push notification (PWA)
 - **Enviar lembrete agora** — botao nas configuracoes para disparar resumo de contas pendentes na hora
 - **Bot Telegram** — @pagafacil_bot com /contas, /nova, /pagar, /ajuda
@@ -39,7 +40,8 @@ Web app (PWA) onde voce cadastra contas a pagar, ve um dashboard inteligente e r
 | Email | Nodemailer + Gmail SMTP |
 | Bot | Telegram Bot API (fetch nativo, zero deps) |
 | Deploy | Vercel (free tier) |
-| Testes | Vitest (117 testes) |
+| Open Finance | Pluggy (REST API + Connect Web SDK) |
+| Testes | Vitest (143 testes) |
 | Linguagem | TypeScript (strict mode) |
 
 ## Rodando localmente
@@ -58,6 +60,7 @@ cp .env.example .env.local
 # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SMTP_USER, SMTP_PASSWORD,
 # TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, CRON_SECRET
 # NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
+# PLUGGY_CLIENT_ID, PLUGGY_CLIENT_SECRET (Open Finance)
 
 # Rode as migrations
 npx prisma migrate dev
@@ -86,13 +89,16 @@ app/
     bills/batch/             # Cadastro em lote
     bills/trash/             # Lixeira (30 dias)
     family/page.tsx          # Family Link (compartilhar contas)
+    bancos/page.tsx          # Open Finance (Pluggy) - conexoes + matches
     onboarding/              # Fluxo primeiro acesso
     settings/                # Configuracoes (Telegram, lembretes)
   api/
     auth/[...nextauth]/      # NextAuth route handlers
     cron/reminders/          # Cron job D-1 lembretes (auth via CRON_SECRET)
     cron/monthly-report/     # Relatorio mensal (auth via CRON_SECRET)
+    cron/bank-sync/          # Sync diario das conexoes Pluggy
     telegram/webhook/        # Bot Telegram webhook
+    pluggy/webhook/          # Webhook Pluggy (item/transactions events)
   invite/family/             # Aceitar convite Family Link
 components/                  # Componentes React
 lib/                         # Auth, DB, server actions, formatadores

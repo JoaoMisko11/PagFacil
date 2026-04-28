@@ -594,6 +594,12 @@
           <h3>Delight (Fase 4)</h3>
           <p>Saudacao contextual por hora do dia e dia da semana, confetti CSS ao zerar contas pendentes, streak de pontualidade (badge motivacional), easter egg celebratorio ao pagar todas do mes, haptic feedback no PWA, transicoes suaves entre paginas, modo compacto vs confortavel com toggle na nav.</p>
         </div>
+
+        <div class="card">
+          <div class="card-icon icon-green">&#127974;</div>
+          <h3>Open Finance (Pluggy)</h3>
+          <p>Conexao bancaria via aggregator Pluggy (sandbox + producao). Pagina /bancos lista conexoes com status, saldo e contas. Sync automatico de transacoes (webhook + cron diario). Engine de matching transacao -> bill com score 0-100 (valor 40pts, data 30pts, descricao 30pts via Levenshtein/substring/word overlap). Score >= 80 marca conta como paga automaticamente; 50-79 sugere para o usuario confirmar. Suporta contas correntes, poupanca e cartao de credito.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -897,6 +903,52 @@
             <div class="model-field"><span class="model-field-name">invitedBy</span><span class="model-field-type">String (FK User)</span></div>
             <div class="model-field"><span class="model-field-name">expiresAt</span><span class="model-field-type">DateTime</span></div>
             <div class="model-field"><span class="model-field-name">acceptedAt</span><span class="model-field-type">DateTime?</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(0,168,104,0.05);">
+            <span>&#127974;</span> BankConnection
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">pluggyItemId</span><span class="model-field-type">String @unique</span></div>
+            <div class="model-field"><span class="model-field-name">userId</span><span class="model-field-type">String (FK User)</span></div>
+            <div class="model-field"><span class="model-field-name">bankName</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">status</span><span class="model-field-type">UPDATED | LOGIN_ERROR | etc</span></div>
+            <div class="model-field"><span class="model-field-name">lastSyncAt</span><span class="model-field-type">DateTime?</span></div>
+            <div class="model-field"><span class="model-field-name">accounts</span><span class="model-field-type">BankAccount[]</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(59,130,246,0.05);">
+            <span>&#128181;</span> BankAccount
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">pluggyAccountId</span><span class="model-field-type">String @unique</span></div>
+            <div class="model-field"><span class="model-field-name">type</span><span class="model-field-type">CHECKING | SAVINGS | CREDIT</span></div>
+            <div class="model-field"><span class="model-field-name">name</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">balance</span><span class="model-field-type">Int (centavos)</span></div>
+            <div class="model-field"><span class="model-field-name">number</span><span class="model-field-type">String? (mascarado)</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header" style="background: rgba(245,158,11,0.05);">
+            <span>&#128184;</span> BankTransaction
+          </div>
+          <div class="model-fields">
+            <div class="model-field"><span class="model-field-name">id</span><span class="model-field-type">String (cuid)</span></div>
+            <div class="model-field"><span class="model-field-name">pluggyTransactionId</span><span class="model-field-type">String @unique</span></div>
+            <div class="model-field"><span class="model-field-name">amount</span><span class="model-field-type">Int (centavos, signed)</span></div>
+            <div class="model-field"><span class="model-field-name">date</span><span class="model-field-type">DateTime</span></div>
+            <div class="model-field"><span class="model-field-name">description</span><span class="model-field-type">String</span></div>
+            <div class="model-field"><span class="model-field-name">type</span><span class="model-field-type">DEBIT | CREDIT</span></div>
+            <div class="model-field"><span class="model-field-name">matchedBillId</span><span class="model-field-type">String? @unique (FK Bill)</span></div>
+            <div class="model-field"><span class="model-field-name">matchStatus</span><span class="model-field-type">UNMATCHED | SUGGESTED | AUTO_MATCHED | USER_CONFIRMED | IGNORED</span></div>
+            <div class="model-field"><span class="model-field-name">matchScore</span><span class="model-field-type">Int? (0-100)</span></div>
           </div>
         </div>
       </div>

@@ -1,5 +1,35 @@
 # Changelog — PagaFácil
 
+## D27 - 2026-04-28 - Open Finance via Pluggy (Fluxo A: Leitura)
+### Feito
+- [x] **Integração Pluggy (sandbox)** — credenciais configuradas em `.env.local` (`PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET`, `PLUGGY_BASE_URL`)
+- [x] **Schema:** novos modelos `BankConnection`, `BankAccount`, `BankTransaction` + enums `BankAccountType` (CHECKING/SAVINGS/CREDIT) e `BankTransactionMatchStatus` (UNMATCHED/SUGGESTED/AUTO_MATCHED/USER_CONFIRMED/IGNORED). Migration `add_bank_connections`.
+- [x] **Wrapper Pluggy** (`lib/pluggy.ts`) — auth com cache de apiKey (TTL 110min), `createConnectToken`, `getItem`, `listAccounts`, `listTransactions` (com paginação automática), `deleteItem`
+- [x] **Server actions** (`lib/bank-actions.ts`) — `requestBankConnectToken`, `confirmBankConnection`, `removeBankConnection`, `triggerBankSync`, `confirmTransactionMatch`, `ignoreTransactionMatch`
+- [x] **Página `/bancos`** — listagem de conexões com status, contas (saldo, tipo, número mascarado), botão de sync manual, remoção com confirmação. Widget Pluggy Connect via CDN (`pluggy-connect/latest`)
+- [x] **Sync engine** (`lib/bank-sync.ts`) — atualiza item, contas e transações (últimos 30 dias na conexão inicial, 7 dias no cron). Idempotente via `pluggyTransactionId/pluggyAccountId`
+- [x] **Matching engine** (`lib/transaction-match.ts`) — pontuação 0-100: valor (40 pts), data (30 pts), descrição (30 pts via substring/Levenshtein/word overlap). Threshold ≥80 = auto-marca paga; 50-79 = sugere; <50 = ignorada
+- [x] **Auto-pagamento de bills recorrentes** — quando match ≥80, cria parcelas futuras igual o markBillAsPaid existente
+- [x] **UI de revisão de matches** — `MatchSuggestionCard` na página `/bancos` mostrando transação x conta lado a lado, botões "Confirmar" / "Não é esta conta"
+- [x] **Webhook Pluggy** (`/api/pluggy/webhook`) — recebe eventos `item/updated`, `transactions/created` e ressincroniza automaticamente. Suporte opcional a `PLUGGY_WEBHOOK_SECRET` via header
+- [x] **Cron diário** (`/api/cron/bank-sync`) — fallback de polling 1x/dia (9h UTC), sincroniza todas as conexões
+- [x] **Item "Bancos" no dropdown menu** do nav
+- [x] **Testes:** 52 testes novos (`__tests__/pluggy-utils.test.ts`, `__tests__/transaction-match.test.ts`) cobrindo conversão de valores, mascaramento, mapeamento de subtype, normalização de descrição, similaridade de Levenshtein e scoring completo. Total: 143 testes passando
+
+### Pendente
+- [ ] Configurar webhook URL no dashboard Pluggy (https://api.pluggy.ai/webhooks): `https://pagafacil.work/api/pluggy/webhook`
+- [ ] Configurar `PLUGGY_WEBHOOK_SECRET` em produção
+- [ ] Configurar credenciais Pluggy na Vercel
+- [ ] Adicionar Pluggy production credentials (atual são sandbox)
+- [ ] Fluxo B (importação de boletos) — Fase 2
+- [ ] Fluxo C (iniciação de pagamento Pix) — Fase 3
+
+### Bugs Conhecidos
+- Pluggy webhook URL precisa ser configurada manualmente no dashboard
+- Sandbox da Pluggy tem dados fake — em produção, pedir credenciais reais
+
+---
+
 ## D26 - 2026-04-16 - Página de Insights + Aviso Google OAuth
 ### Feito
 - [x] **Nota no login** — texto abaixo do botão Google avisando que está em fase de teste e sugerindo Email/Telegram como alternativa
