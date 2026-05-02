@@ -944,7 +944,7 @@ export async function sendMyRemindersNow(): Promise<ActionState> {
         text += `PRÓXIMOS 7 DIAS (${upcoming.length}):\n`
         text += upcoming.map((b) => `• ${formatBillLine(b)}`).join("\n")
       }
-      text += `\n\nAcesse: ${process.env.NEXTAUTH_URL ?? "https://paga-facil.vercel.app"}\n\n— PagaFácil`
+      text += `\n\nAcesse: ${process.env.NEXTAUTH_URL ?? process.env.AUTH_URL ?? "https://www.pagafacil.work"}\n\n— PagaFácil`
 
       const subject = overdue.length > 0
         ? `${overdue.length} conta${overdue.length > 1 ? "s" : ""} vencida${overdue.length > 1 ? "s" : ""} + ${upcoming.length} próxima${upcoming.length > 1 ? "s" : ""}`

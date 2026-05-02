@@ -1,5 +1,15 @@
 # Changelog — PagaFácil
 
+## D31 - 2026-05-02 - Fix: Auth em produção (AUTH_URL/AUTH_SECRET)
+### Feito
+- [x] **Domínio canônico** — atualizado fallback do email de reminders em `lib/actions.ts` de `https://paga-facil.vercel.app` para `https://www.pagafacil.work`. Adicionado `AUTH_URL` à cadeia de fallback (`NEXTAUTH_URL ?? AUTH_URL ?? canônico`)
+- [x] **Vercel envs** — adicionado `AUTH_SECRET` e `AUTH_URL=https://www.pagafacil.work` em Production. Sem `AUTH_URL`, o Auth.js v5 estava deduzindo o host pelos headers e falhando na validação do cookie PKCE com `InvalidCheck: pkceCodeVerifier value could not be parsed` no callback do Google
+
+### Bugs Conhecidos
+- Nenhum
+
+---
+
 ## D27 - 2026-04-28 - Open Finance via Pluggy (Fluxo A: Leitura)
 ### Feito
 - [x] **Integração Pluggy (sandbox)** — credenciais configuradas em `.env.local` (`PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET`, `PLUGGY_BASE_URL`)
